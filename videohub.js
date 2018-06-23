@@ -180,6 +180,13 @@ instance.prototype.config_fields = function () {
 
 	return [
 		{
+			type: 'text',
+			id: 'info',
+			width: 12,
+			label: 'Information',
+			value: 'This module will connect to any BlackmagicDesign VideoHub Device.'
+		},
+		{
 			type: 'textinput',
 			id: 'host',
 			label: 'Videohub IP',
