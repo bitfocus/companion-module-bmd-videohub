@@ -1,3 +1,5 @@
+// BlackMagic Design VideoHub
+
 var tcp = require('../../tcp');
 var instance_skel = require('../../instance_skel');
 var debug;
