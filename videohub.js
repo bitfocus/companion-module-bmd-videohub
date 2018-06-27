@@ -16,6 +16,7 @@ function instance(system, id, config) {
 	self.input_labels = {};
 	self.output_labels = {};
 	self.routing = {};
+	self.has_data = false;
 
 	// super-constructor
 	instance_skel.apply(this, arguments);
@@ -53,6 +54,10 @@ instance.prototype.updateLabels = function(labeltype, object) {
 			var num = a.shift();
 			var label = a.join(" ");
 			self.input_labels[num] = label;
+
+			if (typeof self.set_variable == 'function') {
+				self.set_variable('input_' + parseInt(num) + 1, label);
+			}
 		}
 	}
 
@@ -63,6 +68,10 @@ instance.prototype.updateLabels = function(labeltype, object) {
 			var num = a.shift();
 			var label = a.join(" ");
 			self.output_labels[num] = label;
+
+			if (typeof self.set_variable == 'function') {
+				self.set_variable('output_' + parseInt(num) + 1, label);
+			}
 		}
 	}
 
@@ -76,10 +85,14 @@ instance.prototype.videohubInformation = function(key,data) {
 
 	if (key.match(/(INPUT|OUTPUT) LABELS/)) {
 		self.updateLabels(key,data);
+		self.has_data = true;
+		self.update_variables()
 	}
 
 	else if (key == 'VIDEO OUTPUT ROUTING') {
 		self.updateRouting(key,data);
+		self.has_data = true;
+		self.update_variables()
 	}
 
 	else {
@@ -102,6 +115,8 @@ instance.prototype.init = function() {
 	log = self.log;
 
 	self.init_tcp();
+
+	self.update_variables(); // export variables
 };
 
 instance.prototype.init_tcp = function() {
@@ -208,7 +223,59 @@ instance.prototype.destroy = function() {
 	debug("destroy", self.id);;
 };
 
-instance.prototype.actions = function(system) {
+instance.prototype.update_variables = function (system) {
+	var self = this;
+	var variables = [];
+
+	// Feedback variable support, temporary if
+	// TODO: Remove
+	if (typeof self.set_variable_definitions != 'function') {
+		return;
+	}
+
+	for (var input_index in self.input_labels) {
+		var inp = parseInt(input_index)+1;
+
+		variables.push({
+			label: 'Label of input ' + inp,
+			name: 'input_' + inp
+		});
+
+		if (self.has_data) {
+			self.set_variable('input_' + inp, self.input_labels[input_index]);
+		}
+	}
+
+	for (var output_index in self.output_labels) {
+		var outp = parseInt(output_index)+1;
+
+		variables.push({
+			label: 'Label of output ' + outp,
+			name: 'output_' + outp
+		});
+
+		if (self.has_data) {
+			self.set_variable('output_' + outp, self.output_labels[output_index]);
+		}
+	}
+
+	for (var output_index in self.output_labels) {
+		var outp = parseInt(output_index)+1;
+
+		variables.push({
+			label: 'Label of input routed to output ' + outp,
+			name: 'output_' + outp + '_input'
+		});
+
+		if (self.has_data) {
+			self.set_variable('output_' + outp + '_input', self.input_labels[self.routing[output_index]]);
+		}
+	}
+
+	self.set_variable_definitions(variables);
+};
+
+instance.prototype.actions = function() {
 	var self = this;
 
 	var videohub_sources = [];
@@ -223,8 +290,6 @@ instance.prototype.actions = function(system) {
 		var outp = parseInt(output_index)+1;
 		videohub_destinations.push({ id: output_index, label: outp + ": " + self.output_labels[output_index] });
 	}
-
-	console.log("videohub_destinations", videohub_destinations);
 
 	self.system.emit('instance_actions', self.id, {
 
@@ -312,7 +377,6 @@ Sending some action { id: 'SkbYKtsWm',
 instance.prototype.action = function(action) {
 
 	var self = this;
-	console.log("Sending some action", action);
 	var cmd;
 
 	if (action.action === 'route') {
@@ -326,7 +390,6 @@ instance.prototype.action = function(action) {
 	}
 
 	if (cmd !== undefined) {
-		console.log("SENDING TO VIDEOHUB:\n" + cmd);
 		if (self.socket !== undefined && self.socket.connected) {
 			self.socket.send(cmd);
 		} else {
@@ -339,7 +402,7 @@ instance.prototype.action = function(action) {
 instance.module_info = {
 	label: 'BMD VideoHub',
 	id: 'videohub',
-	version: '0.0.1'
+	version: '0.0.2'
 };
 
 instance_skel.extendedBy(instance);
