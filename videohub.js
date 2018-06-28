@@ -305,7 +305,7 @@ instance.prototype.update_variables = function (system) {
 instance.prototype.feedback = function(feedback, bank) {
 	var self = this;
 
-	if (feedback.id = 'input_bg') {
+	if (feedback.type = 'input_bg') {
 
 		if (self.routing[parseInt(feedback.output) - 1] == parseInt(feedback.input) - 1) {
 			return {
