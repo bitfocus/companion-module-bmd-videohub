@@ -55,8 +55,8 @@ instance.prototype.updateLabels = function(labeltype, object) {
 			var label = a.join(" ");
 			self.input_labels[num] = label;
 
-			if (typeof self.set_variable == 'function') {
-				self.set_variable('input_' + parseInt(num) + 1, label);
+			if (typeof self.setVariable == 'function') {
+				self.setVariable('input_' + parseInt(num) + 1, label);
 			}
 		}
 	}
@@ -69,8 +69,8 @@ instance.prototype.updateLabels = function(labeltype, object) {
 			var label = a.join(" ");
 			self.output_labels[num] = label;
 
-			if (typeof self.set_variable == 'function') {
-				self.set_variable('output_' + parseInt(num) + 1, label);
+			if (typeof self.setVariable == 'function') {
+				self.setVariable('output_' + parseInt(num) + 1, label);
 			}
 		}
 	}
@@ -93,6 +93,7 @@ instance.prototype.videohubInformation = function(key,data) {
 		self.updateRouting(key,data);
 		self.has_data = true;
 		self.update_variables()
+		self.checkFeedbacks();
 	}
 
 	else {
@@ -229,7 +230,7 @@ instance.prototype.update_variables = function (system) {
 
 	// Feedback variable support, temporary if
 	// TODO: Remove
-	if (typeof self.set_variable_definitions != 'function') {
+	if (typeof self.setVariableDefinitions != 'function') {
 		return;
 	}
 
@@ -242,7 +243,7 @@ instance.prototype.update_variables = function (system) {
 		});
 
 		if (self.has_data) {
-			self.set_variable('input_' + inp, self.input_labels[input_index]);
+			self.setVariable('input_' + inp, self.input_labels[input_index]);
 		}
 	}
 
@@ -255,7 +256,7 @@ instance.prototype.update_variables = function (system) {
 		});
 
 		if (self.has_data) {
-			self.set_variable('output_' + outp, self.output_labels[output_index]);
+			self.setVariable('output_' + outp, self.output_labels[output_index]);
 		}
 	}
 
@@ -268,11 +269,50 @@ instance.prototype.update_variables = function (system) {
 		});
 
 		if (self.has_data) {
-			self.set_variable('output_' + outp + '_input', self.input_labels[self.routing[output_index]]);
+			self.setVariable('output_' + outp + '_input', self.input_labels[self.routing[output_index]]);
 		}
 	}
 
-	self.set_variable_definitions(variables);
+	self.setVariableDefinitions(variables);
+
+	// feedbacks
+	var feedbacks = {};
+
+	feedbacks['input_bg'] = {
+		label: 'Change background to red',
+		description: 'If the input specified is in use by the output specified, change color of the bank to red',
+		options: [
+			{
+				type: 'textinput',
+				label: 'Input',
+				id: 'input',
+				default: '1',
+				regex: self.REGEX_NUMBER
+			},
+			{
+				type: 'textinput',
+				label: 'Output',
+				id: 'output',
+				default: '1',
+				regex: self.REGEX_NUMBER
+			}
+		]
+	};
+
+	self.setFeedbackDefinitions(feedbacks);
+};
+
+instance.prototype.feedback = function(feedback, bank) {
+	var self = this;
+
+	if (feedback.id = 'input_bg') {
+
+		if (self.routing[parseInt(feedback.output) - 1] == parseInt(feedback.input) - 1) {
+			return {
+				bgcolor: self.rgb(255, 0, 0)
+			};
+		}
+	}
 };
 
 instance.prototype.actions = function() {
