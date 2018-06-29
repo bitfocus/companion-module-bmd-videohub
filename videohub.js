@@ -93,7 +93,12 @@ instance.prototype.videohubInformation = function(key,data) {
 		self.updateRouting(key,data);
 		self.has_data = true;
 		self.update_variables()
-		self.checkFeedbacks();
+
+		// Feedback support, temporary if statement
+		// TODO: Remove
+		if (typeof self.checkFeedbacks == 'function') {
+			self.checkFeedbacks();
+		}
 	}
 
 	else {
