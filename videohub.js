@@ -312,7 +312,7 @@ instance.prototype.feedback = function(feedback, bank) {
 
 	if (feedback.type = 'input_bg') {
 
-		if (self.routing[parseInt(feedback.output) - 1] == parseInt(feedback.input) - 1) {
+		if (self.routing[parseInt(feedback.options.output) - 1] == parseInt(feedback.options.input) - 1) {
 			return {
 				bgcolor: self.rgb(255, 0, 0)
 			};
