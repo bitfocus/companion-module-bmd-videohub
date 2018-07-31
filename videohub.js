@@ -120,6 +120,9 @@ instance.prototype.init = function() {
 	debug = self.debug;
 	log = self.log;
 
+	self.videohub_sources = [];
+	self.videohub_destinations = [];
+
 	self.init_tcp();
 
 	self.update_variables(); // export variables
@@ -280,6 +283,19 @@ instance.prototype.update_variables = function (system) {
 
 	self.setVariableDefinitions(variables);
 
+	self.videohub_sources.length = 0;
+	self.videohub_destinations.length = 0;
+
+	for (var input_index in self.input_labels) {
+		var inp = parseInt(input_index)+1;
+		self.videohub_sources.push({ id: input_index, label: inp + ": " + self.input_labels[input_index] });
+	}
+
+	for (var output_index in self.output_labels) {
+		var outp = parseInt(output_index)+1;
+		self.videohub_destinations.push({ id: output_index, label: outp + ": " + self.output_labels[output_index] });
+	}
+
 	// feedbacks
 	var feedbacks = {};
 
@@ -288,18 +304,18 @@ instance.prototype.update_variables = function (system) {
 		description: 'If the input specified is in use by the output specified, change color of the bank to red',
 		options: [
 			{
-				type: 'textinput',
+				type: 'dropdown',
 				label: 'Input',
 				id: 'input',
-				default: '1',
-				regex: self.REGEX_NUMBER
+				default: '0',
+				choices: self.videohub_sources
 			},
 			{
-				type: 'textinput',
+				type: 'dropdown',
 				label: 'Output',
 				id: 'output',
-				default: '1',
-				regex: self.REGEX_NUMBER
+				default: '0',
+				choices: self.videohub_destinations
 			}
 		]
 	};
@@ -312,7 +328,7 @@ instance.prototype.feedback = function(feedback, bank) {
 
 	if (feedback.type = 'input_bg') {
 
-		if (self.routing[parseInt(feedback.options.output) - 1] == parseInt(feedback.options.input) - 1) {
+		if (self.routing[parseInt(feedback.options.output)] == parseInt(feedback.options.input)) {
 			return {
 				bgcolor: self.rgb(255, 0, 0)
 			};
@@ -322,19 +338,6 @@ instance.prototype.feedback = function(feedback, bank) {
 
 instance.prototype.actions = function() {
 	var self = this;
-
-	var videohub_sources = [];
-	var videohub_destinations = [];
-
-	for (var input_index in self.input_labels) {
-		var inp = parseInt(input_index)+1;
-		videohub_sources.push({ id: input_index, label: inp + ": " + self.input_labels[input_index] });
-	}
-
-	for (var output_index in self.output_labels) {
-		var outp = parseInt(output_index)+1;
-		videohub_destinations.push({ id: output_index, label: outp + ": " + self.output_labels[output_index] });
-	}
 
 	self.system.emit('instance_actions', self.id, {
 
@@ -352,7 +355,7 @@ instance.prototype.actions = function() {
 					label: 'Destination',
 					id: 'destination',
 					default: '0',
-					choices: videohub_destinations
+					choices: self.videohub_destinations
 				}
 			]
 		},
@@ -365,7 +368,7 @@ instance.prototype.actions = function() {
 					label: 'Source',
 					id: 'source',
 					default: '0',
-					choices: videohub_sources
+					choices: self.videohub_sources
 				},
 				{
 					type: 'textinput',
@@ -384,41 +387,21 @@ instance.prototype.actions = function() {
 					label: 'Source',
 					id: 'source',
 					default: '0',
-					choices: videohub_sources
+					choices: self.videohub_sources
 				},
 				{
 					type: 'dropdown',
 					label: 'Destination',
 					id: 'destination',
 					default: '0',
-					choices: videohub_destinations
+					choices: self.videohub_destinations
 				}
 			]
 		}
 
 	});
 }
-/*
-Sending some action { id: 'Sk3_KFjW7',
-	label: 'S14IRPq-X:rename_destination',
-	instance: 'S14IRPq-X',
-	action: 'rename_destination',
-	options: { label: 'Dest name', destination: '0' } }
-	lib/tcp sending 27 bytes to 10.40.101.3 9990 +15h
-Sending some action { id: 'By0dYKjbQ',
-	label: 'S14IRPq-X:rename_source',
-	instance: 'S14IRPq-X',
-	action: 'rename_source',
-	options: { source: '0', label: 'Src name' } }
-	lib/tcp sending 27 bytes to 10.40.101.3 9990 +0ms
-Sending some action { id: 'SkbYKtsWm',
-	label: 'S14IRPq-X:route',
-	instance: 'S14IRPq-X',
-	action: 'route',
-	options: { source: '1', destination: '0' } }
-	lib/tcp sending 27 bytes to 10.40.101.3 9990 +1ms
 
-*/
 instance.prototype.action = function(action) {
 
 	var self = this;
@@ -447,7 +430,7 @@ instance.prototype.action = function(action) {
 instance.module_info = {
 	label: 'BMD VideoHub',
 	id: 'videohub',
-	version: '0.0.2'
+	version: '0.0.3'
 };
 
 instance_skel.extendedBy(instance);
