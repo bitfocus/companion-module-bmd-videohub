@@ -300,9 +300,15 @@ instance.prototype.update_variables = function (system) {
 	var feedbacks = {};
 
 	feedbacks['input_bg'] = {
-		label: 'Change background to red',
-		description: 'If the input specified is in use by the output specified, change color of the bank to red',
+		label: 'Change background color',
+		description: 'If the input specified is in use by the output specified, change background color of the bank',
 		options: [
+			{
+				type: 'colorpicker',
+				label: 'Background color',
+				id: 'bg',
+				default: self.rgb(255,0,0)
+			},
 			{
 				type: 'dropdown',
 				label: 'Input',
@@ -327,10 +333,14 @@ instance.prototype.feedback = function(feedback, bank) {
 	var self = this;
 
 	if (feedback.type = 'input_bg') {
+		var bg = feedback.options.bg;
+		if (bg === undefined) {
+			bg = feedback.default;
+		}
 
 		if (self.routing[parseInt(feedback.options.output)] == parseInt(feedback.options.input)) {
 			return {
-				bgcolor: self.rgb(255, 0, 0)
+				bgcolor: bg
 			};
 		}
 	}
