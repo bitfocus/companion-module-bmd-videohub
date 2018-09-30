@@ -437,11 +437,5 @@ instance.prototype.action = function(action) {
 	}
 };
 
-instance.module_info = {
-	label: 'BMD VideoHub',
-	id: 'videohub',
-	version: '0.0.3'
-};
-
 instance_skel.extendedBy(instance);
 exports = module.exports = instance;

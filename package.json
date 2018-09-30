@@ -1,7 +1,12 @@
 {
-  "name": "companion-module-videohub",
-  "version": "0.0.3",
-  "description": "",
+  "name": "videohub",
+  "version": "1.0.0",
+	"api_version": "1.0.0",
+	"keywords": [ "Matrix" ],
+	"manufacturer": "Blackmagic Design",
+	"product": "Videohub",
+	"shortname": "videohub",
+	"description": "",
   "main": "videohub.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,7 +15,7 @@
     "type": "git",
     "url": "git+https://github.com/bitfocus/companion-module-videohub.git"
   },
-  "author": "",
+  "author": "William Viker <william@bitfocus.io>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/bitfocus/companion-module-videohub/issues"
