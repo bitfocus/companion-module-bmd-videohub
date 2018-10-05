@@ -55,9 +55,7 @@ instance.prototype.updateLabels = function(labeltype, object) {
 			var label = a.join(" ");
 			self.input_labels[num] = label;
 
-			if (typeof self.setVariable == 'function') {
-				self.setVariable('input_' + parseInt(num) + 1, label);
-			}
+			self.setVariable('input_' + parseInt(num) + 1, label);
 		}
 	}
 
@@ -69,9 +67,7 @@ instance.prototype.updateLabels = function(labeltype, object) {
 			var label = a.join(" ");
 			self.output_labels[num] = label;
 
-			if (typeof self.setVariable == 'function') {
-				self.setVariable('output_' + parseInt(num) + 1, label);
-			}
+			self.setVariable('output_' + parseInt(num) + 1, label);
 		}
 	}
 
@@ -94,11 +90,7 @@ instance.prototype.videohubInformation = function(key,data) {
 		self.has_data = true;
 		self.update_variables()
 
-		// Feedback support, temporary if statement
-		// TODO: Remove
-		if (typeof self.checkFeedbacks == 'function') {
-			self.checkFeedbacks();
-		}
+		self.checkFeedbacks();
 	}
 
 	else {
@@ -182,7 +174,6 @@ instance.prototype.init_tcp = function() {
 			else if (line.length === 0 && self.command !== null) {
 				var cmd = self.command.trim().split(/:/)[0];
 
-				// TODO: clone object here?!
 				self.videohubInformation(cmd, self.stash);
 
 				self.stash = [];
@@ -235,12 +226,6 @@ instance.prototype.destroy = function() {
 instance.prototype.update_variables = function (system) {
 	var self = this;
 	var variables = [];
-
-	// Feedback variable support, temporary if
-	// TODO: Remove
-	if (typeof self.setVariableDefinitions != 'function') {
-		return;
-	}
 
 	for (var input_index in self.input_labels) {
 		var inp = parseInt(input_index)+1;
@@ -305,6 +290,12 @@ instance.prototype.update_variables = function (system) {
 		options: [
 			{
 				type: 'colorpicker',
+				label: 'Foreground color',
+				id: 'fg',
+				default: self.rgb(255,255,255)
+			},
+			{
+				type: 'colorpicker',
 				label: 'Background color',
 				id: 'bg',
 				default: self.rgb(255,0,0)
@@ -333,14 +324,10 @@ instance.prototype.feedback = function(feedback, bank) {
 	var self = this;
 
 	if (feedback.type = 'input_bg') {
-		var bg = feedback.options.bg;
-		if (bg === undefined) {
-			bg = feedback.default;
-		}
-
 		if (self.routing[parseInt(feedback.options.output)] == parseInt(feedback.options.input)) {
 			return {
-				bgcolor: bg
+				color: feedback.options.fg,
+				bgcolor: feedback.options.bg
 			};
 		}
 	}
