@@ -55,7 +55,7 @@ instance.prototype.updateLabels = function(labeltype, object) {
 			var label = a.join(" ");
 			self.input_labels[num] = label;
 
-			self.setVariable('input_' + parseInt(num) + 1, label);
+			self.setVariable('input_' + (parseInt(num) + 1), label);
 		}
 	}
 
@@ -67,7 +67,7 @@ instance.prototype.updateLabels = function(labeltype, object) {
 			var label = a.join(" ");
 			self.output_labels[num] = label;
 
-			self.setVariable('output_' + parseInt(num) + 1, label);
+			self.setVariable('output_' + (parseInt(num) + 1), label);
 		}
 	}
 
