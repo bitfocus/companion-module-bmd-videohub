@@ -394,6 +394,19 @@ instance.prototype.actions = function() {
 					choices: self.videohub_destinations
 				}
 			]
+		},
+		'multiview_solomode': {
+			label: 'multiview solo/fullscreen mode',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'On/Off',
+					id: 'mvmode',
+					default: 'true',
+					choices: { id: 'true', label: 'Fullscreen'},{ id: 'false', label: 'Multiview'er}
+				}
+			]
+
 		}
 
 	});
@@ -412,6 +425,9 @@ instance.prototype.action = function(action) {
 	}
 	else if (action.action === 'rename_destination') {
 		cmd = "OUTPUT LABELS:\n"+action.options.destination+" "+action.options.label+"\n\n";
+	}
+	else if (action.action === 'multiview_solomode') {
+		cmd = "CONFIGURATION:\nSolo enabled: "+action.options.mvmode+"\n\n";
 	}
 
 	if (cmd !== undefined) {
