@@ -5,9 +5,10 @@ var log;
 
 /**
  * Companion instance class for the Blackmagic VideoHub Routers.
+ * This class is extended for the BMD Multiview module.
  *
  * @extends instance_skel
- * @version 1.1.0
+ * @version 1.1.1
  * @since 1.0.0
  * @author William Viker <william@bitfocus.io>
  * @author Keith Rocheck <keith.rocheck@gmail.com>
@@ -30,10 +31,10 @@ class instance extends instance_skel {
 		this.selected   = 0;
 		this.deviceName = '';
 
-		this.inputCount      = parseInt(this.config.inputCount);
-		this.outputCount     = parseInt(this.config.outputCount);
-		this.monitoringCount = parseInt(this.config.monitoringCount);
-		this.serialCount     = parseInt(this.config.serialCount);
+		this.inputCount      = parseInt(config.inputCount);
+		this.outputCount     = parseInt(config.outputCount);
+		this.monitoringCount = parseInt(config.monitoringCount);
+		this.serialCount     = parseInt(config.serialCount);
 
 		this.inputs  = {};
 		this.outputs = {};
@@ -60,9 +61,165 @@ class instance extends instance_skel {
 	 * @since 1.0.0
 	 */
 	actions(system) {
-		var actions = {};
 
 		this.setupChoices();
+		this.setActions(this.getActions(system));
+	}
+
+	/**
+	 * Executes the provided action.
+	 *
+	 * @param {Object} action - the action to be executed
+	 * @access public
+	 * @since 1.0.0
+	 */
+	action(action) {
+		var cmd;
+		var opt = action.options;
+
+		switch (action.action) {
+			case 'route':
+				if (parseInt(opt.destination) >= this.outputCount) {
+					cmd = "VIDEO MONITORING OUTPUT ROUTING:\n"+(parseInt(opt.destination)-this.outputCount)+" "+opt.source+"\n\n";
+				}
+				else {
+					cmd = "VIDEO OUTPUT ROUTING:\n"+opt.destination+" "+opt.source+"\n\n";
+				}
+				break;
+			case 'route_serial':
+				cmd = "SERIAL PORT ROUTING:\n"+opt.destination+" "+opt.source+"\n\n";
+				break;
+			case 'rename_source':
+				cmd = "INPUT LABELS:\n"+opt.source+" "+opt.label+"\n\n";
+				break;
+			case 'rename_destination':
+				if (parseInt(opt.destination) >= this.outputCount) {
+					cmd = "MONITORING OUTPUT LABELS:\n"+(parseInt(opt.destination)-this.outputCount)+" "+opt.label+"\n\n";
+				}
+				else {
+					cmd = "OUTPUT LABELS:\n"+opt.destination+" "+opt.label+"\n\n";
+				}
+				break;
+			case 'rename_serial':
+				cmd = "SERIAL PORT LABELS:\n"+opt.serial+" "+opt.label+"\n\n";
+				break;
+			case 'select_destination':
+				this.selected = parseInt(opt.destination);
+				this.checkFeedbacks('selected_destination');
+				this.checkFeedbacks('selected_source');
+				break;
+			case 'route_source':
+				if (this.selected >= this.outputCount) {
+					cmd = "VIDEO MONITORING OUTPUT ROUTING:\n"+(this.selected-this.outputCount)+" "+opt.source+"\n\n";
+				}
+				else {
+					cmd = "VIDEO OUTPUT ROUTING:\n"+this.selected+" "+opt.source+"\n\n";
+				}
+				break;
+		}
+
+		if (cmd !== undefined) {
+
+			if (this.socket !== undefined && this.socket.connected) {
+				this.socket.send(cmd);
+			}
+			else {
+				debug('Socket not connected :(');
+			}
+		}
+	}
+
+	/**
+	 * Creates the configuration fields for web config.
+	 *
+	 * @returns {Array} the config fields
+	 * @access public
+	 * @since 1.0.0
+	 */
+	config_fields() {
+
+		return [
+			{
+				type: 'text',
+				id: 'info',
+				width: 12,
+				label: 'Information',
+				value: 'This module will connect to any Blackmagic Design VideoHub Device.'
+			},
+			{
+				type: 'textinput',
+				id: 'host',
+				label: 'Videohub IP',
+				width: 6,
+				default: '192.168.10.150',
+				regex: this.REGEX_IP
+			},
+			{
+				type: 'text',
+				id: 'info',
+				width: 12,
+				label: 'Information',
+				value: 'This counts below will automatically populate from the device upon connection, however, can be set manually for offline programming.'
+			},
+			{
+				type: 'textinput',
+				id: 'inputCount',
+				label: 'Input Count',
+				default: '12',
+				width: 3,
+				regex: '/^\\d*$/'
+			},
+			{
+				type: 'textinput',
+				id: 'outputCount',
+				label: 'Output Count',
+				default: '12',
+				width: 3,
+				regex: '/^\\d*$/'
+			},
+			{
+				type: 'textinput',
+				id: 'monitoringCount',
+				label: 'Monitoring Output Count (when present)',
+				default: '0',
+				width: 3,
+				regex: '/^\\d*$/'
+			},
+			{
+				type: 'textinput',
+				id: 'serialCount',
+				label: 'Serial Port Count (when present)',
+				default: '0',
+				width: 3,
+				regex: '/^\\d*$/'
+			}
+		]
+	}
+
+	/**
+	 * Clean up the instance before it is destroyed.
+	 *
+	 * @access public
+	 * @since 1.0.0
+	 */
+	destroy() {
+		if (this.socket !== undefined) {
+			this.socket.destroy();
+		}
+
+		debug("destroy", this.id);
+	}
+
+	/**
+	 * Get the available actions.  Utilized by bmd-multiview.
+	 *
+	 * @param {EventEmitter} system - the brains of the operation
+	 * @returns {Object[]} the available actions
+	 * @access public
+	 * @since 1.0.0
+	 */
+	getActions(system) {
+		var actions = {};
 
 		actions['rename_destination'] = {
 			label: 'Rename destination',
@@ -191,157 +348,7 @@ class instance extends instance_skel {
 			]
 		};
 
-		this.setActions(actions);
-	}
-
-	/**
-	 * Executes the provided action.
-	 *
-	 * @param {Object} action - the action to be executed
-	 * @access public
-	 * @since 1.0.0
-	 */
-	action(action) {
-		var cmd;
-		var opt = action.options;
-
-		switch (action.action) {
-			case 'route':
-				if (parseInt(opt.destination) >= this.outputCount)
-				{
-					cmd = "VIDEO MONITORING OUTPUT ROUTING:\n"+(parseInt(opt.destination)-this.outputCount)+" "+opt.source+"\n\n";
-				}
-				else
-				{
-					cmd = "VIDEO OUTPUT ROUTING:\n"+opt.destination+" "+opt.source+"\n\n";
-				}
-				break;
-			case 'route_serial':
-				cmd = "SERIAL PORT ROUTING:\n"+opt.destination+" "+opt.source+"\n\n";
-				break;
-			case 'rename_source':
-				cmd = "INPUT LABELS:\n"+opt.source+" "+opt.label+"\n\n";
-				break;
-			case 'rename_destination':
-				if (parseInt(opt.destination) >= this.outputCount)
-				{
-					cmd = "MONITORING OUTPUT LABELS:\n"+(parseInt(opt.destination)-this.outputCount)+" "+opt.label+"\n\n";
-				}
-				else
-				{
-					cmd = "OUTPUT LABELS:\n"+opt.destination+" "+opt.label+"\n\n";
-				}
-				break;
-			case 'rename_serial':
-				cmd = "SERIAL PORT LABELS:\n"+opt.serial+" "+opt.label+"\n\n";
-				break;
-			case 'select_destination':
-				this.selected = parseInt(opt.destination);
-				this.checkFeedbacks('selected_destination');
-				this.checkFeedbacks('selected_source');
-				break;
-			case 'route_source':
-				if (this.selected >= this.outputCount)
-				{
-					cmd = "VIDEO MONITORING OUTPUT ROUTING:\n"+(this.selected-this.outputCount)+" "+opt.source+"\n\n";
-				}
-				else
-				{
-					cmd = "VIDEO OUTPUT ROUTING:\n"+this.selected+" "+opt.source+"\n\n";
-				}
-				break;
-		}
-
-		if (cmd !== undefined) {
-
-			if (this.socket !== undefined && this.socket.connected) {
-				this.socket.send(cmd);
-			}
-			else {
-				debug('Socket not connected :(');
-			}
-		}
-	}
-
-	/**
-	 * Creates the configuration fields for web config.
-	 *
-	 * @returns {Array} the config fields
-	 * @access public
-	 * @since 1.0.0
-	 */
-	config_fields() {
-
-		return [
-			{
-				type: 'text',
-				id: 'info',
-				width: 12,
-				label: 'Information',
-				value: 'This module will connect to any Blackmagic Design VideoHub Device.'
-			},
-			{
-				type: 'textinput',
-				id: 'host',
-				label: 'Videohub IP',
-				width: 6,
-				default: '192.168.10.150',
-				regex: this.REGEX_IP
-			},
-			{
-				type: 'text',
-				id: 'info',
-				width: 12,
-				label: 'Information',
-				value: 'This counts below will automatically populate from the device upon connection, however, can be set manually for offline programming.'
-			},
-			{
-				type: 'textinput',
-				id: 'inputCount',
-				label: 'Input Count',
-				default: '12',
-				width: 2,
-				regex: '/^\\d*$/'
-			},
-			{
-				type: 'textinput',
-				id: 'outputCount',
-				label: 'Output Count',
-				default: '12',
-				width: 2,
-				regex: '/^\\d*$/'
-			},
-			{
-				type: 'textinput',
-				id: 'monitoringCount',
-				label: 'Monitoring Output Count (when present)',
-				default: '0',
-				width: 2,
-				regex: '/^\\d*$/'
-			},
-			{
-				type: 'textinput',
-				id: 'serialCount',
-				label: 'Serial Port Count (when present)',
-				default: '0',
-				width: 2,
-				regex: '/^\\d*$/'
-			}
-		]
-	}
-
-	/**
-	 * Clean up the instance before it is destroyed.
-	 *
-	 * @access public
-	 * @since 1.0.0
-	 */
-	destroy() {
-		if (this.socket !== undefined) {
-			this.socket.destroy();
-		}
-
-		debug("destroy", this.id);
+		return actions;
 	}
 
 	/**
@@ -426,6 +433,8 @@ class instance extends instance_skel {
 
 		this.initVariables();
 		this.initFeedbacks();
+		this.initPresets();
+		this.checkFeedbacks('selected_destination');
 
 		this.init_tcp();
 	}
@@ -552,6 +561,49 @@ class instance extends instance_skel {
 			}
 		};
 
+		if (this.serialCount > 0) {
+			feedbacks['serial_bg'] = {
+				label: 'Change background color by serial route',
+				description: 'If the input specified is in use by the output specified, change background color of the bank',
+				options: [
+					{
+						type: 'colorpicker',
+						label: 'Foreground color',
+						id: 'fg',
+						default: this.rgb(0,0,0)
+					},
+					{
+						type: 'colorpicker',
+						label: 'Background color',
+						id: 'bg',
+						default: this.rgb(255,255,0)
+					},
+					{
+						type: 'dropdown',
+						label: 'Input',
+						id: 'input',
+						default: '0',
+						choices: this.CHOICES_SERIALS
+					},
+					{
+						type: 'dropdown',
+						label: 'Output',
+						id: 'output',
+						default: '0',
+						choices: this.CHOICES_SERIALS
+					}
+				],
+				callback: (feedback, bank) => {
+					if (this.getSerial(parseInt(feedback.options.output)).route == parseInt(feedback.options.input)) {
+						return {
+							color: feedback.options.fg,
+							bgcolor: feedback.options.bg
+						};
+					}
+				}
+			};
+		}
+
 		feedbacks['selected_destination'] = {
 			label: 'Change background color by selected destination',
 			description: 'If the input specified is in use by the selected output specified, change background color of the bank',
@@ -621,6 +673,163 @@ class instance extends instance_skel {
 		};
 
 		this.setFeedbackDefinitions(feedbacks);
+	}
+
+	/**
+	 * INTERNAL: initialize presets.
+	 *
+	 * @access protected
+	 * @since 1.1.1
+	 */
+	initPresets () {
+		var presets = [];
+
+		for (var i = 0; i < (this.outputCount + this.monitoringCount); i++) {
+
+			presets.push({
+				category: 'Select Destination',
+				label: 'Selection destination button for ' + this.getOutput(i).name,
+				bank: {
+					style: 'text',
+					text: '$(videohub:output_' + (i+1) + ')',
+					size: 18,
+					color: this.rgb(255,255,255),
+					bgcolor: this.rgb(0,0,0)
+				},
+				feedbacks: [
+					{
+						type: 'selected_destination',
+						options: {
+							bg: this.rgb(255,255,0),
+							fg: this.rgb(0,0,0),
+							output: i
+						}
+					}
+				],
+				actions: [
+					{
+						action: 'select_destination',
+						options: {
+							destination: i
+						}
+					}
+				]
+			});
+		}
+
+		for (var i = 0; i < this.inputCount; i++) {
+
+			presets.push({
+				category: 'Route Source',
+				label: 'Route ' + this.getInput(i).name + ' to selected destination',
+				bank: {
+					style: 'text',
+					text: '$(videohub:input_' + (i+1) + ')',
+					size: 18,
+					color: this.rgb(255,255,255),
+					bgcolor: this.rgb(0,0,0)
+				},
+				feedbacks: [
+					{
+						type: 'selected_source',
+						options: {
+							bg: this.rgb(255,255,255),
+							fg: this.rgb(0,0,0),
+							input: i
+						}
+					}
+				],
+				actions: [
+					{
+						action: 'route_source',
+						options: {
+							source: i
+						}
+					}
+				]
+			});
+		}
+
+		for (var out = 0; out < (this.outputCount + this.monitoringCount); out++) {
+			for (var i = 0; i < this.inputCount; i++) {
+
+				presets.push({
+					category: 'Output ' + (out+1),
+					label: 'Output ' + (out+1) + ' button for ' + this.getInput(i).name,
+					bank: {
+						style: 'text',
+						text: '$(videohub:input_' + (i+1) + ')',
+						size: 18,
+						color: this.rgb(255,255,255),
+						bgcolor: this.rgb(0,0,0)
+					},
+					feedbacks: [
+						{
+							type: 'input_bg',
+							options: {
+								bg: this.rgb(255,255,0),
+								fg: this.rgb(0,0,0),
+								input: i,
+								output: out
+							}
+						}
+					],
+					actions: [
+						{
+							action: 'route',
+							options: {
+								source: i,
+								destination: out
+							}
+						}
+					]
+				});
+			}
+		}
+
+		if (this.serialCount > 0) {
+			for (var out = 0; out < this.serialCount; out++) {
+				for (var i = 0; i < this.serialCount; i++) {
+					if (i == out) {
+						continue;
+					}
+
+					presets.push({
+						category: 'Serial ' + (out+1),
+						label: 'Route serial ' + (i+1) + ' to serial ' + (out+1),
+						bank: {
+							style: 'text',
+							text: '$(videohub:serial_' + (i+1) + ')',
+							size: 18,
+							color: this.rgb(255,255,255),
+							bgcolor: this.rgb(0,0,0)
+						},
+						feedbacks: [
+							{
+								type: 'serial_bg',
+								options: {
+									bg: this.rgb(255,255,0),
+									fg: this.rgb(0,0,0),
+									input: i,
+									output: out
+								}
+							}
+						],
+						actions: [
+							{
+								action: 'route_serial',
+								options: {
+									source: i,
+									destination: out
+								}
+							}
+						]
+					});
+				}
+			}
+		}
+
+		this.setPresetDefinitions(presets);
 	}
 
 	/**
@@ -717,6 +926,7 @@ class instance extends instance_skel {
 			this.updateLabels(key,data);
 			this.actions();
 			this.initFeedbacks();
+			this.initPresets();
 		}
 		else if (key.match(/(VIDEO OUTPUT|VIDEO MONITORING OUTPUT|SERIAL PORT) ROUTING/)) {
 			this.updateRouting(key,data);
@@ -731,6 +941,7 @@ class instance extends instance_skel {
 			this.updateStatus(key,data);
 			this.actions();
 			this.initFeedbacks();
+			this.initPresets();
 		}
 		else if (key == 'SERIAL PORT DIRECTIONS') {
 			this.updateSerialDirections(key,data);
@@ -740,6 +951,7 @@ class instance extends instance_skel {
 			this.actions();
 			this.initVariables();
 			this.initFeedbacks();
+			this.initPresets();
 		}
 		else {
 			// TODO: find out more about the video hub from stuff that comes in here
@@ -804,6 +1016,11 @@ class instance extends instance_skel {
 		this.outputCount     = parseInt(this.config.outputCount);
 		this.monitoringCount = parseInt(this.config.monitoringCount);
 		this.serialCount     = parseInt(this.config.serialCount);
+
+		this.actions();
+		this.initFeedbacks();
+		this.initPresets();
+		this.initVariables();
 
 		if (resetConnection === true || this.socket === undefined) {
 			this.init_tcp();
