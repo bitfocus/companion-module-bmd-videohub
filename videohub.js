@@ -692,7 +692,7 @@ class instance extends instance_skel {
 				bank: {
 					style: 'text',
 					text: '$(videohub:output_' + (i+1) + ')',
-					size: 18,
+					size: '18',
 					color: this.rgb(255,255,255),
 					bgcolor: this.rgb(0,0,0)
 				},
@@ -725,7 +725,7 @@ class instance extends instance_skel {
 				bank: {
 					style: 'text',
 					text: '$(videohub:input_' + (i+1) + ')',
-					size: 18,
+					size: '18',
 					color: this.rgb(255,255,255),
 					bgcolor: this.rgb(0,0,0)
 				},
@@ -759,7 +759,7 @@ class instance extends instance_skel {
 					bank: {
 						style: 'text',
 						text: '$(videohub:input_' + (i+1) + ')',
-						size: 18,
+						size: '18',
 						color: this.rgb(255,255,255),
 						bgcolor: this.rgb(0,0,0)
 					},
@@ -800,7 +800,7 @@ class instance extends instance_skel {
 						bank: {
 							style: 'text',
 							text: '$(videohub:serial_' + (i+1) + ')',
-							size: 18,
+							size: '18',
 							color: this.rgb(255,255,255),
 							bgcolor: this.rgb(0,0,0)
 						},
