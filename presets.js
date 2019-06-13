@@ -10,7 +10,7 @@ module.exports = {
 		var presets = [];
 
 		presets.push({
-			category: 'Actions',
+			category: 'Actions\n(XY only)',
 			label: 'Take',
 			bank: {
 				style: 'text',
@@ -36,7 +36,7 @@ module.exports = {
 		});
 
 		presets.push({
-			category: 'Actions',
+			category: 'Actions\n(XY only)',
 			label: 'Clear',
 			bank: {
 				style: 'text',
@@ -64,7 +64,7 @@ module.exports = {
 		for (var i = 0; i < (this.outputCount + this.monitoringCount); i++) {
 
 			presets.push({
-				category: 'Select Destination',
+				category: 'Select Destination (X)',
 				label: 'Selection destination button for ' + this.getOutput(i).name,
 				bank: {
 					style: 'text',
@@ -105,7 +105,7 @@ module.exports = {
 		for (var i = 0; i < this.inputCount; i++) {
 
 			presets.push({
-				category: 'Route Source',
+				category: 'Route Source (Y)',
 				label: 'Route ' + this.getInput(i).name + ' to selected destination',
 				bank: {
 					style: 'text',
@@ -165,16 +165,7 @@ module.exports = {
 								input: i,
 								output: out
 							}
-						},
-					{
-						type: 'take_tally_route',
-						options: {
-							bg: this.rgb(255,0,0),
-							fg: this.rgb(255,255,255),
-								input: i,
-								output: out
 						}
-					}
 					],
 					actions: [
 						{
