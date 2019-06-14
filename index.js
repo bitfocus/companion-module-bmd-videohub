@@ -82,7 +82,7 @@ class instance extends instance_skel {
 	actions(system) {
 
 		this.setupChoices();
-		this.setActions(this.getActions(system));
+		this.setActions(this.getActions());
 	}
 
 	/**
