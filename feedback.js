@@ -1,14 +1,15 @@
 module.exports = {
 
 	/**
-	 * Get the available feedbacks.  Utilized by bmd-multiview.
+	 * Get the available feedbacks.
+	 * 
+	 * !!! Utilized by bmd-multiview16 !!!
 	 *
 	 * @returns {Object[]} the available feedbacks
 	 * @access public
 	 * @since 1.2.0
 	 */
 	getFeedbacks() {
-		// feedbacks
 		var feedbacks = {};
 
 		feedbacks['input_bg'] = {

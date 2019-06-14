@@ -1,7 +1,9 @@
 module.exports = {
 
 	/**
-	 * Get the available actions.  Utilized by bmd-multiview.
+	 * Get the available actions.
+	 * 
+	 * !!! Utilized by bmd-multiview16 !!!
 	 *
 	 * @returns {Object[]} the available actions
 	 * @access public
