@@ -177,6 +177,46 @@ module.exports = {
 						}
 					]
 				});
+
+				presets.push({
+					category: 'Output ' + (out+1) + ' (momentary)',
+					label: 'Output ' + (out+1) + ' button for ' + this.getInput(i).name + ' with route back',
+					bank: {
+						style: 'text',
+						text: '$(videohub:input_' + (i+1) + ') (mom.)',
+						size: '18',
+						color: this.rgb(255,255,255),
+						bgcolor: this.rgb(0,0,0)
+					},
+					feedbacks: [
+						{
+							type: 'input_bg',
+							options: {
+								bg: this.rgb(255,255,0),
+								fg: this.rgb(0,0,0),
+								input: i,
+								output: out
+							}
+						}
+					],
+					actions: [
+						{
+							action: 'route',
+							options: {
+								source: i,
+								destination: out
+							}
+						}
+					],
+					release_actions: [
+						{
+							action: 'route_back',
+							options: {
+								destination: out
+							}
+						}
+					]
+				});
 			}
 		}
 
