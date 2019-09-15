@@ -98,11 +98,25 @@ class instance extends instance_skel {
 
 		switch (action.action) {
 			case 'route':
+				var output = this.getOutput(parseInt(opt.destination));
+				output.fallback = output.route;
 				if (parseInt(opt.destination) >= this.outputCount) {
 					cmd = "VIDEO MONITORING OUTPUT ROUTING:\n"+(parseInt(opt.destination)-this.outputCount)+" "+opt.source+"\n\n";
 				}
 				else {
 					cmd = "VIDEO OUTPUT ROUTING:\n"+opt.destination+" "+opt.source+"\n\n";
+				}
+				break;
+			case 'route_back':
+				var output = this.getOutput(parseInt(opt.destination));
+				if (output.fallback !== undefined && output.fallback >= 0) {
+					if (parseInt(opt.destination) >= this.outputCount) {
+						cmd = "VIDEO MONITORING OUTPUT ROUTING:\n"+(parseInt(opt.destination)-this.outputCount)+" "+output.fallback+"\n\n";
+					}
+					else {
+						cmd = "VIDEO OUTPUT ROUTING:\n"+opt.destination+" "+output.fallback+"\n\n";
+					}
+					output.fallback = -1;
 				}
 				break;
 			case 'route_serial':

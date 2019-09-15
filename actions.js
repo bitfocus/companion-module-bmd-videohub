@@ -90,6 +90,19 @@ module.exports = {
 			]
 		};
 
+		actions['route_back'] = {
+			label: 'Route back',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Destination',
+					id: 'destination',
+					default: '0',
+					choices: this.CHOICES_OUTPUTS
+				}
+			]
+		};
+
 		if (this.serialCount > 0) {
 			actions['route_serial'] = {
 				label: 'Route serial port',

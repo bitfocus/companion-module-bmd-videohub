@@ -38,7 +38,8 @@ module.exports = {
 				name:       'Output ' + (id+1),
 				route:      id,
 				status:     'BNC',
-				lock:       'U'
+				lock:       'U',
+				fallback:   -1
 			};
 		}
 
