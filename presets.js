@@ -210,7 +210,7 @@ module.exports = {
 					],
 					release_actions: [
 						{
-							action: 'route_back',
+							action: 'route_to_previous',
 							options: {
 								destination: out
 							}

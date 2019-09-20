@@ -90,8 +90,8 @@ module.exports = {
 			]
 		};
 
-		actions['route_back'] = {
-			label: 'Route back',
+		actions['route_to_previous'] = {
+			label: 'Return to previous route',
 			options: [
 				{
 					type: 'dropdown',
