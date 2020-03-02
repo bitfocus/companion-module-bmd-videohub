@@ -1,4 +1,6 @@
 # companion-module-videohub
+See HELP.md and LICENSE
+
 **Changes in v1.2.0**
 - Moved to split files structure for actions, feedback, presets, and variables.
 - **companion-module-bmd-multiview16 extends this module.**  Future changes require testing against both modules.
