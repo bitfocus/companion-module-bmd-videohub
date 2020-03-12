@@ -1,4 +1,4 @@
-# companion-module-videohub
+# companion-module-bmd-videohub
 See HELP.md and LICENSE
 
 **Changes in v1.2.0**
