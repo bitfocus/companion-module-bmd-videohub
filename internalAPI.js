@@ -8,7 +8,8 @@ module.exports = {
 	 * @access protected
 	 * @since 1.1.0
 	 */
-	getInput(id) {
+
+  	getInput(id) {
 
 		if (this.inputs[id] === undefined) {
 			this.inputs[id] = {
@@ -41,7 +42,6 @@ module.exports = {
 				lock:       'U'
 			};
 		}
-
 		return this.outputs[id];
 	},
 
@@ -188,6 +188,7 @@ module.exports = {
 		}
 	},
 
+
 	/**
 	 * INTERNAL: Updates routing table based on data from the Videohub
 	 *
@@ -196,7 +197,7 @@ module.exports = {
 	 * @access protected
 	 * @since 1.0.0
 	 */
-	updateRouting(labeltype, object) {
+	updateRouting(labeltype, object, currentRoutingTable) {
 
 		for (var key in object) {
 			var parsethis = object[key];
@@ -204,11 +205,18 @@ module.exports = {
 			var dest = parseInt(a.shift());
 			var src = parseInt(a.join(" "));
 
+			// Initialize currentRoutingTable if not already.  
+			// Seems odd to do it here instead of constructor but otherwise outputCount is undefined sometimes. v1.3.0
+			if(currentRoutingTable.length < this.outputCount) {
+				currentRoutingTable.length = this.outputCount;
+	 		}
+
 			switch (labeltype) {
 				case 'VIDEO MONITORING OUTPUT ROUTING':
 					dest = dest + this.outputCount;
 				case 'VIDEO OUTPUT ROUTING':
 					this.getOutput(dest).route = src;
+					currentRoutingTable[dest] = src;     // keep the local routing table up to date v1.3.0  jla
 					this.setVariable('output_' + (dest+1) + '_input',  this.getInput(src).name);
 					break;
 				case 'SERIAL PORT ROUTING':
