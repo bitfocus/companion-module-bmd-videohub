@@ -1,14 +1,18 @@
 var tcp = require('../../tcp');
 var instance_skel = require('../../instance_skel');
+var fs = require('fs');
 
 var instance_api  = require('./internalAPI');
 var actions       = require('./actions');
 var feedback      = require('./feedback');
 var presets       = require('./presets');
 var variables     = require('./variables');
+const { isNull }  = require('util');
 
 var debug;
 var log;
+
+var currentRoutingTable = [];
 
 /**
  * Companion instance class for the Blackmagic VideoHub Routers.
@@ -16,10 +20,11 @@ var log;
  * !!! This class is being used by the bmd-multiview16 module, be careful !!!
  *
  * @extends instance_skel
- * @version 1.2.0
+ * @version 1.3.0
  * @since 1.0.0
  * @author William Viker <william@bitfocus.io>
  * @author Keith Rocheck <keith.rocheck@gmail.com>
+ * @author Jim Amen <jim.amen50@gmail.com>
  */
 class instance extends instance_skel {
 
@@ -95,9 +100,72 @@ class instance extends instance_skel {
 	action(action) {
 		var cmd;
 		var opt = action.options;
+		var string = "  : BMD uses zero based indexing when referencing source and destination so '0' in this file refernces port '1'.  You may add your own text here after the colon. ";
+		var routes_text = [];
+		var data =[];
+		var routes = [];
+		var dest_source = [];
 
 		switch (action.action) {
+
+			case 'store_route_in_file':  // added ability to store routes to a file v1.3.0
+
+				for (let index = 0; index < currentRoutingTable.length; index++) {
+					data[index] = index  + ' ' + currentRoutingTable[index];
+				}
+				try{
+					// use the blocking version of file write here.
+					fs.writeFileSync(opt.destination_file, data + string, 'utf8');
+					this.log('info',data.length + " Routes written to: " + opt.destination_file );
+				}
+				catch (e) {
+					this.log('error',"File Write Error: " + e.message);
+				}
+				break;
+
+			case 'load_route_from_file': // added ability to read routes from a file v1.3.0
+
+				try {
+					// use the blocking version of file read here. 
+					var data = fs.readFileSync(opt.source_file, 'utf8');
+					try{
+						routes_text= data.split(':');
+						routes = routes_text[0].split(',');
+						if((routes.length > 0) && (routes.length <= currentRoutingTable.length)) {      
+						    cmd = '';
+							for (let index = 0; index < routes.length; index++) {
+								dest_source = routes[index].split(' ');
+								if(isNaN(dest_source[0])) {
+									throw routes[index] + " - " + dest_source[0] + " is not a valid Router Destination ";
+								}
+								if(dest_source[0] < 0 || dest_source[0] > (currentRoutingTable.length - 1)) {
+									throw dest_source[0] + "  is an invalid destination.  Remember, Router is zero based when indexing ports.  Max Routes for this router = " +  currentRoutingTable.length;
+								}
+								if(isNaN(dest_source[1])) {
+									throw routes[index] + " - " + dest_source[1] + " is not a valid Router Source ";
+								}
+								if(dest_source[1] < 0 || dest_source[1] > (currentRoutingTable.length - 1)) {
+									throw dest_source[1] + "  is an invalid source. Remember, Router is zero based when indexing ports.  Max Routes for this router = " + currentRoutingTable.length; 
+								}
+								cmd = cmd + "VIDEO OUTPUT ROUTING:\n" +  routes[index] + "\n\n";  // not sure if we need both \n here...
+							}
+						}
+						else {
+							throw "Invalid number of Routes: " + routes.length + ",";
+						}
+						this.log('info', routes.length + " Routes read from File: " + opt.source_file );
+					}
+					catch (err) {
+						this.log('error', err + " in File:" + opt.source_file);
+					}
+				}
+				catch(e) {
+					this.log('error',"File Read Error: " + e.message);
+				}
+				break;
+
 			case 'route':
+
 				if (parseInt(opt.destination) >= this.outputCount) {
 					cmd = "VIDEO MONITORING OUTPUT ROUTING:\n"+(parseInt(opt.destination)-this.outputCount)+" "+opt.source+"\n\n";
 				}
@@ -105,13 +173,19 @@ class instance extends instance_skel {
 					cmd = "VIDEO OUTPUT ROUTING:\n"+opt.destination+" "+opt.source+"\n\n";
 				}
 				break;
+
 			case 'route_serial':
+
 				cmd = "SERIAL PORT ROUTING:\n"+opt.destination+" "+opt.source+"\n\n";
 				break;
+
 			case 'rename_source':
+
 				cmd = "INPUT LABELS:\n"+opt.source+" "+opt.label+"\n\n";
 				break;
+
 			case 'rename_destination':
+
 				if (parseInt(opt.destination) >= this.outputCount) {
 					cmd = "MONITORING OUTPUT LABELS:\n"+(parseInt(opt.destination)-this.outputCount)+" "+opt.label+"\n\n";
 				}
@@ -119,16 +193,22 @@ class instance extends instance_skel {
 					cmd = "OUTPUT LABELS:\n"+opt.destination+" "+opt.label+"\n\n";
 				}
 				break;
+
 			case 'rename_serial':
+			
 				cmd = "SERIAL PORT LABELS:\n"+opt.serial+" "+opt.label+"\n\n";
 				break;
+
 			case 'select_destination':
-				this.selected = parseInt(opt.destination);
+
+			this.selected = parseInt(opt.destination);
 				this.checkFeedbacks('selected_destination');
 				this.checkFeedbacks('take_tally_source');
 				this.checkFeedbacks('selected_source');
 				break;
+
 			case 'route_source':
+
 				if (this.selected >= this.outputCount) {
 					if (this.config.take === true) {
 						this.queue = "VIDEO MONITORING OUTPUT ROUTING:\n"+(this.selected-this.outputCount)+" "+opt.source+"\n\n";
@@ -158,6 +238,7 @@ class instance extends instance_skel {
 					}
 				}
 				break;
+
 			case 'take':
 				cmd = this.queue;
 				this.queue = '';
@@ -167,6 +248,8 @@ class instance extends instance_skel {
 				this.checkFeedbacks('take_tally_source');
 				this.checkFeedbacks('take_tally_dest');
 				this.checkFeedbacks('take_tally_route');
+				break;  // why no break here originally? jla
+
 			case 'clear':
 				this.queue = '';
 				this.queuedDest = -1;
@@ -175,15 +258,21 @@ class instance extends instance_skel {
 				this.checkFeedbacks('take_tally_source');
 				this.checkFeedbacks('take_tally_dest');
 				this.checkFeedbacks('take_tally_route');
+				break;  // why no break here originally?  I like things to be consistant jla
 		}
 
 		if (cmd !== undefined) {
-
+			// do the work of sending data to Videohub right here!  jla
 			if (this.socket !== undefined && this.socket.connected) {
-				this.socket.send(cmd);
+				try {
+					this.socket.send(cmd);
+				} catch (error) {
+					this.log('error',"TCP error " + error.message);
+				}
 			}
 			else {
-				this.debug('Socket not connected :(');
+				this.log('error',"Socket not connected ");   /// changed to an 'error' instead of debug
+				init_tcp();                                  /// what the heck, lets try to reinitialize the tcp stack
 			}
 		}
 	}
@@ -225,7 +314,7 @@ class instance extends instance_skel {
 				id: 'info',
 				width: 12,
 				label: 'Information',
-				value: 'This counts below will automatically populate from the device upon connection, however, can be set manually for offline programming.'
+				value: 'The counts below will automatically populate from the device upon connection, however, they can be set manually for offline programming.'
 			},
 			{
 				type: 'number',
@@ -402,6 +491,7 @@ class instance extends instance_skel {
 	 */
 	processVideohubInformation(key,data) {
 
+
 		if (key.match(/(INPUT|OUTPUT|MONITORING OUTPUT|SERIAL PORT) LABELS/)) {
 			this.updateLabels(key,data);
 			this.actions();
@@ -409,8 +499,7 @@ class instance extends instance_skel {
 			this.initPresets();
 		}
 		else if (key.match(/(VIDEO OUTPUT|VIDEO MONITORING OUTPUT|SERIAL PORT) ROUTING/)) {
-			this.updateRouting(key,data);
-
+			this.updateRouting(key,data,currentRoutingTable);  // I think this is the first time through updateRouting
 			this.checkFeedbacks('input_bg');
 			this.checkFeedbacks('selected_source');
 		}
