@@ -12,6 +12,32 @@ module.exports = {
 	getActions() {
 		var actions = {};
 
+		actions['load_route_from_file'] = {
+			label: 'Load Routes File',
+			options: [
+								
+				{
+					type: 'textinput',
+					label: 'Source File',
+					id: 'source_file',
+					default: "C:\\VideoHub.txt"
+				}
+			]
+		};
+
+		actions['store_route_in_file'] = {
+			label: 'Save Routes File',
+			options: [
+								
+				{
+					type: 'textinput',
+					label: 'Destination File',
+					id: 'destination_file',
+					default: "C:\\VideoHub.txt"
+				}
+			]
+		};
+
 		actions['rename_destination'] = {
 			label: 'Rename destination',
 			options: [
