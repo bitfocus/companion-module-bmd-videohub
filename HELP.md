@@ -13,3 +13,5 @@ This module will connect to any Blackmagic Design VideoHub Device.
 * Route source to selected destination
 * Take (when enabled)
 * Clear (when enabled)
+* Write routes to a disk file
+* Read routes from a disk file
