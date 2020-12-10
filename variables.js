@@ -1,5 +1,5 @@
 module.exports = {
-
+	
 	/**
 	 * INTERNAL: initialize variables.
 	 *

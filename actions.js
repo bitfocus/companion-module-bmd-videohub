@@ -12,6 +12,45 @@ module.exports = {
 	getActions() {
 		var actions = {};
 
+		actions['route_to_previous'] = {
+			label: 'Return to previous route',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Destination',
+					id: 'destination',
+					default: '0',
+					choices: this.CHOICES_OUTPUTS
+				}
+			]
+		};
+
+		actions['load_route_from_file'] = {
+			label: 'Load Routes File',
+			options: [
+								
+				{
+					type: 'textinput',
+					label: 'Source File',
+					id: 'source_file',
+					default: "C:\\VideoHub.txt"
+				}
+			]
+		};
+
+		actions['store_route_in_file'] = {
+			label: 'Save Routes File',
+			options: [
+								
+				{
+					type: 'textinput',
+					label: 'Destination File',
+					id: 'destination_file',
+					default: "C:\\VideoHub.txt"
+				}
+			]
+		};
+
 		actions['rename_destination'] = {
 			label: 'Rename destination',
 			options: [
