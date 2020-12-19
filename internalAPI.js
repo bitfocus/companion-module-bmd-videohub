@@ -8,7 +8,6 @@ module.exports = {
 	 * @access protected
 	 * @since 1.1.0
 	 */
-
 	getInput(id) {
 
 		if (this.inputs[id] === undefined) {
@@ -189,9 +188,8 @@ module.exports = {
 		}
 	},
 
-
 	/**
-	 * INTERNAL: Updates routing table based on data From the Videohub
+	 * INTERNAL: Updates Companion's routing table based on data sent from the Videohub
 	 *
 	 * @param {string} labeltype - the command/data type being passed
 	 * @param {Object} object - the collected data
@@ -215,7 +213,7 @@ module.exports = {
 					if(output.fallback.length > 20){
 						output.fallback = output.fallback.slice(2);
 					}
-	                output.fallback.push(src);  // push the route returned from the hardware into the fallback route 
+					output.fallback.push(src);  // push the route returned from the hardware into the fallback route 
 					output.route = src;         // now we set the route in the container to the new value
 					this.setVariable('output_' + (dest+1) + '_input',  this.getInput(src).name);
 					break;

@@ -7,12 +7,9 @@ var actions       = require('./actions');
 var feedback      = require('./feedback');
 var presets       = require('./presets');
 var variables     = require('./variables');
-const { isNull }  = require('util');
-const { getOutput } = require('./internalAPI');
 
 var debug;
 var log;
-
 
 /**
  * Companion instance class for the Blackmagic VideoHub Routers.
@@ -76,7 +73,6 @@ class instance extends instance_skel {
 		];
 
 		this.actions(); // export actions
-
 	}
 
 	/**
@@ -104,24 +100,21 @@ class instance extends instance_skel {
 		var opt = action.options;
 		var string = "";
 		var routes_text = [];
-		var data =[];  // String with route date that gets written to file
-		var routes = [];  // disk data parse helper
-		var dest_source = [];  // disk data parse helper
+		var data =[];
+		var routes = [];
+		var dest_source = [];
 
 		switch (action.action) {
 
-			case 'store_route_in_file':  // added ability to store routes to a file v1.3.0
+			case 'store_route_in_file':
+				string = "  : BMD uses zero based indexing when referencing source and destination so '0' in this file references port '1'.  You may add your own text here after the colon. \n";
+				string = string + "\nRouting history: \n"
 
-				string = "  : BMD uses zero based indexing when referencing source and destination so '0' in this file refernces port '1'.  You may add your own text here after the colon. \n";
-				string = "\nRouting history: \n"
-
-				// this information in the disk file is more for debug than anything else.  Its ignored on read
 				for (let index = 0; index < this.outputCount; index++) {
 					data[index] = index  + ' ' + this.getOutput(index).route;
 					string = string + index + "  " + this.getOutput(index).fallback + "\n"
 				}
 				try{
-					// use the blocking version of file write here.
 					fs.writeFileSync(opt.destination_file, data + string, 'utf8');
 					this.log('info',data.length + " Routes written to: " + opt.destination_file );
 				}
@@ -130,14 +123,12 @@ class instance extends instance_skel {
 				}
 				break;
 
-			case 'load_route_from_file': // added ability to read routes from a file v1.3.0
-
+			case 'load_route_from_file':
 				try {
-					// use the blocking version of file read here. 
 					var data = fs.readFileSync(opt.source_file, 'utf8');
 					try{
-						routes_text= data.split(':');  // strip out unwanted text after the ':'
-						routes = routes_text[0].split(',');  // split routes into source - destination array
+						routes_text= data.split(':');
+						routes = routes_text[0].split(',');
 						if((routes.length > 0) && (routes.length <= this.outputCount)) {      
 						    cmd = '';
 							for (let index = 0; index < routes.length; index++) {
@@ -154,7 +145,7 @@ class instance extends instance_skel {
 								if(dest_source[1] < 0 || dest_source[1] > (this.outputCount - 1)) {
 									throw dest_source[1] + "  is an invalid source. Remember, Router is zero based when indexing ports.  Max Routes for this router = " +this.outputCount; 
 								}
-								cmd = cmd + "VIDEO OUTPUT ROUTING:\n" +  routes[index] + "\n\n";  // not sure if we need both \n here...
+								cmd = cmd + "VIDEO OUTPUT ROUTING:\n" +  routes[index] + "\n\n"; 
 							}
 						}
 						else {
@@ -172,7 +163,6 @@ class instance extends instance_skel {
 				break;
 
 			case 'route':
-
 				var output = this.getOutput(parseInt(opt.destination));
 
 				if (parseInt(opt.destination) >= this.outputCount) {
@@ -184,21 +174,19 @@ class instance extends instance_skel {
 				break;
 
 			case 'route_to_previous':
-
 				var output = this.getOutput(parseInt(opt.destination));
 				var fallbackpop = -1;
 
-				if(output !== undefined){
-					fallbackpop = output.fallback.pop();  // The current route (i.e what the hardware is acctually set to)
-														  // has already been pushed onto the stack at "updateRouting" so to 
-														  // get to the last route we have to first pop this one off
-					fallbackpop = output.fallback.pop();  // This now, is the route to fallback to
+				fallbackpop = output.fallback.pop();  // The current route (i.e what the hardware is actually set to)
+													  // has already been pushed onto the stack at "updateRouting" so to 
+													  // get to the last route we have to first pop this one off.
+				fallbackpop = output.fallback.pop();  // This now, is the route to fallback to.
 					
-					if(output.fallback.length < 1 ){
-						output.fallback.push(-1);
-					}
+				if(output.fallback.length < 1 ){
+					output.fallback.push(-1);
 				}
-				if (output !== undefined && fallbackpop >= 0) {
+
+				if (fallbackpop >= 0) {
 
 					if (parseInt(opt.destination) >= this.outputCount) {
 						cmd = "VIDEO MONITORING OUTPUT ROUTING:\n"+(parseInt(opt.destination)-this.outputCount) + " " + fallbackpop + "\n\n";
@@ -210,17 +198,12 @@ class instance extends instance_skel {
 				break;
 
 			case 'route_serial':
-
 				cmd = "SERIAL PORT ROUTING:\n"+opt.destination+" "+opt.source+"\n\n";
 				break;
-
 			case 'rename_source':
-
 				cmd = "INPUT LABELS:\n"+opt.source+" "+opt.label+"\n\n";
 				break;
-
 			case 'rename_destination':
-
 				if (parseInt(opt.destination) >= this.outputCount) {
 					cmd = "MONITORING OUTPUT LABELS:\n"+(parseInt(opt.destination)-this.outputCount)+" "+opt.label+"\n\n";
 				}
@@ -228,22 +211,16 @@ class instance extends instance_skel {
 					cmd = "OUTPUT LABELS:\n"+opt.destination+" "+opt.label+"\n\n";
 				}
 				break;
-
-			case 'rename_serial':
-			
+			case 'rename_serial':	
 				cmd = "SERIAL PORT LABELS:\n"+opt.serial+" "+opt.label+"\n\n";
 				break;
-
 			case 'select_destination':
-
-			this.selected = parseInt(opt.destination);
+				this.selected = parseInt(opt.destination);
 				this.checkFeedbacks('selected_destination');
 				this.checkFeedbacks('take_tally_source');
 				this.checkFeedbacks('selected_source');
 				break;
-
 			case 'route_source':
-
 				if (this.selected >= this.outputCount) {
 					if (this.config.take === true) {
 						this.queue = "VIDEO MONITORING OUTPUT ROUTING:\n"+(this.selected-this.outputCount)+" "+opt.source+"\n\n";
@@ -273,7 +250,6 @@ class instance extends instance_skel {
 					}
 				}
 				break;
-
 			case 'take':
 				cmd = this.queue;
 				this.queue = '';
@@ -283,8 +259,7 @@ class instance extends instance_skel {
 				this.checkFeedbacks('take_tally_source');
 				this.checkFeedbacks('take_tally_dest');
 				this.checkFeedbacks('take_tally_route');
-				break;  // why no break here originally? jla
-
+				break;  
 			case 'clear':
 				this.queue = '';
 				this.queuedDest = -1;
@@ -293,11 +268,10 @@ class instance extends instance_skel {
 				this.checkFeedbacks('take_tally_source');
 				this.checkFeedbacks('take_tally_dest');
 				this.checkFeedbacks('take_tally_route');
-				break;  // why no break here originally?   jla
+				break;  
 		}
 
 		if (cmd !== undefined) {
-			// do the work of sending data to Videohub right here!  jla
 			if (this.socket !== undefined && this.socket.connected) {
 				try {
 					this.socket.send(cmd);
@@ -306,8 +280,8 @@ class instance extends instance_skel {
 				}
 			}
 			else {
-				this.log('error',"Socket not connected ");   /// changed to an 'error' instead of debug
-				init_tcp();                                  /// what the heck, lets try to reinitialize the tcp stack
+				this.log('error',"Socket not connected ");   
+				this.init_tcp();
 			}
 		}
 	}
