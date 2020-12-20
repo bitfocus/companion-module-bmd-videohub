@@ -38,10 +38,10 @@ module.exports = {
 				name:       'Output ' + (id+1),
 				route:      id,
 				status:     'BNC',
-				lock:       'U'
+				lock:       'U',
+				fallback: 	[-1]
 			};
 		}
-
 		return this.outputs[id];
 	},
 
@@ -189,7 +189,7 @@ module.exports = {
 	},
 
 	/**
-	 * INTERNAL: Updates routing table based on data from the Videohub
+	 * INTERNAL: Updates Companion's routing table based on data sent from the Videohub
 	 *
 	 * @param {string} labeltype - the command/data type being passed
 	 * @param {Object} object - the collected data
@@ -208,7 +208,13 @@ module.exports = {
 				case 'VIDEO MONITORING OUTPUT ROUTING':
 					dest = dest + this.outputCount;
 				case 'VIDEO OUTPUT ROUTING':
-					this.getOutput(dest).route = src;
+					var output = this.getOutput(parseInt(dest));
+					// Lets not let the fallback array grow without bounds. is 20 enough?
+					if(output.fallback.length > 20){
+						output.fallback = output.fallback.slice(2);
+					}
+					output.fallback.push(src);  // push the route returned from the hardware into the fallback route 
+					output.route = src;         // now we set the route in the container to the new value
 					this.setVariable('output_' + (dest+1) + '_input',  this.getInput(src).name);
 					break;
 				case 'SERIAL PORT ROUTING':

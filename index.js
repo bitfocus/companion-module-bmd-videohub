@@ -1,5 +1,6 @@
 var tcp = require('../../tcp');
 var instance_skel = require('../../instance_skel');
+var fs = require('fs');
 
 var instance_api  = require('./internalAPI');
 var actions       = require('./actions');
@@ -16,10 +17,12 @@ var log;
  * !!! This class is being used by the bmd-multiview16 module, be careful !!!
  *
  * @extends instance_skel
- * @version 1.2.0
+ * @version 1.3.0
  * @since 1.0.0
  * @author William Viker <william@bitfocus.io>
  * @author Keith Rocheck <keith.rocheck@gmail.com>
+ * @author Peter Schuster
+ * @author Jim Amen <jim.amen50@gmail.com>
  */
 class instance extends instance_skel {
 
@@ -95,9 +98,73 @@ class instance extends instance_skel {
 	action(action) {
 		var cmd;
 		var opt = action.options;
+		var string = "";
+		var routes_text = [];
+		var data =[];
+		var routes = [];
+		var dest_source = [];
 
 		switch (action.action) {
+
+			case 'store_route_in_file':
+				string = "  : BMD uses zero based indexing when referencing source and destination so '0' in this file references port '1'.  You may add your own text here after the colon. \n";
+				string = string + "\nRouting history: \n"
+
+				for (let index = 0; index < this.outputCount; index++) {
+					data[index] = index  + ' ' + this.getOutput(index).route;
+					string = string + index + "  " + this.getOutput(index).fallback + "\n"
+				}
+				try{
+					fs.writeFileSync(opt.destination_file, data + string, 'utf8');
+					this.log('info',data.length + " Routes written to: " + opt.destination_file );
+				}
+				catch (e) {
+					this.log('error',"File Write Error: " + e.message);
+				}
+				break;
+
+			case 'load_route_from_file':
+				try {
+					var data = fs.readFileSync(opt.source_file, 'utf8');
+					try{
+						routes_text= data.split(':');
+						routes = routes_text[0].split(',');
+						if((routes.length > 0) && (routes.length <= this.outputCount)) {      
+						    cmd = '';
+							for (let index = 0; index < routes.length; index++) {
+								dest_source = routes[index].split(' ');
+								if(isNaN(dest_source[0])) {
+									throw routes[index] + " - " + dest_source[0] + " is not a valid Router Destination ";
+								}
+								if(dest_source[0] < 0 || dest_source[0] > (this.outputCount - 1)) {
+									throw dest_source[0] + "  is an invalid destination.  Remember, Router is zero based when indexing ports.  Max Routes for this router = " + this.outputCount;
+								}
+								if(isNaN(dest_source[1])) {
+									throw routes[index] + " - " + dest_source[1] + " is not a valid Router Source ";
+								}
+								if(dest_source[1] < 0 || dest_source[1] > (this.outputCount - 1)) {
+									throw dest_source[1] + "  is an invalid source. Remember, Router is zero based when indexing ports.  Max Routes for this router = " +this.outputCount; 
+								}
+								cmd = cmd + "VIDEO OUTPUT ROUTING:\n" +  routes[index] + "\n\n"; 
+							}
+						}
+						else {
+							throw "Invalid number of Routes: " + routes.length + ",";
+						}
+						this.log('info', routes.length + " Routes read from File: " + opt.source_file );
+					}
+					catch (err) {
+						this.log('error', err + " in File:" + opt.source_file);
+					}
+				}
+				catch(e) {
+					this.log('error',"File Read Error: " + e.message);
+				}
+				break;
+
 			case 'route':
+				var output = this.getOutput(parseInt(opt.destination));
+
 				if (parseInt(opt.destination) >= this.outputCount) {
 					cmd = "VIDEO MONITORING OUTPUT ROUTING:\n"+(parseInt(opt.destination)-this.outputCount)+" "+opt.source+"\n\n";
 				}
@@ -105,6 +172,31 @@ class instance extends instance_skel {
 					cmd = "VIDEO OUTPUT ROUTING:\n"+opt.destination+" "+opt.source+"\n\n";
 				}
 				break;
+
+			case 'route_to_previous':
+				var output = this.getOutput(parseInt(opt.destination));
+				var fallbackpop = -1;
+
+				fallbackpop = output.fallback.pop();  // The current route (i.e what the hardware is actually set to)
+													  // has already been pushed onto the stack at "updateRouting" so to 
+													  // get to the last route we have to first pop this one off.
+				fallbackpop = output.fallback.pop();  // This now, is the route to fallback to.
+					
+				if(output.fallback.length < 1 ){
+					output.fallback.push(-1);
+				}
+
+				if (fallbackpop >= 0) {
+
+					if (parseInt(opt.destination) >= this.outputCount) {
+						cmd = "VIDEO MONITORING OUTPUT ROUTING:\n"+(parseInt(opt.destination)-this.outputCount) + " " + fallbackpop + "\n\n";
+					}
+					else {
+						cmd = "VIDEO OUTPUT ROUTING:\n"+opt.destination + " " + fallbackpop + "\n\n";
+					}
+				}
+				break;
+
 			case 'route_serial':
 				cmd = "SERIAL PORT ROUTING:\n"+opt.destination+" "+opt.source+"\n\n";
 				break;
@@ -119,7 +211,7 @@ class instance extends instance_skel {
 					cmd = "OUTPUT LABELS:\n"+opt.destination+" "+opt.label+"\n\n";
 				}
 				break;
-			case 'rename_serial':
+			case 'rename_serial':	
 				cmd = "SERIAL PORT LABELS:\n"+opt.serial+" "+opt.label+"\n\n";
 				break;
 			case 'select_destination':
@@ -167,6 +259,7 @@ class instance extends instance_skel {
 				this.checkFeedbacks('take_tally_source');
 				this.checkFeedbacks('take_tally_dest');
 				this.checkFeedbacks('take_tally_route');
+				break;  
 			case 'clear':
 				this.queue = '';
 				this.queuedDest = -1;
@@ -175,15 +268,20 @@ class instance extends instance_skel {
 				this.checkFeedbacks('take_tally_source');
 				this.checkFeedbacks('take_tally_dest');
 				this.checkFeedbacks('take_tally_route');
+				break;  
 		}
 
 		if (cmd !== undefined) {
-
 			if (this.socket !== undefined && this.socket.connected) {
-				this.socket.send(cmd);
+				try {
+					this.socket.send(cmd);
+				} catch (error) {
+					this.log('error',"TCP error " + error.message);
+				}
 			}
 			else {
-				this.debug('Socket not connected :(');
+				this.log('error',"Socket not connected ");   
+				this.init_tcp();
 			}
 		}
 	}
@@ -225,7 +323,7 @@ class instance extends instance_skel {
 				id: 'info',
 				width: 12,
 				label: 'Information',
-				value: 'This counts below will automatically populate from the device upon connection, however, can be set manually for offline programming.'
+				value: 'The counts below will automatically populate from the device upon connection, however, they can be set manually for offline programming.'
 			},
 			{
 				type: 'number',
@@ -409,8 +507,7 @@ class instance extends instance_skel {
 			this.initPresets();
 		}
 		else if (key.match(/(VIDEO OUTPUT|VIDEO MONITORING OUTPUT|SERIAL PORT) ROUTING/)) {
-			this.updateRouting(key,data);
-
+			this.updateRouting(key,data); 
 			this.checkFeedbacks('input_bg');
 			this.checkFeedbacks('selected_source');
 		}
