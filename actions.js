@@ -90,6 +90,26 @@ module.exports = {
 			]
 		};
 
+		actions['route_routed'] = {
+			label: 'Route source routed to given destination',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Destination to take routed source from',
+					id: 'source_routed_to_destination',
+					default: '0',
+					choices: this.CHOICES_OUTPUTS
+				},
+				{
+					type: 'dropdown',
+					label: 'Destination',
+					id: 'destination',
+					default: '0',
+					choices: this.CHOICES_OUTPUTS
+				}
+			]
+		};
+
 		actions['route_to_previous'] = {
 			label: 'Return to previous route',
 			options: [

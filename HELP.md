@@ -8,6 +8,7 @@ This module will connect to any Blackmagic Design VideoHub Device.
 * Rename source
 * Rename serial port (when present)
 * Route
+* Route source routed to other destination
 * Route serial port (when present)
 * Select destination
 * Route source to selected destination

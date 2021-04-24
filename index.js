@@ -173,6 +173,15 @@ class instance extends instance_skel {
 				}
 				break;
 
+			case 'route_routed':
+				if (parseInt(opt.destination) >= this.outputCount) {
+					cmd = "VIDEO MONITORING OUTPUT ROUTING:\n"+(parseInt(opt.destination)-this.outputCount)+" "+opt.source+"\n\n";
+				}
+				else {
+					cmd = "VIDEO OUTPUT ROUTING:\n"+opt.destination+" "+this.getOutput(parseInt(opt.source_routed_to_destination)).route+"\n\n";
+				}
+				break;
+
 			case 'route_to_previous':
 				var output = this.getOutput(parseInt(opt.destination));
 				var fallbackpop = -1;
