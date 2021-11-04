@@ -52,6 +52,47 @@ module.exports = {
 				}
 			}
 		};
+		
+		feedbacks['input_not_bg'] = {
+			label: 'Change background color by NOT the routing specifiec',
+			description: 'If the input specified is NOT in use by the output specified, change background color of the bank',
+			options: [
+				{
+					type: 'colorpicker',
+					label: 'Foreground color',
+					id: 'fg',
+					default: this.rgb(0,0,0)
+				},
+				{
+					type: 'colorpicker',
+					label: 'Background color',
+					id: 'bg',
+					default: this.rgb(255,255,0)
+				},
+				{
+					type: 'dropdown',
+					label: 'Input',
+					id: 'input',
+					default: '0',
+					choices: this.CHOICES_INPUTS
+				},
+				{
+					type: 'dropdown',
+					label: 'Output',
+					id: 'output',
+					default: '0',
+					choices: this.CHOICES_OUTPUTS
+				}
+			],
+			callback: (feedback, bank) => {
+				if (this.getOutput(parseInt(feedback.options.output)).route != parseInt(feedback.options.input)) {
+					return {
+						color: feedback.options.fg,
+						bgcolor: feedback.options.bg
+					};
+				}
+			}
+		};
 
 		if (this.serialCount > 0) {
 			feedbacks['serial_bg'] = {
