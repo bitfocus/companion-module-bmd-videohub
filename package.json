@@ -18,12 +18,12 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/bitfocus/companion-module-videohub.git"
+		"url": "git+https://github.com/bitfocus/companion-module-bmd-videohub.git"
 	},
 	"author": "William Viker <william@bitfocus.io>",
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/bitfocus/companion-module-videohub/issues"
+		"url": "https://github.com/bitfocus/companion-module-bmd-videohub/issues"
 	},
 	"homepage": "https://github.com/bitfocus/companion-module-videohub#readme"
 }
