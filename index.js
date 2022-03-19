@@ -113,8 +113,12 @@ class instance extends instance_skel {
 					string = string + index + '  ' + this.getOutput(index).fallback + '\n'
 				}
 				try {
-					fs.writeFileSync(opt.destination_file, data + string, 'utf8')
-					this.log('info', data.length + ' Routes written to: ' + opt.destination_file)
+					let dest_file = opt.destination_file;
+					this.parseVariables(dest_file, function (value) {
+						dest_file = value;
+					});
+					fs.writeFileSync(dest_file, data + string, 'utf8')
+					this.log('info', data.length + ' Routes written to: ' + dest_file)
 				} catch (e) {
 					this.log('error', 'File Write Error: ' + e.message)
 				}
@@ -122,7 +126,11 @@ class instance extends instance_skel {
 
 			case 'load_route_from_file':
 				try {
-					var data = fs.readFileSync(opt.source_file, 'utf8')
+					let source_file = opt.source_file;
+					this.parseVariables(source_file, function (value) {
+						source_file = value;
+					});
+					var data = fs.readFileSync(source_file, 'utf8')
 					try {
 						routes_text = data.split(':')
 						routes = routes_text[0].split(',')
@@ -155,9 +163,9 @@ class instance extends instance_skel {
 						} else {
 							throw 'Invalid number of Routes: ' + routes.length + ','
 						}
-						this.log('info', routes.length + ' Routes read from File: ' + opt.source_file)
+						this.log('info', routes.length + ' Routes read from File: ' + source_file)
 					} catch (err) {
-						this.log('error', err + ' in File:' + opt.source_file)
+						this.log('error', err + ' in File:' + source_file)
 					}
 				} catch (e) {
 					this.log('error', 'File Read Error: ' + e.message)
@@ -205,23 +213,34 @@ class instance extends instance_skel {
 					}
 				}
 				break
-
 			case 'route_serial':
 				cmd = 'SERIAL PORT ROUTING:\n' + opt.destination + ' ' + opt.source + '\n\n'
 				break
 			case 'rename_source':
-				cmd = 'INPUT LABELS:\n' + opt.source + ' ' + opt.label + '\n\n'
+				let srclabel = opt.label;
+				this.parseVariables(srclabel, function (value) {
+					srclabel = value;
+				});
+				cmd = 'INPUT LABELS:\n' + opt.source + ' ' + srclabel + '\n\n'
 				break
 			case 'rename_destination':
+				let destlabel = opt.label;
+				this.parseVariables(destlabel, function (value) {
+					destlabel = value;
+				});
 				if (parseInt(opt.destination) >= this.outputCount) {
 					cmd =
-						'MONITORING OUTPUT LABELS:\n' + (parseInt(opt.destination) - this.outputCount) + ' ' + opt.label + '\n\n'
+						'MONITORING OUTPUT LABELS:\n' + (parseInt(opt.destination) - this.outputCount) + ' ' + destlabel + '\n\n'
 				} else {
-					cmd = 'OUTPUT LABELS:\n' + opt.destination + ' ' + opt.label + '\n\n'
+					cmd = 'OUTPUT LABELS:\n' + opt.destination + ' ' + destlabel + '\n\n'
 				}
 				break
 			case 'rename_serial':
-				cmd = 'SERIAL PORT LABELS:\n' + opt.serial + ' ' + opt.label + '\n\n'
+				let seriallabel = opt.label;
+				this.parseVariables(seriallabel, function (value) {
+					seriallabel = value;
+				});
+				cmd = 'SERIAL PORT LABELS:\n' + opt.serial + ' ' + seriallabel + '\n\n'
 				break
 			case 'select_destination':
 				this.selected = parseInt(opt.destination)
