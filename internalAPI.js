@@ -1,5 +1,4 @@
 module.exports = {
-
 	/**
 	 * INTERNAL: returns the desired input object.
 	 *
@@ -9,17 +8,16 @@ module.exports = {
 	 * @since 1.1.0
 	 */
 	getInput(id) {
-
 		if (this.inputs[id] === undefined) {
 			this.inputs[id] = {
-				label:      (id+1) + ': Input ' + (id+1),
-				name:       'Input ' + (id+1),
-				status:     'BNC',
-				lock:       'U'
-			};
+				label: id + 1 + ': Input ' + (id + 1),
+				name: 'Input ' + (id + 1),
+				status: 'BNC',
+				lock: 'U',
+			}
 		}
 
-		return this.inputs[id];
+		return this.inputs[id]
 	},
 
 	/**
@@ -31,18 +29,17 @@ module.exports = {
 	 * @since 1.1.0
 	 */
 	getOutput(id) {
-
 		if (this.outputs[id] === undefined) {
 			this.outputs[id] = {
-				label:      (id+1) + ': Output ' + (id+1),
-				name:       'Output ' + (id+1),
-				route:      id,
-				status:     'BNC',
-				lock:       'U',
-				fallback: 	[-1]
-			};
+				label: id + 1 + ': Output ' + (id + 1),
+				name: 'Output ' + (id + 1),
+				route: id,
+				status: 'BNC',
+				lock: 'U',
+				fallback: [-1],
+			}
 		}
-		return this.outputs[id];
+		return this.outputs[id]
 	},
 
 	/**
@@ -54,19 +51,18 @@ module.exports = {
 	 * @since 1.1.0
 	 */
 	getSerial(id) {
-
 		if (this.serials[id] === undefined) {
 			this.serials[id] = {
-				label:      (id+1) + ': Serial ' + (id+1),
-				name:       'Serial ' + (id+1),
-				route:      id,
-				status:     'RS422',
-				lock:       'U',
-				directions: 'auto'
-			};
+				label: id + 1 + ': Serial ' + (id + 1),
+				name: 'Serial ' + (id + 1),
+				route: id,
+				status: 'RS422',
+				lock: 'U',
+				directions: 'auto',
+			}
 		}
 
-		return this.serials[id];
+		return this.serials[id]
 	},
 
 	/**
@@ -78,34 +74,33 @@ module.exports = {
 	 * @since 1.1.0
 	 */
 	updateDevice(labeltype, object) {
-
 		for (var key in object) {
-			var parsethis = object[key];
-			var a = parsethis.split(/: /);
-			var attribute = a.shift();
-			var value = a.join(" ");
+			var parsethis = object[key]
+			var a = parsethis.split(/: /)
+			var attribute = a.shift()
+			var value = a.join(' ')
 
 			switch (attribute) {
 				case 'Model name':
-					this.deviceName = value;
-					this.log('info', 'Connected to a ' + this.deviceName);
-					break;
+					this.deviceName = value
+					this.log('info', 'Connected to a ' + this.deviceName)
+					break
 				case 'Video inputs':
-					this.config.inputCount = value;
-					break;
+					this.config.inputCount = value
+					break
 				case 'Video outputs':
-					this.config.outputCount = value;
-					break;
+					this.config.outputCount = value
+					break
 				case 'Video monitoring outputs':
-					this.config.monitoringCount = value;
-					break;
+					this.config.monitoringCount = value
+					break
 				case 'Serial ports':
-					this.config.serialCount = value;
-					break;
+					this.config.serialCount = value
+					break
 			}
 		}
 
-		this.saveConfig();
+		this.saveConfig()
 	},
 
 	/**
@@ -117,45 +112,41 @@ module.exports = {
 	 * @since 1.0.0
 	 */
 	updateLabels(labeltype, object) {
-
 		for (var key in object) {
-			var parsethis = object[key];
-			var a = parsethis.split(/ /);
-			var num = parseInt(a.shift());
-			var label = a.join(" ");
+			var parsethis = object[key]
+			var a = parsethis.split(/ /)
+			var num = parseInt(a.shift())
+			var label = a.join(' ')
 
 			switch (labeltype) {
 				case 'INPUT LABELS':
-					this.getInput(num).name  = label;
-					this.getInput(num).label = (num+1).toString() + ': ' + label;
-					this.setVariable('input_' + (num+1), label);
-					break;
+					this.getInput(num).name = label
+					this.getInput(num).label = (num + 1).toString() + ': ' + label
+					this.setVariable('input_' + (num + 1), label)
+					break
 				case 'MONITORING OUTPUT LABELS':
-					num = num + this.outputCount;
+					num = num + this.outputCount
 				case 'OUTPUT LABELS':
-					this.getOutput(num).name  = label;
-					this.getOutput(num).label = (num+1).toString() + ': ' + label;
-					this.setVariable('output_' + (num+1), label);
-					break;
+					this.getOutput(num).name = label
+					this.getOutput(num).label = (num + 1).toString() + ': ' + label
+					this.setVariable('output_' + (num + 1), label)
+					break
 				case 'SERIAL PORT LABELS':
-					this.getSerial(num).name  = label;
-					this.getSerial(num).label = (num+1).toString() + ': ' + label;
-					this.setVariable('serial_' + (num+1), label);
-					break;
+					this.getSerial(num).name = label
+					this.getSerial(num).label = (num + 1).toString() + ': ' + label
+					this.setVariable('serial_' + (num + 1), label)
+					break
 			}
 		}
 
 		if (labeltype == 'INPUT LABELS') {
-
-			for (var i = 0; i < (this.outputCount + this.monitoringCount); i++) {
-
+			for (var i = 0; i < this.outputCount + this.monitoringCount; i++) {
 				if (this.getOutput(i).status != 'None') {
-
-					this.setVariable('output_' + (i+1) + '_input',  this.getInput(this.getOutput(i).route).name);
+					this.setVariable('output_' + (i + 1) + '_input', this.getInput(this.getOutput(i).route).name)
 				}
 			}
 
-			this.setVariable('selected_source', this.getInput(this.getOutput(this.selected).route).name);
+			this.setVariable('selected_source', this.getInput(this.getOutput(this.selected).route).name)
 		}
 	},
 
@@ -168,22 +159,21 @@ module.exports = {
 	 * @since 1.1.0
 	 */
 	updateLocks(labeltype, object) {
-
 		for (var key in object) {
-			var parsethis = object[key];
-			var a = parsethis.split(/ /);
-			var num = parseInt(a.shift());
-			var label = a.join(" ");
+			var parsethis = object[key]
+			var a = parsethis.split(/ /)
+			var num = parseInt(a.shift())
+			var label = a.join(' ')
 
 			switch (labeltype) {
 				case 'MONITORING OUTPUT LOCKS':
-					num = num + this.outputCount;
+					num = num + this.outputCount
 				case 'VIDEO OUTPUT LOCKS':
-					this.getOutput(num).lock = label;
-					break;
+					this.getOutput(num).lock = label
+					break
 				case 'SERIAL PORT LOCKS':
-					this.getSerial(num).lock = label;
-					break;
+					this.getSerial(num).lock = label
+					break
 			}
 		}
 	},
@@ -197,30 +187,29 @@ module.exports = {
 	 * @since 1.0.0
 	 */
 	updateRouting(labeltype, object) {
-
 		for (var key in object) {
-			var parsethis = object[key];
-			var a = parsethis.split(/ /);
-			var dest = parseInt(a.shift());
-			var src = parseInt(a.join(" "));
+			var parsethis = object[key]
+			var a = parsethis.split(/ /)
+			var dest = parseInt(a.shift())
+			var src = parseInt(a.join(' '))
 
 			switch (labeltype) {
 				case 'VIDEO MONITORING OUTPUT ROUTING':
-					dest = dest + this.outputCount;
+					dest = dest + this.outputCount
 				case 'VIDEO OUTPUT ROUTING':
-					var output = this.getOutput(parseInt(dest));
+					var output = this.getOutput(parseInt(dest))
 					// Lets not let the fallback array grow without bounds. is 20 enough?
-					if(output.fallback.length > 20){
-						output.fallback = output.fallback.slice(2);
+					if (output.fallback.length > 20) {
+						output.fallback = output.fallback.slice(2)
 					}
-					output.fallback.push(src);  // push the route returned from the hardware into the fallback route 
-					output.route = src;         // now we set the route in the container to the new value
-					this.setVariable('output_' + (dest+1) + '_input',  this.getInput(src).name);
-					break;
+					output.fallback.push(src) // push the route returned from the hardware into the fallback route
+					output.route = src // now we set the route in the container to the new value
+					this.setVariable('output_' + (dest + 1) + '_input', this.getInput(src).name)
+					break
 				case 'SERIAL PORT ROUTING':
 					this.getSerial(dest).route = src
-					this.setVariable('serial_' + (dest+1) + '_route', this.getSerial(src).name);
-					break;
+					this.setVariable('serial_' + (dest + 1) + '_route', this.getSerial(src).name)
+					break
 			}
 		}
 	},
@@ -234,17 +223,16 @@ module.exports = {
 	 * @since 1.1.0
 	 */
 	updateSerialDirections(labeltype, object) {
-
 		for (var key in object) {
-			var parsethis = object[key];
-			var a = parsethis.split(/ /);
-			var num = parseInt(a.shift());
-			var type = a.join(" ");
+			var parsethis = object[key]
+			var a = parsethis.split(/ /)
+			var num = parseInt(a.shift())
+			var type = a.join(' ')
 
 			switch (labeltype) {
 				case 'SERIAL PORT DIRECTIONS':
-					this.getSerial(num).direction = type;
-					break;
+					this.getSerial(num).direction = type
+					break
 			}
 		}
 	},
@@ -258,24 +246,23 @@ module.exports = {
 	 * @since 1.1.0
 	 */
 	updateStatus(labeltype, object) {
-
 		for (var key in object) {
-			var parsethis = object[key];
-			var a = parsethis.split(/ /);
-			var num = parseInt(a.shift());
-			var label = a.join(" ");
+			var parsethis = object[key]
+			var a = parsethis.split(/ /)
+			var num = parseInt(a.shift())
+			var label = a.join(' ')
 
 			switch (labeltype) {
 				case 'VIDEO INPUT STATUS':
-					this.getInput(num).status = label;
-					break;
+					this.getInput(num).status = label
+					break
 				case 'VIDEO OUTPUT STATUS':
-					this.getOutput(num).status = label;
-					break;
+					this.getOutput(num).status = label
+					break
 				case 'SERIAL PORT STATUS':
-					this.getSerial(num).status = label;
-					break;
+					this.getSerial(num).status = label
+					break
 			}
 		}
-	}
+	},
 }

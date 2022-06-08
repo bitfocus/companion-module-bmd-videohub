@@ -5,7 +5,9 @@
 	],
 	"version": "1.4.0",
 	"api_version": "1.0.0",
-	"keywords": [ "Matrix" ],
+	"keywords": [
+		"Matrix"
+	],
 	"manufacturer": "Blackmagic Design",
 	"product": "Videohub",
 	"shortname": "videohub",
@@ -15,13 +17,13 @@
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"repository": {
-	"type": "git",
-		"url": "git+https://github.com/bitfocus/companion-module-videohub.git"
+		"type": "git",
+		"url": "git+https://github.com/bitfocus/companion-module-bmd-videohub.git"
 	},
 	"author": "William Viker <william@bitfocus.io>",
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/bitfocus/companion-module-videohub/issues"
+		"url": "https://github.com/bitfocus/companion-module-bmd-videohub/issues"
 	},
 	"homepage": "https://github.com/bitfocus/companion-module-videohub#readme"
 }

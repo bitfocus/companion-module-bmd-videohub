@@ -1,8 +1,7 @@
 module.exports = {
-
 	/**
 	 * Get the available actions.
-	 * 
+	 *
 	 * !!! Utilized by bmd-multiview16 !!!
 	 *
 	 * @returns {Object[]} the available actions
@@ -10,7 +9,7 @@ module.exports = {
 	 * @since 1.2.0
 	 */
 	getActions() {
-		var actions = {};
+		var actions = {}
 
 		actions['rename_destination'] = {
 			label: 'Rename destination',
@@ -20,17 +19,17 @@ module.exports = {
 					label: 'Destination',
 					id: 'destination',
 					default: '0',
-					choices: this.CHOICES_OUTPUTS
+					choices: this.CHOICES_OUTPUTS,
 				},
 				{
 					type: 'textinput',
 					label: 'New label',
 					id: 'label',
-					default: "Dest name"
-				}
-			]
-		};
-		actions['rename_source'] ={
+					default: 'Dest name',
+				},
+			],
+		}
+		actions['rename_source'] = {
 			label: 'Rename source',
 			options: [
 				{
@@ -38,19 +37,19 @@ module.exports = {
 					label: 'Source',
 					id: 'source',
 					default: '0',
-					choices: this.CHOICES_INPUTS
+					choices: this.CHOICES_INPUTS,
 				},
 				{
 					type: 'textinput',
 					label: 'New label',
 					id: 'label',
-					default: "Src name"
-				}
-			]
-		};
+					default: 'Src name',
+				},
+			],
+		}
 
 		if (this.serialCount > 0) {
-			actions['rename_serial'] ={
+			actions['rename_serial'] = {
 				label: 'Rename serial port',
 				options: [
 					{
@@ -58,16 +57,16 @@ module.exports = {
 						label: 'Serial Port',
 						id: 'serial',
 						default: '0',
-						choices: this.CHOICES_SERIALS
+						choices: this.CHOICES_SERIALS,
 					},
 					{
 						type: 'textinput',
 						label: 'New label',
 						id: 'label',
-						default: "Serial name"
-					}
-				]
-			};
+						default: 'Serial name',
+					},
+				],
+			}
 		}
 
 		actions['route'] = {
@@ -78,17 +77,17 @@ module.exports = {
 					label: 'Source',
 					id: 'source',
 					default: '0',
-					choices: this.CHOICES_INPUTS
+					choices: this.CHOICES_INPUTS,
 				},
 				{
 					type: 'dropdown',
 					label: 'Destination',
 					id: 'destination',
 					default: '0',
-					choices: this.CHOICES_OUTPUTS
-				}
-			]
-		};
+					choices: this.CHOICES_OUTPUTS,
+				},
+			],
+		}
 
 		actions['route_routed'] = {
 			label: 'Route source routed to given destination',
@@ -118,10 +117,10 @@ module.exports = {
 					label: 'Destination',
 					id: 'destination',
 					default: '0',
-					choices: this.CHOICES_OUTPUTS
-				}
-			]
-		};
+					choices: this.CHOICES_OUTPUTS,
+				},
+			],
+		}
 
 		if (this.serialCount > 0) {
 			actions['route_serial'] = {
@@ -132,17 +131,17 @@ module.exports = {
 						label: 'Source',
 						id: 'source',
 						default: '0',
-						choices: this.CHOICES_SERIALS
+						choices: this.CHOICES_SERIALS,
 					},
 					{
 						type: 'dropdown',
 						label: 'Destination',
 						id: 'destination',
 						default: '1',
-						choices: this.CHOICES_SERIALS
-					}
-				]
-			};
+						choices: this.CHOICES_SERIALS,
+					},
+				],
+			}
 		}
 
 		actions['select_destination'] = {
@@ -153,10 +152,10 @@ module.exports = {
 					label: 'Destination',
 					id: 'destination',
 					default: '0',
-					choices: this.CHOICES_OUTPUTS
-				}
-			]
-		};
+					choices: this.CHOICES_OUTPUTS,
+				},
+			],
+		}
 		actions['route_source'] = {
 			label: 'Route source to selected destination',
 			options: [
@@ -165,40 +164,38 @@ module.exports = {
 					label: 'Source',
 					id: 'source',
 					default: '0',
-					choices: this.CHOICES_INPUTS
-				}
-			]
-		};
+					choices: this.CHOICES_INPUTS,
+				},
+			],
+		}
 
-		actions['take']  = { label: 'Take' };
-		actions['clear'] = { label: 'Clear' };
+		actions['take'] = { label: 'Take' }
+		actions['clear'] = { label: 'Clear' }
 
 		actions['load_route_from_file'] = {
 			label: 'Load Routes File',
 			options: [
-								
 				{
 					type: 'textinput',
 					label: 'Source File',
 					id: 'source_file',
-					default: "C:\\VideoHub.txt"
-				}
-			]
-		};
+					default: 'C:\\VideoHub.txt',
+				},
+			],
+		}
 
 		actions['store_route_in_file'] = {
 			label: 'Save Routes File',
 			options: [
-								
 				{
 					type: 'textinput',
 					label: 'Destination File',
 					id: 'destination_file',
-					default: "C:\\VideoHub.txt"
-				}
-			]
-		};
+					default: 'C:\\VideoHub.txt',
+				},
+			],
+		}
 
-		return actions;
-	}
+		return actions
+	},
 }
