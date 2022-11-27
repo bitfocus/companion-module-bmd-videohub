@@ -67,18 +67,9 @@ class VideohubInstance extends InstanceBase<VideoHubConfig> {
 	}
 
 	initThings(includeVariables: boolean) {
-		console.log('initThing', includeVariables)
 		if (includeVariables) {
 			initVariables(this, this.state)
 		}
-
-		console.log(
-			'init counts',
-			Object.keys(getActions(this, this.state)).length,
-			Object.keys(getFeedbacks(this.state)).length,
-			Object.keys(getPresets(this.state)).length,
-			JSON.stringify(getPresets(this.state)).length
-		)
 
 		this.setActionDefinitions(getActions(this, this.state))
 		this.setFeedbackDefinitions(getFeedbacks(this.state))

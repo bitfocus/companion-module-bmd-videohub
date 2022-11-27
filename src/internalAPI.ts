@@ -96,9 +96,9 @@ export function updateLabels(self: InstanceBaseExt, state: VideohubState, labelt
 				variableValues[`output_${output.id + 1}_input`] = state.getInput(output.route)?.name ?? '?'
 			}
 		}
-
-		updateSelectedDestinationVariables(state, variableValues)
 	}
+
+	updateSelectedDestinationVariables(state, variableValues)
 
 	self.setVariableValues(variableValues)
 }
