@@ -1,6 +1,7 @@
-import { CompanionVariableValues } from '@companion-module/base'
-import { VideohubState } from './state'
-import type { InstanceBaseExt } from './types'
+import type { CompanionVariableValues } from '@companion-module/base'
+import type { VideohubState } from './state.js'
+import type { InstanceBaseExt } from './types.js'
+import { updateSelectedDestinationVariables } from './variables.js'
 
 /**
  * INTERNAL: Updates device data from the Videohub
@@ -55,7 +56,7 @@ export function updateLabels(self: InstanceBaseExt, state: VideohubState, labelt
 				if (input) {
 					input.name = label
 					input.label = `${num + 1}: ${label}`
-					variableValues[`input_${num + 1} `] = label
+					variableValues[`input_${num + 1}`] = label
 				}
 				break
 			}
@@ -64,7 +65,7 @@ export function updateLabels(self: InstanceBaseExt, state: VideohubState, labelt
 				if (output) {
 					output.name = label
 					output.label = `${num + 1}: ${label}`
-					variableValues[`output_${num + 1} `] = label
+					variableValues[`output_${num + 1}`] = label
 				}
 				break
 			}
@@ -73,7 +74,7 @@ export function updateLabels(self: InstanceBaseExt, state: VideohubState, labelt
 				if (output) {
 					output.name = label
 					output.label = `${num + 1}: ${label}`
-					variableValues[`output_${num + 1} `] = label
+					variableValues[`output_${num + 1}`] = label
 				}
 				break
 			}
@@ -82,7 +83,7 @@ export function updateLabels(self: InstanceBaseExt, state: VideohubState, labelt
 				if (serial) {
 					serial.name = label
 					serial.label = `${num + 1}: ${label}`
-					variableValues[`serial_${num + 1} `] = label
+					variableValues[`serial_${num + 1}`] = label
 				}
 				break
 			}
@@ -96,10 +97,7 @@ export function updateLabels(self: InstanceBaseExt, state: VideohubState, labelt
 			}
 		}
 
-		const selectedOutput = state.getSelectedOutput()
-		const inputForSelectedOutput = selectedOutput ? state.getInput(selectedOutput.route) : undefined
-
-		variableValues['selected_source'] = inputForSelectedOutput?.name ?? '?'
+		updateSelectedDestinationVariables(state, variableValues)
 	}
 
 	self.setVariableValues(variableValues)
@@ -186,6 +184,8 @@ export function updateRouting(self: InstanceBaseExt, state: VideohubState, label
 			}
 		}
 	}
+
+	updateSelectedDestinationVariables(state, variableValues)
 
 	self.setVariableValues(variableValues)
 	self.checkFeedbacks('input_bg', 'selected_source')

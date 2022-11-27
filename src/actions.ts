@@ -1,8 +1,9 @@
-import type { CompanionActionDefinitions } from '@companion-module/base'
+import type { CompanionActionDefinitions, CompanionVariableValues } from '@companion-module/base'
 import fs from 'fs/promises'
-import { getInputChoices } from './choices'
-import type { VideohubState } from './state'
-import type { InstanceBaseExt } from './types'
+import { getInputChoices } from './choices.js'
+import type { VideohubState } from './state.js'
+import type { InstanceBaseExt } from './types.js'
+import { updateSelectedDestinationVariables } from './variables.js'
 
 /**
  * Get the available actions.
@@ -183,10 +184,6 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 				// get to the last route we have to first pop this one off.
 				fallbackpop = output.fallback.pop() // This now, is the route to fallback to.
 
-				if (output.fallback.length < 1) {
-					output.fallback.push(-1)
-				}
-
 				if (fallbackpop !== undefined && fallbackpop >= 0) {
 					if (output.type === 'monitor') {
 						sendCommand('VIDEO MONITORING OUTPUT ROUTING:\n' + output.index + ' ' + fallbackpop + '\n\n')
@@ -238,6 +235,10 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 			state.selectedDestination = Number(action.options.destination)
 
 			self.checkFeedbacks('selected_destination', 'take_tally_source', 'selected_source')
+
+			const values: CompanionVariableValues = {}
+			updateSelectedDestinationVariables(state, values)
+			self.setVariableValues(values)
 		},
 	}
 	actions['route_source'] = {
@@ -381,7 +382,7 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 			if (!action.options.destination_file || typeof action.options.destination_file !== 'string') return
 
 			let string =
-				"  : BMD uses zero based indexing when referencing source and destination so '0' in this file references port '1'.  You may add your own text here after the colon. \n"
+				"\n\n  : BMD uses zero based indexing when referencing source and destination so '0' in this file references port '1'.  You may add your own text here after the colon. \n"
 			string += '\nRouting history: \n'
 
 			const data = []
@@ -391,7 +392,7 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 			}
 
 			try {
-				await fs.writeFile(action.options.destination_file, data.join('') + string, 'utf8')
+				await fs.writeFile(action.options.destination_file, data.join('\n') + string, 'utf8')
 				self.log('info', data.length + ' Routes written to: ' + action.options.destination_file)
 			} catch (e: any) {
 				self.log('error', 'File Write Error: ' + e.message)

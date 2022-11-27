@@ -92,7 +92,7 @@ export class VideohubState {
 				route: id,
 				status: 'BNC',
 				// lock: 'U',
-				fallback: [-1],
+				fallback: [],
 				type: 'primary',
 			})
 		}
@@ -107,7 +107,7 @@ export class VideohubState {
 				route: id,
 				status: 'BNC',
 				// lock: 'U',
-				fallback: [-1],
+				fallback: [],
 				type: 'monitor',
 			})
 		}
@@ -166,15 +166,15 @@ export class VideohubState {
 		return this.#serials[id]
 	}
 
-	public *iterateInputs(): Iterable<InputState> {
+	public iterateInputs(): InputState[] {
 		return this.#inputs
 	}
 
-	public *iterateAllOutputs(): Iterable<OutputState> {
+	public iterateAllOutputs(): OutputState[] {
 		return [...this.#primaryOutputs, ...this.#monitorOutputs]
 	}
 
-	public *iterateSerials(): Iterable<SerialState> {
+	public iterateSerials(): SerialState[] {
 		return this.#serials
 	}
 }
