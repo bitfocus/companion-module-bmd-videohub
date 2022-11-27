@@ -20,7 +20,7 @@ export function initVariables(self: InstanceBase<VideoHubConfig>, state: Videohu
 		}
 	}
 
-	for (const output of state.iterateOutputs()) {
+	for (const output of state.iterateAllOutputs()) {
 		if (output.status != 'None') {
 			variableDefinitions.push({
 				name: `Label of output ${output.id + 1}`,
@@ -34,7 +34,7 @@ export function initVariables(self: InstanceBase<VideoHubConfig>, state: Videohu
 				variableId: `output_${output.id + 1}_input`,
 			})
 
-			variableValues[`output_${output.id + 1}_input`] = state.getInput(output.route).name
+			variableValues[`output_${output.id + 1}_input`] = state.getInput(output.route)?.name ?? '?'
 		}
 	}
 
@@ -52,7 +52,8 @@ export function initVariables(self: InstanceBase<VideoHubConfig>, state: Videohu
 				variableId: `serial_${serial.id + 1}_route`,
 			})
 
-			variableValues[`serial_${serial.id + 1}_route`] = state.getSerial(serial.route).name
+			const sourceSerial = state.getSerial(serial.route)
+			variableValues[`serial_${serial.id + 1}_route`] = sourceSerial?.name ?? '?'
 		}
 	}
 
@@ -63,7 +64,7 @@ export function initVariables(self: InstanceBase<VideoHubConfig>, state: Videohu
 
 	const selectedOutput = state.getSelectedOutput()
 
-	variableValues['selected_destination'] = selectedOutput?.name ?? 'None'
+	variableValues['selected_destination'] = selectedOutput?.name ?? '?'
 
 	variableDefinitions.push({
 		name: 'Label of input routed to selection',
@@ -72,7 +73,7 @@ export function initVariables(self: InstanceBase<VideoHubConfig>, state: Videohu
 
 	const inputForSelectedOutput = selectedOutput ? state.getInput(selectedOutput.route) : undefined
 
-	variableValues['selected_source'] = inputForSelectedOutput?.name ?? 'None'
+	variableValues['selected_source'] = inputForSelectedOutput?.name ?? '?'
 
 	self.setVariableDefinitions(variableDefinitions)
 	self.setVariableValues(variableValues)

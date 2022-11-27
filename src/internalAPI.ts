@@ -52,46 +52,54 @@ export function updateLabels(self: InstanceBaseExt, state: VideohubState, labelt
 		switch (labeltype) {
 			case 'INPUT LABELS': {
 				const input = state.getInput(num)
-				input.name = label
-				input.label = `${num + 1}: ${label}`
-				variableValues[`input_${num + 1} `] = label
+				if (input) {
+					input.name = label
+					input.label = `${num + 1}: ${label}`
+					variableValues[`input_${num + 1} `] = label
+				}
 				break
 			}
 			case 'MONITORING OUTPUT LABELS': {
 				const output = state.getMonitoringOutput(num)
-				output.name = label
-				output.label = `${num + 1}: ${label}`
-				variableValues[`output_${num + 1} `] = label
+				if (output) {
+					output.name = label
+					output.label = `${num + 1}: ${label}`
+					variableValues[`output_${num + 1} `] = label
+				}
 				break
 			}
 			case 'OUTPUT LABELS': {
-				const output = state.getOutput(num)
-				output.name = label
-				output.label = `${num + 1}: ${label}`
-				variableValues[`output_${num + 1} `] = label
+				const output = state.getOutputById(num)
+				if (output) {
+					output.name = label
+					output.label = `${num + 1}: ${label}`
+					variableValues[`output_${num + 1} `] = label
+				}
 				break
 			}
 			case 'SERIAL PORT LABELS': {
 				const serial = state.getSerial(num)
-				serial.name = label
-				serial.label = `${num + 1}: ${label}`
-				variableValues[`serial_${num + 1} `] = label
+				if (serial) {
+					serial.name = label
+					serial.label = `${num + 1}: ${label}`
+					variableValues[`serial_${num + 1} `] = label
+				}
 				break
 			}
 		}
 	}
 
 	if (labeltype == 'INPUT LABELS') {
-		for (const output of state.iterateOutputs()) {
+		for (const output of state.iterateAllOutputs()) {
 			if (output.status != 'None') {
-				variableValues[`output_${output.id + 1}_input`] = state.getInput(output.route).name
+				variableValues[`output_${output.id + 1}_input`] = state.getInput(output.route)?.name ?? '?'
 			}
 		}
 
 		const selectedOutput = state.getSelectedOutput()
 		const inputForSelectedOutput = selectedOutput ? state.getInput(selectedOutput.route) : undefined
 
-		variableValues['selected_source'] = inputForSelectedOutput?.name ?? 'None'
+		variableValues['selected_source'] = inputForSelectedOutput?.name ?? '?'
 	}
 
 	self.setVariableValues(variableValues)
@@ -141,31 +149,39 @@ export function updateRouting(self: InstanceBaseExt, state: VideohubState, label
 
 		switch (labeltype) {
 			case 'VIDEO MONITORING OUTPUT ROUTING': {
-				var output = state.getMonitoringOutput(dest)
-				// Lets not let the fallback array grow without bounds. is 20 enough?
-				if (output.fallback.length > 20) {
-					output.fallback = output.fallback.slice(2)
+				const output = state.getMonitoringOutput(dest)
+				if (output) {
+					// Lets not let the fallback array grow without bounds. is 20 enough?
+					if (output.fallback.length > 20) {
+						output.fallback = output.fallback.slice(2)
+					}
+					output.fallback.push(src) // push the route returned from the hardware into the fallback route
+					output.route = src // now we set the route in the container to the new value
+
+					variableValues[`output_${dest + 1}_input`] = state.getInput(src)?.name ?? '?'
 				}
-				output.fallback.push(src) // push the route returned from the hardware into the fallback route
-				output.route = src // now we set the route in the container to the new value
-				variableValues[`output_${dest + 1}_input`] = state.getInput(src).name
 				break
 			}
 			case 'VIDEO OUTPUT ROUTING': {
-				var output = state.getOutput(dest)
-				// Lets not let the fallback array grow without bounds. is 20 enough?
-				if (output.fallback.length > 20) {
-					output.fallback = output.fallback.slice(2)
+				const output = state.getOutputById(dest)
+				if (output) {
+					// Lets not let the fallback array grow without bounds. is 20 enough?
+					if (output.fallback.length > 20) {
+						output.fallback = output.fallback.slice(2)
+					}
+					output.fallback.push(src) // push the route returned from the hardware into the fallback route
+					output.route = src // now we set the route in the container to the new value
+
+					variableValues[`output_${dest + 1}_input`] = state.getInput(src)?.name ?? '?'
 				}
-				output.fallback.push(src) // push the route returned from the hardware into the fallback route
-				output.route = src // now we set the route in the container to the new value
-				variableValues[`output_${dest + 1}_input`] = state.getInput(src).name
 				break
 			}
 			case 'SERIAL PORT ROUTING': {
 				const serial = state.getSerial(dest)
-				serial.route = src
-				variableValues[`serial_${dest + 1}_route`] = state.getSerial(src).name
+				if (serial) {
+					serial.route = src
+					variableValues[`serial_${dest + 1}_route`] = state.getSerial(src)?.name ?? '?'
+				}
 				break
 			}
 		}
@@ -211,15 +227,21 @@ export function updateStatus(_self: InstanceBaseExt, state: VideohubState, label
 		const label = values.join(' ')
 
 		switch (labeltype) {
-			case 'VIDEO INPUT STATUS':
-				state.getInput(num).status = label
+			case 'VIDEO INPUT STATUS': {
+				const input = state.getInput(num)
+				if (input) input.status = label
 				break
-			case 'VIDEO OUTPUT STATUS':
-				state.getOutput(num).status = label
+			}
+			case 'VIDEO OUTPUT STATUS': {
+				const output = state.getOutputById(num)
+				if (output) output.status = label
 				break
-			case 'SERIAL PORT STATUS':
-				state.getSerial(num).status = label
+			}
+			case 'SERIAL PORT STATUS': {
+				const serial = state.getSerial(num)
+				if (serial) serial.status = label
 				break
+			}
 		}
 	}
 }

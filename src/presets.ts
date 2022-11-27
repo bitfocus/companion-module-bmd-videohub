@@ -74,13 +74,13 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 		],
 	}
 
-	for (let i = 0; i < state.outputCount + state.monitoringCount; i++) {
-		presets[`select_destination_${i}`] = {
+	for (const output of state.iterateAllOutputs()) {
+		presets[`select_destination_${output.id}`] = {
 			category: 'Select Destination (X)',
-			name: 'Selection destination button for ' + state.getOutput(i).name,
+			name: `Selection destination button for ${output.name}`,
 			type: 'button',
 			style: {
-				text: '$(videohub:output_' + (i + 1) + ')',
+				text: `$(videohub:output_${output.id + 1})`,
 				size: '18',
 				color: combineRgb(255, 255, 255),
 				bgcolor: combineRgb(0, 0, 0),
@@ -91,7 +91,7 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 					options: {
 						bg: combineRgb(255, 255, 0),
 						fg: combineRgb(0, 0, 0),
-						output: i,
+						output: output.id,
 					},
 				},
 				{
@@ -99,7 +99,7 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 					options: {
 						bg: combineRgb(255, 0, 0),
 						fg: combineRgb(255, 255, 255),
-						output: i,
+						output: output.id,
 					},
 				},
 			],
@@ -109,7 +109,7 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 						{
 							actionId: 'select_destination',
 							options: {
-								destination: i,
+								destination: output.id,
 							},
 						},
 					],
@@ -119,13 +119,13 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 		}
 	}
 
-	for (let i = 0; i < state.inputCount; i++) {
-		presets[`route_source_${i}`] = {
+	for (const input of state.iterateInputs()) {
+		presets[`route_source_${input.id}`] = {
 			category: 'Route Source (Y)',
-			name: 'Route ' + state.getInput(i).name + ' to selected destination',
+			name: `Route ${input.name} to selected destination`,
 			type: 'button',
 			style: {
-				text: '$(videohub:input_' + (i + 1) + ')',
+				text: `$(videohub:input_${input.id + 1})`,
 				size: '18',
 				color: combineRgb(255, 255, 255),
 				bgcolor: combineRgb(0, 0, 0),
@@ -136,7 +136,7 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 					options: {
 						bg: combineRgb(255, 255, 255),
 						fg: combineRgb(0, 0, 0),
-						input: i,
+						input: input.id,
 					},
 				},
 				{
@@ -144,7 +144,7 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 					options: {
 						bg: combineRgb(255, 0, 0),
 						fg: combineRgb(255, 255, 255),
-						input: i,
+						input: input.id,
 					},
 				},
 			],
@@ -154,7 +154,7 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 						{
 							actionId: 'route_source',
 							options: {
-								source: i,
+								source: input.id,
 							},
 						},
 					],
@@ -164,14 +164,14 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 		}
 	}
 
-	for (let out = 0; out < state.outputCount + state.monitoringCount; out++) {
-		for (let i = 0; i < state.inputCount; i++) {
-			presets[`output_${out}_${i}`] = {
-				category: 'Output ' + (out + 1),
-				name: 'Output ' + (out + 1) + ' button for ' + state.getInput(i).name,
+	for (const output of state.iterateAllOutputs()) {
+		for (const input of state.iterateInputs()) {
+			presets[`output_${output.id}_${input.id}`] = {
+				category: `Output ${output.id + 1}`,
+				name: `Output ${output.id + 1} button for ${input.name}`,
 				type: 'button',
 				style: {
-					text: '$(videohub:input_' + (i + 1) + ')',
+					text: `$(videohub:input_${input.id + 1})`,
 					size: '18',
 					color: combineRgb(255, 255, 255),
 					bgcolor: combineRgb(0, 0, 0),
@@ -182,8 +182,8 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 						options: {
 							bg: combineRgb(255, 255, 0),
 							fg: combineRgb(0, 0, 0),
-							input: i,
-							output: out,
+							input: input.id,
+							output: output.id,
 						},
 					},
 				],
@@ -193,8 +193,8 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 							{
 								actionId: 'route',
 								options: {
-									source: i,
-									destination: out,
+									source: input.id,
+									destination: output.id,
 								},
 							},
 						],
@@ -203,12 +203,12 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 				],
 			}
 
-			presets[`output_${out}_${i}_momentary`] = {
-				category: 'Output ' + (out + 1) + ' (momentary)',
-				name: 'Output ' + (out + 1) + ' button for ' + state.getInput(i).name + ' with route back',
+			presets[`output_${output.id}_${input.id}_momentary`] = {
+				category: `Output ${output.id + 1} (momentary)`,
+				name: `Output ${output.id + 1} button for ${input.name} with route back`,
 				type: 'button',
 				style: {
-					text: '$(videohub:input_' + (i + 1) + ') (mom.)',
+					text: `$(videohub:input_${input.id + 1}) (mom.)`,
 					size: '18',
 					color: combineRgb(255, 255, 255),
 					bgcolor: combineRgb(0, 0, 0),
@@ -219,8 +219,8 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 						options: {
 							bg: combineRgb(255, 255, 0),
 							fg: combineRgb(0, 0, 0),
-							input: i,
-							output: out,
+							input: input.id,
+							output: output.id,
 						},
 					},
 				],
@@ -230,8 +230,8 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 							{
 								actionId: 'route',
 								options: {
-									source: i,
-									destination: out,
+									source: input.id,
+									destination: output.id,
 								},
 							},
 						],
@@ -239,7 +239,7 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 							{
 								actionId: 'route_to_previous',
 								options: {
-									destination: out,
+									destination: output.id,
 								},
 							},
 						],
@@ -249,49 +249,47 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 		}
 	}
 
-	if (state.serialCount > 0) {
-		for (let out = 0; out < state.serialCount; out++) {
-			for (let i = 0; i < state.serialCount; i++) {
-				if (i == out) {
-					continue
-				}
+	for (const serialOut of state.iterateSerials()) {
+		for (const serialIn of state.iterateSerials()) {
+			if (serialIn.id == serialOut.id) {
+				continue
+			}
 
-				presets[`serial_${out}`] = {
-					category: 'Serial ' + (out + 1),
-					name: 'Route serial ' + (i + 1) + ' to serial ' + (out + 1),
-					type: 'button',
-					style: {
-						text: '$(videohub:serial_' + (i + 1) + ')',
-						size: '18',
-						color: combineRgb(255, 255, 255),
-						bgcolor: combineRgb(0, 0, 0),
+			presets[`serial_${serialOut.id}`] = {
+				category: `Serial ${serialOut.id + 1}`,
+				name: `Route serial ${serialIn.id + 1} to serial ${serialOut.id + 1}`,
+				type: 'button',
+				style: {
+					text: `$(videohub:serial_${serialIn.id + 1})`,
+					size: '18',
+					color: combineRgb(255, 255, 255),
+					bgcolor: combineRgb(0, 0, 0),
+				},
+				feedbacks: [
+					{
+						feedbackId: 'serial_bg',
+						options: {
+							bg: combineRgb(255, 255, 0),
+							fg: combineRgb(0, 0, 0),
+							input: serialIn.id,
+							output: serialOut.id,
+						},
 					},
-					feedbacks: [
-						{
-							feedbackId: 'serial_bg',
-							options: {
-								bg: combineRgb(255, 255, 0),
-								fg: combineRgb(0, 0, 0),
-								input: i,
-								output: out,
-							},
-						},
-					],
-					steps: [
-						{
-							down: [
-								{
-									actionId: 'route_serial',
-									options: {
-										source: i,
-										destination: out,
-									},
+				],
+				steps: [
+					{
+						down: [
+							{
+								actionId: 'route_serial',
+								options: {
+									source: serialIn.id,
+									destination: serialOut.id,
 								},
-							],
-							up: [],
-						},
-					],
-				}
+							},
+						],
+						up: [],
+					},
+				],
 			}
 		}
 	}

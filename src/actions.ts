@@ -45,16 +45,13 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 			},
 		],
 		callback: (action) => {
-			if (Number(action.options.destination) >= state.outputCount) {
-				sendCommand(
-					'MONITORING OUTPUT LABELS:\n' +
-						(Number(action.options.destination) - state.outputCount) +
-						' ' +
-						action.options.label +
-						'\n\n'
-				)
-			} else {
-				sendCommand('OUTPUT LABELS:\n' + action.options.destination + ' ' + action.options.label + '\n\n')
+			const output = state.getOutputById(Number(action.options.destination))
+			if (output) {
+				if (output.type === 'monitor') {
+					sendCommand('MONITORING OUTPUT LABELS:\n' + output.index + ' ' + action.options.label + '\n\n')
+				} else {
+					sendCommand('OUTPUT LABELS:\n' + output.index + ' ' + action.options.label + '\n\n')
+				}
 			}
 		},
 	}
@@ -123,16 +120,13 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 			},
 		],
 		callback: (action) => {
-			if (Number(action.options.destination) >= state.outputCount) {
-				sendCommand(
-					'VIDEO MONITORING OUTPUT ROUTING:\n' +
-						(Number(action.options.destination) - state.outputCount) +
-						' ' +
-						action.options.source +
-						'\n\n'
-				)
-			} else {
-				sendCommand('VIDEO OUTPUT ROUTING:\n' + action.options.destination + ' ' + action.options.source + '\n\n')
+			const output = state.getOutputById(Number(action.options.destination))
+			if (output) {
+				if (output.type === 'monitor') {
+					sendCommand('VIDEO MONITORING OUTPUT ROUTING:\n' + output.index + ' ' + action.options.source + '\n\n')
+				} else {
+					sendCommand('VIDEO OUTPUT ROUTING:\n' + output.index + ' ' + action.options.source + '\n\n')
+				}
 			}
 		},
 	}
@@ -156,17 +150,15 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 			},
 		],
 		callback: (action) => {
-			if (Number(action.options.destination) >= state.outputCount) {
-				sendCommand(
-					'VIDEO MONITORING OUTPUT ROUTING:\n' +
-						(Number(action.options.destination) - state.outputCount) +
-						' ' +
-						action.options.source +
-						'\n\n'
-				)
-			} else {
-				const output = state.getOutput(Number(action.options.source_routed_to_destination))
-				sendCommand('VIDEO OUTPUT ROUTING:\n' + action.options.destination + ' ' + output.route + '\n\n')
+			const thisOutput = state.getOutputById(Number(action.options.destination))
+			const otherOutput = state.getOutputById(Number(action.options.source_routed_to_destination))
+
+			if (thisOutput && otherOutput) {
+				if (thisOutput.type === 'monitor') {
+					sendCommand('VIDEO MONITORING OUTPUT ROUTING:\n' + thisOutput.index + ' ' + otherOutput.route + '\n\n')
+				} else {
+					sendCommand('VIDEO OUTPUT ROUTING:\n' + thisOutput.index + ' ' + otherOutput.route + '\n\n')
+				}
 			}
 		},
 	}
@@ -183,28 +175,24 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 			},
 		],
 		callback: (action) => {
-			let output = state.getOutput(Number(action.options.destination))
+			const output = state.getOutputById(Number(action.options.destination))
 
-			let fallbackpop = output.fallback.pop() // The current route (i.e what the hardware is actually set to)
-			// has already been pushed onto the stack at "updateRouting" so to
-			// get to the last route we have to first pop this one off.
-			fallbackpop = output.fallback.pop() // This now, is the route to fallback to.
+			if (output) {
+				let fallbackpop = output.fallback.pop() // The current route (i.e what the hardware is actually set to)
+				// has already been pushed onto the stack at "updateRouting" so to
+				// get to the last route we have to first pop this one off.
+				fallbackpop = output.fallback.pop() // This now, is the route to fallback to.
 
-			if (output.fallback.length < 1) {
-				output.fallback.push(-1)
-			}
+				if (output.fallback.length < 1) {
+					output.fallback.push(-1)
+				}
 
-			if (fallbackpop !== undefined && fallbackpop >= 0) {
-				if (Number(action.options.destination) >= state.outputCount) {
-					sendCommand(
-						'VIDEO MONITORING OUTPUT ROUTING:\n' +
-							(Number(action.options.destination) - state.outputCount) +
-							' ' +
-							fallbackpop +
-							'\n\n'
-					)
-				} else {
-					sendCommand('VIDEO OUTPUT ROUTING:\n' + action.options.destination + ' ' + fallbackpop + '\n\n')
+				if (fallbackpop !== undefined && fallbackpop >= 0) {
+					if (output.type === 'monitor') {
+						sendCommand('VIDEO MONITORING OUTPUT ROUTING:\n' + output.index + ' ' + fallbackpop + '\n\n')
+					} else {
+						sendCommand('VIDEO OUTPUT ROUTING:\n' + output.index + ' ' + fallbackpop + '\n\n')
+					}
 				}
 			}
 		},
@@ -264,36 +252,32 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 			},
 		],
 		callback: (action) => {
-			if (state.selectedDestination >= state.outputCount) {
-				if (self.config.take) {
-					state.queue =
-						'VIDEO MONITORING OUTPUT ROUTING:\n' +
-						(state.selectedDestination - state.outputCount) +
-						' ' +
-						action.options.source +
-						'\n\n'
-					state.queuedDest = state.selectedDestination - state.outputCount
-					state.queuedSource = Number(action.options.source)
+			const output = state.getSelectedOutput()
+			if (output) {
+				if (output.type === 'monitor') {
+					if (self.config.take) {
+						state.queuedOp = {
+							cmd: 'VIDEO MONITORING OUTPUT ROUTING:\n' + output.index + ' ' + action.options.source + '\n\n',
+							dest: output.id,
+							src: Number(action.options.source),
+						}
 
-					self.checkFeedbacks('take', 'take_tally_source', 'take_tally_dest', 'take_tally_route')
+						self.checkFeedbacks('take', 'take_tally_source', 'take_tally_dest', 'take_tally_route')
+					} else {
+						sendCommand('VIDEO MONITORING OUTPUT ROUTING:\n' + output.index + ' ' + action.options.source + '\n\n')
+					}
 				} else {
-					sendCommand(
-						'VIDEO MONITORING OUTPUT ROUTING:\n' +
-							(state.selectedDestination - state.outputCount) +
-							' ' +
-							action.options.source +
-							'\n\n'
-					)
-				}
-			} else {
-				if (self.config.take) {
-					state.queue = 'VIDEO OUTPUT ROUTING:\n' + state.selectedDestination + ' ' + action.options.source + '\n\n'
-					state.queuedDest = state.selectedDestination
-					state.queuedSource = Number(action.options.source)
+					if (self.config.take) {
+						state.queuedOp = {
+							cmd: 'VIDEO OUTPUT ROUTING:\n' + output.index + ' ' + action.options.source + '\n\n',
+							dest: output.id,
+							src: Number(action.options.source),
+						}
 
-					self.checkFeedbacks('take', 'take_tally_source', 'take_tally_dest', 'take_tally_route')
-				} else {
-					sendCommand('VIDEO OUTPUT ROUTING:\n' + state.selectedDestination + ' ' + action.options.source + '\n\n')
+						self.checkFeedbacks('take', 'take_tally_source', 'take_tally_dest', 'take_tally_route')
+					} else {
+						sendCommand('VIDEO OUTPUT ROUTING:\n' + output.index + ' ' + action.options.source + '\n\n')
+					}
 				}
 			}
 		},
@@ -303,24 +287,19 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 		name: 'Take',
 		options: [],
 		callback: () => {
-			const cmd = state.queue
-
-			state.queue = ''
-			state.queuedDest = -1
-			state.queuedSource = -1
+			const op = state.queuedOp
+			state.queuedOp = undefined
 
 			self.checkFeedbacks('take', 'take_tally_source', 'take_tally_dest', 'take_tally_route')
 
-			sendCommand(cmd)
+			if (op) sendCommand(op.cmd)
 		},
 	}
 	actions['clear'] = {
 		name: 'Clear',
 		options: [],
 		callback: () => {
-			state.queue = ''
-			state.queuedDest = -1
-			state.queuedSource = -1
+			state.queuedOp = undefined
 
 			self.checkFeedbacks('take', 'take_tally_source', 'take_tally_dest', 'take_tally_route')
 		},
@@ -346,28 +325,28 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 
 					const routes_text = data.split(':')
 					const routes = routes_text[0].split(',')
-					if (routes.length > 0 && routes.length <= state.outputCount) {
+					if (routes.length > 0 && routes.length <= state.allOutputsCount) {
 						cmd = ''
 						for (let index = 0; index < routes.length; index++) {
 							const dest_source = routes[index].split(' ').map((s) => Number(s))
 							if (isNaN(dest_source[0])) {
 								throw routes[index] + ' - ' + dest_source[0] + ' is not a valid Router Destination '
 							}
-							if (dest_source[0] < 0 || dest_source[0] > state.outputCount - 1) {
+							if (dest_source[0] < 0 || dest_source[0] > state.allOutputsCount - 1) {
 								throw (
 									dest_source[0] +
 									'  is an invalid destination.  Remember, Router is zero based when indexing ports.  Max Routes for this router = ' +
-									state.outputCount
+									state.allOutputsCount
 								)
 							}
 							if (isNaN(dest_source[1])) {
 								throw routes[index] + ' - ' + dest_source[1] + ' is not a valid Router Source '
 							}
-							if (dest_source[1] < 0 || dest_source[1] > state.outputCount - 1) {
+							if (dest_source[1] < 0 || dest_source[1] > state.allOutputsCount - 1) {
 								throw (
 									dest_source[1] +
 									'  is an invalid source. Remember, Router is zero based when indexing ports.  Max Routes for this router = ' +
-									state.outputCount
+									state.allOutputsCount
 								)
 							}
 							cmd = cmd + 'VIDEO OUTPUT ROUTING:\n' + routes[index] + '\n\n'
@@ -403,12 +382,12 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 
 			let string =
 				"  : BMD uses zero based indexing when referencing source and destination so '0' in this file references port '1'.  You may add your own text here after the colon. \n"
-			string = string + '\nRouting history: \n'
+			string += '\nRouting history: \n'
 
 			const data = []
-			for (let index = 0; index < state.outputCount; index++) {
-				data[index] = index + ' ' + state.getOutput(index).route
-				string = string + index + '  ' + state.getOutput(index).fallback + '\n'
+			for (const output of state.iterateAllOutputs()) {
+				data.push(`${output.id} ${output.route}`)
+				string += `${output.id} ${output.fallback}\n`
 			}
 
 			try {

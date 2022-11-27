@@ -23,7 +23,7 @@ export function getInputChoices(state: VideohubState): InputChoicesResult {
 		}
 	}
 
-	for (const output of state.iterateOutputs()) {
+	for (const output of state.iterateAllOutputs()) {
 		if (output.status != 'None') {
 			result.outputChoices.push({ id: output.id, label: output.label })
 		}

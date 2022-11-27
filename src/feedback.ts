@@ -45,7 +45,7 @@ export function getFeedbacks(state: VideohubState): CompanionFeedbackDefinitions
 			},
 		],
 		callback: (feedback) => {
-			if (state.getOutput(Number(feedback.options.output)).route == Number(feedback.options.input)) {
+			if (state.getOutputById(Number(feedback.options.output))?.route == Number(feedback.options.input)) {
 				return {
 					color: Number(feedback.options.fg),
 					bgcolor: Number(feedback.options.bg),
@@ -90,7 +90,7 @@ export function getFeedbacks(state: VideohubState): CompanionFeedbackDefinitions
 				},
 			],
 			callback: (feedback) => {
-				if (state.getSerial(Number(feedback.options.output)).route == Number(feedback.options.input)) {
+				if (state.getSerial(Number(feedback.options.output))?.route == Number(feedback.options.input)) {
 					return {
 						color: Number(feedback.options.fg),
 						bgcolor: Number(feedback.options.bg),
@@ -195,7 +195,7 @@ export function getFeedbacks(state: VideohubState): CompanionFeedbackDefinitions
 			},
 		],
 		callback: (feedback) => {
-			if (state.queue != '') {
+			if (state.queuedOp) {
 				return {
 					color: Number(feedback.options.fg),
 					bgcolor: Number(feedback.options.bg),
@@ -232,7 +232,7 @@ export function getFeedbacks(state: VideohubState): CompanionFeedbackDefinitions
 			},
 		],
 		callback: (feedback) => {
-			if (Number(feedback.options.input) == state.queuedSource && state.selectedDestination == state.queuedDest) {
+			if (Number(feedback.options.input) == state.queuedOp?.src && state.selectedDestination == state.queuedOp?.dest) {
 				return {
 					color: Number(feedback.options.fg),
 					bgcolor: Number(feedback.options.bg),
@@ -269,7 +269,7 @@ export function getFeedbacks(state: VideohubState): CompanionFeedbackDefinitions
 			},
 		],
 		callback: (feedback) => {
-			if (Number(feedback.options.output) == state.queuedDest) {
+			if (Number(feedback.options.output) == state.queuedOp?.dest) {
 				return {
 					color: Number(feedback.options.fg),
 					bgcolor: Number(feedback.options.bg),
