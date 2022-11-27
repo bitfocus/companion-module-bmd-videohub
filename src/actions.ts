@@ -314,53 +314,54 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 				label: 'Source File',
 				id: 'source_file',
 				default: 'C:\\VideoHub.txt',
+				useVariables: true,
 			},
 		],
 		callback: async (action) => {
 			if (!action.options.source_file || typeof action.options.source_file !== 'string') return
 
-			try {
-				const data = await fs.readFile(action.options.source_file, 'utf8')
-				try {
-					let cmd = ''
+			const source_file = await self.parseVariablesInString(action.options.source_file)
+			if (!source_file) return
 
-					const routes_text = data.split(':')
-					const routes = routes_text[0].split(',')
-					if (routes.length > 0 && routes.length <= state.allOutputsCount) {
-						cmd = ''
-						for (let index = 0; index < routes.length; index++) {
-							const dest_source = routes[index].split(' ').map((s) => Number(s))
-							if (isNaN(dest_source[0])) {
-								throw routes[index] + ' - ' + dest_source[0] + ' is not a valid Router Destination '
-							}
-							if (dest_source[0] < 0 || dest_source[0] > state.allOutputsCount - 1) {
-								throw (
-									dest_source[0] +
-									'  is an invalid destination.  Remember, Router is zero based when indexing ports.  Max Routes for this router = ' +
-									state.allOutputsCount
-								)
-							}
-							if (isNaN(dest_source[1])) {
-								throw routes[index] + ' - ' + dest_source[1] + ' is not a valid Router Source '
-							}
-							if (dest_source[1] < 0 || dest_source[1] > state.allOutputsCount - 1) {
-								throw (
-									dest_source[1] +
-									'  is an invalid source. Remember, Router is zero based when indexing ports.  Max Routes for this router = ' +
-									state.allOutputsCount
-								)
-							}
-							cmd = cmd + 'VIDEO OUTPUT ROUTING:\n' + routes[index] + '\n\n'
+			try {
+				const data = await fs.readFile(source_file, 'utf8')
+				try {
+					const routes_text = data.split(':')[0] // trim off the comment and extra data
+					const routes = routes_text.split(',') // split into the individual routes
+
+					let primaryRoutes: string[] = []
+					let monitorRoutes: string[] = []
+
+					for (const route of routes) {
+						const [dest, source] = route.split(' ').map((s) => Number(s))
+
+						const output = state.getOutputById(dest)
+						if (!output) {
+							throw `${route} - ${dest} is not a valid Router Destination `
 						}
-					} else {
-						throw 'Invalid number of Routes: ' + routes.length + ','
+
+						const input = state.getInput(source)
+						if (!input) {
+							throw `${route} - ${source} is not a valid Router Source `
+						}
+
+						if (output.type === 'monitor') {
+							monitorRoutes.push(`${output.index} ${input.id}`)
+						} else {
+							primaryRoutes.push(`${output.index} ${input.id}`)
+						}
 					}
 
-					sendCommand(cmd)
+					if (primaryRoutes.length > 0) {
+						sendCommand(`VIDEO OUTPUT ROUTING:\n${primaryRoutes.join('\n')}\n\n`)
+					}
+					if (monitorRoutes.length > 0) {
+						sendCommand(`VIDEO MONITORING OUTPUT ROUTING:\n${primaryRoutes.join('\n')}\n\n`)
+					}
 
-					self.log('info', routes.length + ' Routes read from File: ' + action.options.source_file)
+					self.log('info', routes.length + ' Routes read from File: ' + source_file)
 				} catch (err: any) {
-					self.log('error', err + ' in File:' + action.options.source_file)
+					self.log('error', err + ' in File:' + source_file)
 				}
 			} catch (e: any) {
 				self.log('error', 'File Read Error: ' + e.message)
@@ -376,13 +377,17 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 				label: 'Destination File',
 				id: 'destination_file',
 				default: 'C:\\VideoHub.txt',
+				useVariables: true,
 			},
 		],
 		callback: async (action) => {
 			if (!action.options.destination_file || typeof action.options.destination_file !== 'string') return
 
+			const destination_file = await self.parseVariablesInString(action.options.destination_file)
+			if (!destination_file) return
+
 			let string =
-				"\n\n  : BMD uses zero based indexing when referencing source and destination so '0' in this file references port '1'.  You may add your own text here after the colon. \n"
+				"  : BMD uses zero based indexing when referencing source and destination so '0' in this file references port '1'.  You may add your own text here after the colon. \n"
 			string += '\nRouting history: \n'
 
 			const data = []
@@ -392,8 +397,8 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 			}
 
 			try {
-				await fs.writeFile(action.options.destination_file, data.join('\n') + string, 'utf8')
-				self.log('info', data.length + ' Routes written to: ' + action.options.destination_file)
+				await fs.writeFile(destination_file, data.join(',') + string, 'utf8')
+				self.log('info', data.length + ' Routes written to: ' + destination_file)
 			} catch (e: any) {
 				self.log('error', 'File Write Error: ' + e.message)
 			}
