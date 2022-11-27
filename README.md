@@ -2,6 +2,14 @@
 
 See HELP.md and LICENSE
 
+**Changes in v2.1.0**
+
+- Convert feedbacks to boolean feedbacks
+
+**Changes in v2.0.0**
+
+- Update to Companion 3.0
+
 **Changes in v1.4.0**
 
 - Added ability to route source based on a source routed to given destination.
