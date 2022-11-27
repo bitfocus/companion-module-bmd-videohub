@@ -1,76 +1,73 @@
-module.exports = {
-	/**
-	 * INTERNAL: initialize variables.
-	 *
-	 * @access protected
-	 * @since 1.0.0
-	 */
-	initVariables() {
-		var variables = []
+/**
+ * Initialize variables.
+ */
+export function initVariables(self) {
+	const variableDefinitions = []
+	const variableValues = {}
 
-		for (var i = 0; i < this.inputCount; i++) {
-			if (this.getInput(i).status != 'None') {
-				variables.push({
-					label: 'Label of input ' + (i + 1),
-					name: 'input_' + (i + 1),
+	for (let i = 0; i < self.inputCount; i++) {
+		if (self.getInput(i).status != 'None') {
+			variableDefinitions.push({
+				name: 'Label of input ' + (i + 1),
+				variableId: 'input_' + (i + 1),
+			})
+
+			variableValues['input_' + (i + 1)] = self.getInput(i).name
+		}
+	}
+
+	for (let i = 0; i < self.outputCount + self.monitoringCount; i++) {
+		if (self.getOutput(i).status != 'None') {
+			variableDefinitions.push({
+				name: 'Label of output ' + (i + 1),
+				variableId: 'output_' + (i + 1),
+			})
+
+			variableValues['output_' + (i + 1)] = self.getOutput(i).name
+
+			variableDefinitions.push({
+				name: 'Label of input routed to output ' + (i + 1),
+				variableId: 'output_' + (i + 1) + '_input',
+			})
+
+			variableValues['output_' + (i + 1) + '_input'] = self.getInput(self.getOutput(i).route).name
+		}
+	}
+
+	if (self.serialCount > 0) {
+		for (let i = 0; i < self.serialCount; i++) {
+			if (self.getSerial(i).status != 'None') {
+				variableDefinitions.push({
+					name: 'Label of serial port ' + (i + 1),
+					variableId: 'serial_' + (i + 1),
 				})
 
-				this.setVariable('input_' + (i + 1), this.getInput(i).name)
-			}
-		}
+				variableValues['serial_' + (i + 1)] = self.getSerial(i).name
 
-		for (var i = 0; i < this.outputCount + this.monitoringCount; i++) {
-			if (this.getOutput(i).status != 'None') {
-				variables.push({
-					label: 'Label of output ' + (i + 1),
-					name: 'output_' + (i + 1),
+				variableDefinitions.push({
+					name: 'Label of serial routed to serial power ' + (i + 1),
+					variableId: 'serial_' + (i + 1) + '_route',
 				})
 
-				this.setVariable('output_' + (i + 1), this.getOutput(i).name)
-
-				variables.push({
-					label: 'Label of input routed to output ' + (i + 1),
-					name: 'output_' + (i + 1) + '_input',
-				})
-
-				this.setVariable('output_' + (i + 1) + '_input', this.getInput(this.getOutput(i).route).name)
+				variableValues['serial_' + (i + 1) + '_route'] = self.getSerial(self.getSerial(i).route).name
 			}
 		}
+	}
 
-		if (this.serialCount > 0) {
-			for (var i = 0; i < this.serialCount; i++) {
-				if (this.getSerial(i).status != 'None') {
-					variables.push({
-						label: 'Label of serial port ' + (i + 1),
-						name: 'serial_' + (i + 1),
-					})
+	variableDefinitions.push({
+		name: 'Label of selected destination',
+		variableId: 'selected_destination',
+	})
 
-					this.setVariable('serial_' + (i + 1), this.getSerial(i).name)
+	variableValues['selected_destination'] = self.getOutput(self.selected).name
 
-					variables.push({
-						label: 'Label of serial routed to serial power ' + (i + 1),
-						name: 'serial_' + (i + 1) + '_route',
-					})
+	variableDefinitions.push({
+		name: 'Label of input routed to selection',
+		variableId: 'selected_source',
+	})
 
-					this.setVariable('serial_' + (i + 1) + '_route', this.getSerial(this.getSerial(i).route).name)
-				}
-			}
-		}
+	variableValues['selected_source'] = self.getInput(self.getOutput(self.selected).route).name
 
-		variables.push({
-			label: 'Label of selected destination',
-			name: 'selected_destination',
-		})
-
-		this.setVariable('selected_destination', this.getOutput(this.selected).name)
-
-		variables.push({
-			label: 'Label of input routed to selection',
-			name: 'selected_source',
-		})
-
-		this.setVariable('selected_source', this.getInput(this.getOutput(this.selected).route).name)
-
-		this.setVariableDefinitions(variables)
-	},
+	self.setVariableDefinitions(variableDefinitions)
+	self.setVariableValues(variableValues)
 }
