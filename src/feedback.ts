@@ -1,19 +1,20 @@
-import { combineRgb } from '@companion-module/base'
+import { combineRgb, CompanionFeedbackDefinitions } from '@companion-module/base'
+import { getInputChoices } from './choices.js'
+import { VideohubState } from './state.js'
 
 /**
  * Get the available feedbacks.
  *
  * !!! Utilized by bmd-multiview16 !!!
- *
- * @returns {Object[]} the available feedbacks
- * @access public
- * @since 1.2.0
  */
-export function getFeedbacks() {
-	const feedbacks = {}
+export function getFeedbacks(state: VideohubState): CompanionFeedbackDefinitions {
+	const { inputChoices, outputChoices, serialChoices } = getInputChoices(state)
+
+	const feedbacks: CompanionFeedbackDefinitions = {}
 
 	feedbacks['input_bg'] = {
-		label: 'Change background color by destination',
+		type: 'advanced',
+		name: 'Change background color by destination',
 		description: 'If the input specified is in use by the output specified, change background color of the bank',
 		options: [
 			{
@@ -32,30 +33,33 @@ export function getFeedbacks() {
 				type: 'dropdown',
 				label: 'Input',
 				id: 'input',
-				default: '0',
-				choices: this.CHOICES_INPUTS,
+				default: 0,
+				choices: inputChoices,
 			},
 			{
 				type: 'dropdown',
 				label: 'Output',
 				id: 'output',
-				default: '0',
-				choices: this.CHOICES_OUTPUTS,
+				default: 0,
+				choices: outputChoices,
 			},
 		],
 		callback: (feedback) => {
-			if (this.getOutput(parseInt(feedback.options.output)).route == parseInt(feedback.options.input)) {
+			if (state.getOutput(Number(feedback.options.output)).route == Number(feedback.options.input)) {
 				return {
-					color: feedback.options.fg,
-					bgcolor: feedback.options.bg,
+					color: Number(feedback.options.fg),
+					bgcolor: Number(feedback.options.bg),
 				}
+			} else {
+				return {}
 			}
 		},
 	}
 
-	if (this.serialCount > 0) {
+	if (serialChoices.length > 0) {
 		feedbacks['serial_bg'] = {
-			label: 'Change background color by serial route',
+			type: 'advanced',
+			name: 'Change background color by serial route',
 			description: 'If the input specified is in use by the output specified, change background color of the bank',
 			options: [
 				{
@@ -74,30 +78,33 @@ export function getFeedbacks() {
 					type: 'dropdown',
 					label: 'Input',
 					id: 'input',
-					default: '0',
-					choices: this.CHOICES_SERIALS,
+					default: 0,
+					choices: serialChoices,
 				},
 				{
 					type: 'dropdown',
 					label: 'Output',
 					id: 'output',
-					default: '0',
-					choices: this.CHOICES_SERIALS,
+					default: 0,
+					choices: serialChoices,
 				},
 			],
 			callback: (feedback) => {
-				if (this.getSerial(parseInt(feedback.options.output)).route == parseInt(feedback.options.input)) {
+				if (state.getSerial(Number(feedback.options.output)).route == Number(feedback.options.input)) {
 					return {
-						color: feedback.options.fg,
-						bgcolor: feedback.options.bg,
+						color: Number(feedback.options.fg),
+						bgcolor: Number(feedback.options.bg),
 					}
+				} else {
+					return {}
 				}
 			},
 		}
 	}
 
 	feedbacks['selected_destination'] = {
-		label: 'Change background color by selected destination',
+		type: 'advanced',
+		name: 'Change background color by selected destination',
 		description: 'If the output specified is selected, change background color of the bank',
 		options: [
 			{
@@ -116,22 +123,25 @@ export function getFeedbacks() {
 				type: 'dropdown',
 				label: 'Output',
 				id: 'output',
-				default: '0',
-				choices: this.CHOICES_OUTPUTS,
+				default: 0,
+				choices: outputChoices,
 			},
 		],
 		callback: (feedback) => {
-			if (parseInt(feedback.options.output) == this.selected) {
+			if (Number(feedback.options.output) == state.selectedDestination) {
 				return {
-					color: feedback.options.fg,
-					bgcolor: feedback.options.bg,
+					color: Number(feedback.options.fg),
+					bgcolor: Number(feedback.options.bg),
 				}
+			} else {
+				return {}
 			}
 		},
 	}
 
 	feedbacks['selected_source'] = {
-		label: 'Change background color by route to selected destination',
+		type: 'advanced',
+		name: 'Change background color by route to selected destination',
 		description: 'If the input specified is in use by the selected output, change background color of the bank',
 		options: [
 			{
@@ -150,22 +160,25 @@ export function getFeedbacks() {
 				type: 'dropdown',
 				label: 'Input',
 				id: 'input',
-				default: '0',
-				choices: this.CHOICES_INPUTS,
+				default: 0,
+				choices: inputChoices,
 			},
 		],
 		callback: (feedback) => {
-			if (this.getOutput(this.selected).route == parseInt(feedback.options.input)) {
+			if (state.getSelectedOutput()?.route == Number(feedback.options.input)) {
 				return {
-					color: feedback.options.fg,
-					bgcolor: feedback.options.bg,
+					color: Number(feedback.options.fg),
+					bgcolor: Number(feedback.options.bg),
 				}
+			} else {
+				return {}
 			}
 		},
 	}
 
 	feedbacks['take'] = {
-		label: 'Change background color if take has a route queued',
+		type: 'advanced',
+		name: 'Change background color if take has a route queued',
 		description: 'If a route is queued for take, change background color of the bank',
 		options: [
 			{
@@ -182,17 +195,20 @@ export function getFeedbacks() {
 			},
 		],
 		callback: (feedback) => {
-			if (this.queue != '') {
+			if (state.queue != '') {
 				return {
-					color: feedback.options.fg,
-					bgcolor: feedback.options.bg,
+					color: Number(feedback.options.fg),
+					bgcolor: Number(feedback.options.bg),
 				}
+			} else {
+				return {}
 			}
 		},
 	}
 
 	feedbacks['take_tally_source'] = {
-		label: 'Change background color if the selected source is queued in take',
+		type: 'advanced',
+		name: 'Change background color if the selected source is queued in take',
 		description: 'If the selected source is queued for take, change background color of the bank',
 		options: [
 			{
@@ -211,22 +227,25 @@ export function getFeedbacks() {
 				type: 'dropdown',
 				label: 'Input',
 				id: 'input',
-				default: '0',
-				choices: this.CHOICES_INPUTS,
+				default: 0,
+				choices: inputChoices,
 			},
 		],
 		callback: (feedback) => {
-			if (parseInt(feedback.options.input) == this.queuedSource && this.selected == this.queuedDest) {
+			if (Number(feedback.options.input) == state.queuedSource && state.selectedDestination == state.queuedDest) {
 				return {
-					color: feedback.options.fg,
-					bgcolor: feedback.options.bg,
+					color: Number(feedback.options.fg),
+					bgcolor: Number(feedback.options.bg),
 				}
+			} else {
+				return {}
 			}
 		},
 	}
 
 	feedbacks['take_tally_dest'] = {
-		label: 'Change background color if the selected destination is queued in take',
+		type: 'advanced',
+		name: 'Change background color if the selected destination is queued in take',
 		description: 'If the selected destination is queued for take, change background color of the bank',
 		options: [
 			{
@@ -245,16 +264,18 @@ export function getFeedbacks() {
 				type: 'dropdown',
 				label: 'Output',
 				id: 'output',
-				default: '0',
-				choices: this.CHOICES_OUTPUTS,
+				default: 0,
+				choices: outputChoices,
 			},
 		],
 		callback: (feedback) => {
-			if (parseInt(feedback.options.output) == this.queuedDest) {
+			if (Number(feedback.options.output) == state.queuedDest) {
 				return {
-					color: feedback.options.fg,
-					bgcolor: feedback.options.bg,
+					color: Number(feedback.options.fg),
+					bgcolor: Number(feedback.options.bg),
 				}
+			} else {
+				return {}
 			}
 		},
 	}

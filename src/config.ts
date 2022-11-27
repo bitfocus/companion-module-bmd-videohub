@@ -1,6 +1,17 @@
-import { Regex } from '@companion-module/base'
+import { Regex, SomeCompanionConfigField } from '@companion-module/base'
 
-export function getConfigFields() {
+export interface VideoHubConfig {
+	host?: string
+	port?: number
+	take?: boolean
+
+	inputCount?: number
+	outputCount?: number
+	monitoringCount?: number
+	serialCount?: number
+}
+
+export function getConfigFields(): SomeCompanionConfigField[] {
 	return [
 		{
 			type: 'static-text',

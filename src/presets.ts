@@ -1,4 +1,5 @@
-import { combineRgb } from '@companion-module/base'
+import { combineRgb, CompanionPresetDefinitions } from '@companion-module/base'
+import { VideohubState } from './state'
 
 /**
  * INTERNAL: initialize presets.
@@ -6,12 +7,12 @@ import { combineRgb } from '@companion-module/base'
  * @access protected
  * @since 1.1.1
  */
-export function initPresets() {
-	const presets = {}
+export function getPresets(state: VideohubState): CompanionPresetDefinitions {
+	const presets: CompanionPresetDefinitions = {}
 
 	presets['take'] = {
 		category: 'Actions\n(XY only)',
-		label: 'Take',
+		name: 'Take',
 		type: 'button',
 		style: {
 			text: 'Take',
@@ -43,7 +44,7 @@ export function initPresets() {
 
 	presets['clear'] = {
 		category: 'Actions\n(XY only)',
-		label: 'Clear',
+		name: 'Clear',
 		type: 'button',
 		style: {
 			text: 'Clear',
@@ -73,10 +74,10 @@ export function initPresets() {
 		],
 	}
 
-	for (let i = 0; i < this.outputCount + this.monitoringCount; i++) {
+	for (let i = 0; i < state.outputCount + state.monitoringCount; i++) {
 		presets[`select_destination_${i}`] = {
 			category: 'Select Destination (X)',
-			label: 'Selection destination button for ' + this.getOutput(i).name,
+			name: 'Selection destination button for ' + state.getOutput(i).name,
 			type: 'button',
 			style: {
 				text: '$(videohub:output_' + (i + 1) + ')',
@@ -118,10 +119,10 @@ export function initPresets() {
 		}
 	}
 
-	for (let i = 0; i < this.inputCount; i++) {
+	for (let i = 0; i < state.inputCount; i++) {
 		presets[`route_source_${i}`] = {
 			category: 'Route Source (Y)',
-			label: 'Route ' + this.getInput(i).name + ' to selected destination',
+			name: 'Route ' + state.getInput(i).name + ' to selected destination',
 			type: 'button',
 			style: {
 				text: '$(videohub:input_' + (i + 1) + ')',
@@ -163,11 +164,11 @@ export function initPresets() {
 		}
 	}
 
-	for (let out = 0; out < this.outputCount + this.monitoringCount; out++) {
-		for (let i = 0; i < this.inputCount; i++) {
+	for (let out = 0; out < state.outputCount + state.monitoringCount; out++) {
+		for (let i = 0; i < state.inputCount; i++) {
 			presets[`output_${out}_${i}`] = {
 				category: 'Output ' + (out + 1),
-				label: 'Output ' + (out + 1) + ' button for ' + this.getInput(i).name,
+				name: 'Output ' + (out + 1) + ' button for ' + state.getInput(i).name,
 				type: 'button',
 				style: {
 					text: '$(videohub:input_' + (i + 1) + ')',
@@ -204,7 +205,7 @@ export function initPresets() {
 
 			presets[`output_${out}_${i}_momentary`] = {
 				category: 'Output ' + (out + 1) + ' (momentary)',
-				label: 'Output ' + (out + 1) + ' button for ' + this.getInput(i).name + ' with route back',
+				name: 'Output ' + (out + 1) + ' button for ' + state.getInput(i).name + ' with route back',
 				type: 'button',
 				style: {
 					text: '$(videohub:input_' + (i + 1) + ') (mom.)',
@@ -248,16 +249,16 @@ export function initPresets() {
 		}
 	}
 
-	if (this.serialCount > 0) {
-		for (let out = 0; out < this.serialCount; out++) {
-			for (let i = 0; i < this.serialCount; i++) {
+	if (state.serialCount > 0) {
+		for (let out = 0; out < state.serialCount; out++) {
+			for (let i = 0; i < state.serialCount; i++) {
 				if (i == out) {
 					continue
 				}
 
 				presets[`serial_${out}`] = {
 					category: 'Serial ' + (out + 1),
-					label: 'Route serial ' + (i + 1) + ' to serial ' + (out + 1),
+					name: 'Route serial ' + (i + 1) + ' to serial ' + (out + 1),
 					type: 'button',
 					style: {
 						text: '$(videohub:serial_' + (i + 1) + ')',
@@ -295,5 +296,5 @@ export function initPresets() {
 		}
 	}
 
-	this.setPresetDefinitions(presets)
+	return presets
 }

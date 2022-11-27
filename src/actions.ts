@@ -1,27 +1,29 @@
+import type { CompanionActionDefinitions } from '@companion-module/base'
 import fs from 'fs/promises'
+import { getInputChoices } from './choices'
+import type { VideohubState } from './state'
+import type { InstanceBaseExt } from './types'
 
 /**
  * Get the available actions.
  *
  * !!! Utilized by bmd-multiview16 !!!
- *
- * @returns {Object[]} the available actions
- * @access public
- * @since 1.2.0
  */
-export function getActions() {
-	const actions = {}
+export function getActions(self: InstanceBaseExt, state: VideohubState): CompanionActionDefinitions {
+	const { inputChoices, outputChoices, serialChoices } = getInputChoices(state)
 
-	const sendCommand = (cmd) => {
-		if (this.socket !== undefined && this.socket.connected) {
+	const actions: CompanionActionDefinitions = {}
+
+	const sendCommand = (cmd: string) => {
+		if (self.socket !== undefined && self.socket.isConnected) {
 			try {
-				this.socket.send(cmd)
-			} catch (error) {
-				this.log('error', 'TCP error ' + error.message)
+				self.socket.send(cmd)
+			} catch (error: any) {
+				self.log('error', 'TCP error ' + error.message)
 			}
 		} else {
-			this.log('error', 'Socket not connected ')
-			this.init_tcp()
+			self.log('error', 'Socket not connected ')
+			self.init_tcp()
 		}
 	}
 
@@ -33,7 +35,7 @@ export function getActions() {
 				label: 'Destination',
 				id: 'destination',
 				default: '0',
-				choices: this.CHOICES_OUTPUTS,
+				choices: outputChoices,
 			},
 			{
 				type: 'textinput',
@@ -43,10 +45,10 @@ export function getActions() {
 			},
 		],
 		callback: (action) => {
-			if (parseInt(action.options.destination) >= this.outputCount) {
+			if (Number(action.options.destination) >= state.outputCount) {
 				sendCommand(
 					'MONITORING OUTPUT LABELS:\n' +
-						(parseInt(action.options.destination) - this.outputCount) +
+						(Number(action.options.destination) - state.outputCount) +
 						' ' +
 						action.options.label +
 						'\n\n'
@@ -64,7 +66,7 @@ export function getActions() {
 				label: 'Source',
 				id: 'source',
 				default: '0',
-				choices: this.CHOICES_INPUTS,
+				choices: inputChoices,
 			},
 			{
 				type: 'textinput',
@@ -78,7 +80,7 @@ export function getActions() {
 		},
 	}
 
-	if (this.serialCount > 0) {
+	if (serialChoices.length > 0) {
 		actions['rename_serial'] = {
 			name: 'Rename serial port',
 			options: [
@@ -87,7 +89,7 @@ export function getActions() {
 					label: 'Serial Port',
 					id: 'serial',
 					default: '0',
-					choices: this.CHOICES_SERIALS,
+					choices: serialChoices,
 				},
 				{
 					type: 'textinput',
@@ -110,21 +112,21 @@ export function getActions() {
 				label: 'Source',
 				id: 'source',
 				default: '0',
-				choices: this.CHOICES_INPUTS,
+				choices: inputChoices,
 			},
 			{
 				type: 'dropdown',
 				label: 'Destination',
 				id: 'destination',
 				default: '0',
-				choices: this.CHOICES_OUTPUTS,
+				choices: outputChoices,
 			},
 		],
 		callback: (action) => {
-			if (parseInt(action.options.destination) >= this.outputCount) {
+			if (Number(action.options.destination) >= state.outputCount) {
 				sendCommand(
 					'VIDEO MONITORING OUTPUT ROUTING:\n' +
-						(parseInt(action.options.destination) - this.outputCount) +
+						(Number(action.options.destination) - state.outputCount) +
 						' ' +
 						action.options.source +
 						'\n\n'
@@ -143,33 +145,28 @@ export function getActions() {
 				label: 'Destination to take routed source from',
 				id: 'source_routed_to_destination',
 				default: '0',
-				choices: this.CHOICES_OUTPUTS,
+				choices: outputChoices,
 			},
 			{
 				type: 'dropdown',
 				label: 'Destination',
 				id: 'destination',
 				default: '0',
-				choices: this.CHOICES_OUTPUTS,
+				choices: outputChoices,
 			},
 		],
 		callback: (action) => {
-			if (parseInt(action.options.destination) >= this.outputCount) {
+			if (Number(action.options.destination) >= state.outputCount) {
 				sendCommand(
 					'VIDEO MONITORING OUTPUT ROUTING:\n' +
-						(parseInt(action.options.destination) - this.outputCount) +
+						(Number(action.options.destination) - state.outputCount) +
 						' ' +
 						action.options.source +
 						'\n\n'
 				)
 			} else {
-				sendCommand(
-					'VIDEO OUTPUT ROUTING:\n' +
-						action.options.destination +
-						' ' +
-						this.getOutput(parseInt(action.options.source_routed_to_destination)).route +
-						'\n\n'
-				)
+				const output = state.getOutput(Number(action.options.source_routed_to_destination))
+				sendCommand('VIDEO OUTPUT ROUTING:\n' + action.options.destination + ' ' + output.route + '\n\n')
 			}
 		},
 	}
@@ -182,14 +179,13 @@ export function getActions() {
 				label: 'Destination',
 				id: 'destination',
 				default: '0',
-				choices: this.CHOICES_OUTPUTS,
+				choices: outputChoices,
 			},
 		],
 		callback: (action) => {
-			let output = this.getOutput(parseInt(action.options.destination))
-			let fallbackpop = -1
+			let output = state.getOutput(Number(action.options.destination))
 
-			fallbackpop = output.fallback.pop() // The current route (i.e what the hardware is actually set to)
+			let fallbackpop = output.fallback.pop() // The current route (i.e what the hardware is actually set to)
 			// has already been pushed onto the stack at "updateRouting" so to
 			// get to the last route we have to first pop this one off.
 			fallbackpop = output.fallback.pop() // This now, is the route to fallback to.
@@ -198,11 +194,11 @@ export function getActions() {
 				output.fallback.push(-1)
 			}
 
-			if (fallbackpop >= 0) {
-				if (parseInt(action.options.destination) >= this.outputCount) {
+			if (fallbackpop !== undefined && fallbackpop >= 0) {
+				if (Number(action.options.destination) >= state.outputCount) {
 					sendCommand(
 						'VIDEO MONITORING OUTPUT ROUTING:\n' +
-							(parseInt(action.options.destination) - this.outputCount) +
+							(Number(action.options.destination) - state.outputCount) +
 							' ' +
 							fallbackpop +
 							'\n\n'
@@ -214,7 +210,7 @@ export function getActions() {
 		},
 	}
 
-	if (this.serialCount > 0) {
+	if (serialChoices.length > 0) {
 		actions['route_serial'] = {
 			name: 'Route serial port',
 			options: [
@@ -223,14 +219,14 @@ export function getActions() {
 					label: 'Source',
 					id: 'source',
 					default: '0',
-					choices: this.CHOICES_SERIALS,
+					choices: serialChoices,
 				},
 				{
 					type: 'dropdown',
 					label: 'Destination',
 					id: 'destination',
 					default: '1',
-					choices: this.CHOICES_SERIALS,
+					choices: serialChoices,
 				},
 			],
 			callback: (action) => {
@@ -247,13 +243,13 @@ export function getActions() {
 				label: 'Destination',
 				id: 'destination',
 				default: '0',
-				choices: this.CHOICES_OUTPUTS,
+				choices: outputChoices,
 			},
 		],
 		callback: (action) => {
-			this.selected = parseInt(action.options.destination)
+			state.selectedDestination = Number(action.options.destination)
 
-			this.checkFeedbacks('selected_destination', 'take_tally_source', 'selected_source')
+			self.checkFeedbacks('selected_destination', 'take_tally_source', 'selected_source')
 		},
 	}
 	actions['route_source'] = {
@@ -264,40 +260,40 @@ export function getActions() {
 				label: 'Source',
 				id: 'source',
 				default: '0',
-				choices: this.CHOICES_INPUTS,
+				choices: inputChoices,
 			},
 		],
 		callback: (action) => {
-			if (this.selected >= this.outputCount) {
-				if (this.config.take === true) {
-					this.queue =
+			if (state.selectedDestination >= state.outputCount) {
+				if (self.config.take) {
+					state.queue =
 						'VIDEO MONITORING OUTPUT ROUTING:\n' +
-						(this.selected - this.outputCount) +
+						(state.selectedDestination - state.outputCount) +
 						' ' +
 						action.options.source +
 						'\n\n'
-					this.queuedDest = this.selected - this.outputCount
-					this.queuedSource = parseInt(action.options.source)
+					state.queuedDest = state.selectedDestination - state.outputCount
+					state.queuedSource = Number(action.options.source)
 
-					this.checkFeedbacks('take', 'take_tally_source', 'take_tally_dest', 'take_tally_route')
+					self.checkFeedbacks('take', 'take_tally_source', 'take_tally_dest', 'take_tally_route')
 				} else {
 					sendCommand(
 						'VIDEO MONITORING OUTPUT ROUTING:\n' +
-							(this.selected - this.outputCount) +
+							(state.selectedDestination - state.outputCount) +
 							' ' +
 							action.options.source +
 							'\n\n'
 					)
 				}
 			} else {
-				if (this.config.take === true) {
-					this.queue = 'VIDEO OUTPUT ROUTING:\n' + this.selected + ' ' + action.options.source + '\n\n'
-					this.queuedDest = this.selected
-					this.queuedSource = parseInt(action.options.source)
+				if (self.config.take) {
+					state.queue = 'VIDEO OUTPUT ROUTING:\n' + state.selectedDestination + ' ' + action.options.source + '\n\n'
+					state.queuedDest = state.selectedDestination
+					state.queuedSource = Number(action.options.source)
 
-					this.checkFeedbacks('take', 'take_tally_source', 'take_tally_dest', 'take_tally_route')
+					self.checkFeedbacks('take', 'take_tally_source', 'take_tally_dest', 'take_tally_route')
 				} else {
-					sendCommand('VIDEO OUTPUT ROUTING:\n' + this.selected + ' ' + action.options.source + '\n\n')
+					sendCommand('VIDEO OUTPUT ROUTING:\n' + state.selectedDestination + ' ' + action.options.source + '\n\n')
 				}
 			}
 		},
@@ -307,13 +303,13 @@ export function getActions() {
 		name: 'Take',
 		options: [],
 		callback: () => {
-			const cmd = this.queue
+			const cmd = state.queue
 
-			this.queue = ''
-			this.queuedDest = -1
-			this.queuedSource = -1
+			state.queue = ''
+			state.queuedDest = -1
+			state.queuedSource = -1
 
-			this.checkFeedbacks('take', 'take_tally_source', 'take_tally_dest', 'take_tally_route')
+			self.checkFeedbacks('take', 'take_tally_source', 'take_tally_dest', 'take_tally_route')
 
 			sendCommand(cmd)
 		},
@@ -322,11 +318,11 @@ export function getActions() {
 		name: 'Clear',
 		options: [],
 		callback: () => {
-			this.queue = ''
-			this.queuedDest = -1
-			this.queuedSource = -1
+			state.queue = ''
+			state.queuedDest = -1
+			state.queuedSource = -1
 
-			this.checkFeedbacks('take', 'take_tally_source', 'take_tally_dest', 'take_tally_route')
+			self.checkFeedbacks('take', 'take_tally_source', 'take_tally_dest', 'take_tally_route')
 		},
 	}
 
@@ -341,6 +337,8 @@ export function getActions() {
 			},
 		],
 		callback: async (action) => {
+			if (!action.options.source_file || typeof action.options.source_file !== 'string') return
+
 			try {
 				const data = await fs.readFile(action.options.source_file, 'utf8')
 				try {
@@ -348,28 +346,28 @@ export function getActions() {
 
 					const routes_text = data.split(':')
 					const routes = routes_text[0].split(',')
-					if (routes.length > 0 && routes.length <= this.outputCount) {
+					if (routes.length > 0 && routes.length <= state.outputCount) {
 						cmd = ''
 						for (let index = 0; index < routes.length; index++) {
-							const dest_source = routes[index].split(' ')
+							const dest_source = routes[index].split(' ').map((s) => Number(s))
 							if (isNaN(dest_source[0])) {
 								throw routes[index] + ' - ' + dest_source[0] + ' is not a valid Router Destination '
 							}
-							if (dest_source[0] < 0 || dest_source[0] > this.outputCount - 1) {
+							if (dest_source[0] < 0 || dest_source[0] > state.outputCount - 1) {
 								throw (
 									dest_source[0] +
 									'  is an invalid destination.  Remember, Router is zero based when indexing ports.  Max Routes for this router = ' +
-									this.outputCount
+									state.outputCount
 								)
 							}
 							if (isNaN(dest_source[1])) {
 								throw routes[index] + ' - ' + dest_source[1] + ' is not a valid Router Source '
 							}
-							if (dest_source[1] < 0 || dest_source[1] > this.outputCount - 1) {
+							if (dest_source[1] < 0 || dest_source[1] > state.outputCount - 1) {
 								throw (
 									dest_source[1] +
 									'  is an invalid source. Remember, Router is zero based when indexing ports.  Max Routes for this router = ' +
-									this.outputCount
+									state.outputCount
 								)
 							}
 							cmd = cmd + 'VIDEO OUTPUT ROUTING:\n' + routes[index] + '\n\n'
@@ -379,12 +377,13 @@ export function getActions() {
 					}
 
 					sendCommand(cmd)
-					this.log('info', routes.length + ' Routes read from File: ' + action.options.source_file)
-				} catch (err) {
-					this.log('error', err + ' in File:' + action.options.source_file)
+
+					self.log('info', routes.length + ' Routes read from File: ' + action.options.source_file)
+				} catch (err: any) {
+					self.log('error', err + ' in File:' + action.options.source_file)
 				}
-			} catch (e) {
-				this.log('error', 'File Read Error: ' + e.message)
+			} catch (e: any) {
+				self.log('error', 'File Read Error: ' + e.message)
 			}
 		},
 	}
@@ -400,20 +399,23 @@ export function getActions() {
 			},
 		],
 		callback: async (action) => {
+			if (!action.options.destination_file || typeof action.options.destination_file !== 'string') return
+
 			let string =
 				"  : BMD uses zero based indexing when referencing source and destination so '0' in this file references port '1'.  You may add your own text here after the colon. \n"
 			string = string + '\nRouting history: \n'
 
-			for (let index = 0; index < this.outputCount; index++) {
-				data[index] = index + ' ' + this.getOutput(index).route
-				string = string + index + '  ' + this.getOutput(index).fallback + '\n'
+			const data = []
+			for (let index = 0; index < state.outputCount; index++) {
+				data[index] = index + ' ' + state.getOutput(index).route
+				string = string + index + '  ' + state.getOutput(index).fallback + '\n'
 			}
 
 			try {
-				await fs.writeFile(action.options.destination_file, data + string, 'utf8')
-				this.log('info', data.length + ' Routes written to: ' + action.options.destination_file)
-			} catch (e) {
-				this.log('error', 'File Write Error: ' + e.message)
+				await fs.writeFile(action.options.destination_file, data.join('') + string, 'utf8')
+				self.log('info', data.length + ' Routes written to: ' + action.options.destination_file)
+			} catch (e: any) {
+				self.log('error', 'File Write Error: ' + e.message)
 			}
 		},
 	}
