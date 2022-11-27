@@ -6,6 +6,7 @@ import { getActions } from './actions.js'
 import { getFeedbacks } from './feedback.js'
 import { updateDevice, updateLabels, updateRouting, updateStatus } from './internalAPI.js'
 import { VideohubState } from './state.js'
+import { UpgradeScripts } from './upgrades.js'
 
 /**
  * Companion instance class for the Blackmagic VideoHub Routers.
@@ -204,4 +205,4 @@ class VideohubInstance extends InstanceBase<VideoHubConfig> {
 	}
 }
 
-runEntrypoint(VideohubInstance, [])
+runEntrypoint(VideohubInstance, UpgradeScripts)

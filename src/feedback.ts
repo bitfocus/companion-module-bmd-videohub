@@ -13,22 +13,14 @@ export function getFeedbacks(state: VideohubState): CompanionFeedbackDefinitions
 	const feedbacks: CompanionFeedbackDefinitions = {}
 
 	feedbacks['input_bg'] = {
-		type: 'advanced',
+		type: 'boolean',
 		name: 'Change background color by destination',
 		description: 'If the input specified is in use by the output specified, change background color of the bank',
+		defaultStyle: {
+			color: combineRgb(0, 0, 0),
+			bgcolor: combineRgb(255, 255, 0),
+		},
 		options: [
-			{
-				type: 'colorpicker',
-				label: 'Foreground color',
-				id: 'fg',
-				default: combineRgb(0, 0, 0),
-			},
-			{
-				type: 'colorpicker',
-				label: 'Background color',
-				id: 'bg',
-				default: combineRgb(255, 255, 0),
-			},
 			{
 				type: 'dropdown',
 				label: 'Input',
@@ -45,35 +37,20 @@ export function getFeedbacks(state: VideohubState): CompanionFeedbackDefinitions
 			},
 		],
 		callback: (feedback) => {
-			if (state.getOutputById(Number(feedback.options.output))?.route == Number(feedback.options.input)) {
-				return {
-					color: Number(feedback.options.fg),
-					bgcolor: Number(feedback.options.bg),
-				}
-			} else {
-				return {}
-			}
+			return state.getOutputById(Number(feedback.options.output))?.route == Number(feedback.options.input)
 		},
 	}
 
 	if (serialChoices.length > 0) {
 		feedbacks['serial_bg'] = {
-			type: 'advanced',
+			type: 'boolean',
 			name: 'Change background color by serial route',
 			description: 'If the input specified is in use by the output specified, change background color of the bank',
+			defaultStyle: {
+				color: combineRgb(0, 0, 0),
+				bgcolor: combineRgb(255, 255, 0),
+			},
 			options: [
-				{
-					type: 'colorpicker',
-					label: 'Foreground color',
-					id: 'fg',
-					default: combineRgb(0, 0, 0),
-				},
-				{
-					type: 'colorpicker',
-					label: 'Background color',
-					id: 'bg',
-					default: combineRgb(255, 255, 0),
-				},
 				{
 					type: 'dropdown',
 					label: 'Input',
@@ -90,35 +67,20 @@ export function getFeedbacks(state: VideohubState): CompanionFeedbackDefinitions
 				},
 			],
 			callback: (feedback) => {
-				if (state.getSerial(Number(feedback.options.output))?.route == Number(feedback.options.input)) {
-					return {
-						color: Number(feedback.options.fg),
-						bgcolor: Number(feedback.options.bg),
-					}
-				} else {
-					return {}
-				}
+				return state.getSerial(Number(feedback.options.output))?.route == Number(feedback.options.input)
 			},
 		}
 	}
 
 	feedbacks['selected_destination'] = {
-		type: 'advanced',
+		type: 'boolean',
 		name: 'Change background color by selected destination',
 		description: 'If the output specified is selected, change background color of the bank',
+		defaultStyle: {
+			color: combineRgb(0, 0, 0),
+			bgcolor: combineRgb(255, 255, 0),
+		},
 		options: [
-			{
-				type: 'colorpicker',
-				label: 'Foreground color',
-				id: 'fg',
-				default: combineRgb(0, 0, 0),
-			},
-			{
-				type: 'colorpicker',
-				label: 'Background color',
-				id: 'bg',
-				default: combineRgb(255, 255, 0),
-			},
 			{
 				type: 'dropdown',
 				label: 'Output',
@@ -128,34 +90,19 @@ export function getFeedbacks(state: VideohubState): CompanionFeedbackDefinitions
 			},
 		],
 		callback: (feedback) => {
-			if (Number(feedback.options.output) == state.selectedDestination) {
-				return {
-					color: Number(feedback.options.fg),
-					bgcolor: Number(feedback.options.bg),
-				}
-			} else {
-				return {}
-			}
+			return Number(feedback.options.output) == state.selectedDestination
 		},
 	}
 
 	feedbacks['selected_source'] = {
-		type: 'advanced',
+		type: 'boolean',
 		name: 'Change background color by route to selected destination',
 		description: 'If the input specified is in use by the selected output, change background color of the bank',
+		defaultStyle: {
+			color: combineRgb(0, 0, 0),
+			bgcolor: combineRgb(255, 255, 255),
+		},
 		options: [
-			{
-				type: 'colorpicker',
-				label: 'Foreground color',
-				id: 'fg',
-				default: combineRgb(0, 0, 0),
-			},
-			{
-				type: 'colorpicker',
-				label: 'Background color',
-				id: 'bg',
-				default: combineRgb(255, 255, 255),
-			},
 			{
 				type: 'dropdown',
 				label: 'Input',
@@ -165,64 +112,33 @@ export function getFeedbacks(state: VideohubState): CompanionFeedbackDefinitions
 			},
 		],
 		callback: (feedback) => {
-			if (state.getSelectedOutput()?.route == Number(feedback.options.input)) {
-				return {
-					color: Number(feedback.options.fg),
-					bgcolor: Number(feedback.options.bg),
-				}
-			} else {
-				return {}
-			}
+			return state.getSelectedOutput()?.route == Number(feedback.options.input)
 		},
 	}
 
 	feedbacks['take'] = {
-		type: 'advanced',
+		type: 'boolean',
 		name: 'Change background color if take has a route queued',
 		description: 'If a route is queued for take, change background color of the bank',
-		options: [
-			{
-				type: 'colorpicker',
-				label: 'Foreground color',
-				id: 'fg',
-				default: combineRgb(255, 255, 255),
-			},
-			{
-				type: 'colorpicker',
-				label: 'Background color',
-				id: 'bg',
-				default: combineRgb(255, 0, 0),
-			},
-		],
-		callback: (feedback) => {
-			if (state.queuedOp) {
-				return {
-					color: Number(feedback.options.fg),
-					bgcolor: Number(feedback.options.bg),
-				}
-			} else {
-				return {}
-			}
+		defaultStyle: {
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(255, 0, 0),
+		},
+		options: [],
+		callback: () => {
+			return !!state.queuedOp
 		},
 	}
 
 	feedbacks['take_tally_source'] = {
-		type: 'advanced',
+		type: 'boolean',
 		name: 'Change background color if the selected source is queued in take',
 		description: 'If the selected source is queued for take, change background color of the bank',
+		defaultStyle: {
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(255, 0, 0),
+		},
 		options: [
-			{
-				type: 'colorpicker',
-				label: 'Foreground color',
-				id: 'fg',
-				default: combineRgb(255, 255, 255),
-			},
-			{
-				type: 'colorpicker',
-				label: 'Background color',
-				id: 'bg',
-				default: combineRgb(255, 0, 0),
-			},
 			{
 				type: 'dropdown',
 				label: 'Input',
@@ -232,34 +148,19 @@ export function getFeedbacks(state: VideohubState): CompanionFeedbackDefinitions
 			},
 		],
 		callback: (feedback) => {
-			if (Number(feedback.options.input) == state.queuedOp?.src && state.selectedDestination == state.queuedOp?.dest) {
-				return {
-					color: Number(feedback.options.fg),
-					bgcolor: Number(feedback.options.bg),
-				}
-			} else {
-				return {}
-			}
+			return Number(feedback.options.input) == state.queuedOp?.src && state.selectedDestination == state.queuedOp?.dest
 		},
 	}
 
 	feedbacks['take_tally_dest'] = {
-		type: 'advanced',
+		type: 'boolean',
 		name: 'Change background color if the selected destination is queued in take',
 		description: 'If the selected destination is queued for take, change background color of the bank',
+		defaultStyle: {
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(255, 0, 0),
+		},
 		options: [
-			{
-				type: 'colorpicker',
-				label: 'Foreground color',
-				id: 'fg',
-				default: combineRgb(255, 255, 255),
-			},
-			{
-				type: 'colorpicker',
-				label: 'Background color',
-				id: 'bg',
-				default: combineRgb(255, 0, 0),
-			},
 			{
 				type: 'dropdown',
 				label: 'Output',
@@ -269,14 +170,7 @@ export function getFeedbacks(state: VideohubState): CompanionFeedbackDefinitions
 			},
 		],
 		callback: (feedback) => {
-			if (Number(feedback.options.output) == state.queuedOp?.dest) {
-				return {
-					color: Number(feedback.options.fg),
-					bgcolor: Number(feedback.options.bg),
-				}
-			} else {
-				return {}
-			}
+			return Number(feedback.options.output) == state.queuedOp?.dest
 		},
 	}
 

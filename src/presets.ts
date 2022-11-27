@@ -23,10 +23,11 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 		feedbacks: [
 			{
 				feedbackId: 'take',
-				options: {
-					bg: combineRgb(255, 0, 0),
-					fg: combineRgb(255, 255, 255),
+				style: {
+					bgcolor: combineRgb(255, 0, 0),
+					color: combineRgb(255, 255, 255),
 				},
+				options: {},
 			},
 		],
 		steps: [
@@ -55,10 +56,11 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 		feedbacks: [
 			{
 				feedbackId: 'take',
-				options: {
-					bg: combineRgb(0, 0, 0),
-					fg: combineRgb(255, 255, 255),
+				style: {
+					bgcolor: combineRgb(0, 0, 0),
+					color: combineRgb(255, 255, 255),
 				},
+				options: {},
 			},
 		],
 		steps: [
@@ -88,17 +90,21 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 			feedbacks: [
 				{
 					feedbackId: 'selected_destination',
+					style: {
+						bgcolor: combineRgb(255, 255, 0),
+						color: combineRgb(0, 0, 0),
+					},
 					options: {
-						bg: combineRgb(255, 255, 0),
-						fg: combineRgb(0, 0, 0),
 						output: output.id,
 					},
 				},
 				{
 					feedbackId: 'take_tally_dest',
+					style: {
+						bgcolor: combineRgb(255, 0, 0),
+						color: combineRgb(255, 255, 255),
+					},
 					options: {
-						bg: combineRgb(255, 0, 0),
-						fg: combineRgb(255, 255, 255),
 						output: output.id,
 					},
 				},
@@ -133,17 +139,21 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 			feedbacks: [
 				{
 					feedbackId: 'selected_source',
+					style: {
+						bgcolor: combineRgb(255, 255, 255),
+						color: combineRgb(0, 0, 0),
+					},
 					options: {
-						bg: combineRgb(255, 255, 255),
-						fg: combineRgb(0, 0, 0),
 						input: input.id,
 					},
 				},
 				{
 					feedbackId: 'take_tally_source',
+					style: {
+						bgcolor: combineRgb(255, 0, 0),
+						color: combineRgb(255, 255, 255),
+					},
 					options: {
-						bg: combineRgb(255, 0, 0),
-						fg: combineRgb(255, 255, 255),
 						input: input.id,
 					},
 				},
@@ -179,9 +189,11 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 				feedbacks: [
 					{
 						feedbackId: 'input_bg',
+						style: {
+							bgcolor: combineRgb(255, 255, 0),
+							color: combineRgb(0, 0, 0),
+						},
 						options: {
-							bg: combineRgb(255, 255, 0),
-							fg: combineRgb(0, 0, 0),
 							input: input.id,
 							output: output.id,
 						},
@@ -216,9 +228,11 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 				feedbacks: [
 					{
 						feedbackId: 'input_bg',
+						style: {
+							bgcolor: combineRgb(255, 255, 0),
+							color: combineRgb(0, 0, 0),
+						},
 						options: {
-							bg: combineRgb(255, 255, 0),
-							fg: combineRgb(0, 0, 0),
 							input: input.id,
 							output: output.id,
 						},
@@ -268,9 +282,11 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 				feedbacks: [
 					{
 						feedbackId: 'serial_bg',
+						style: {
+							bgcolor: combineRgb(255, 255, 0),
+							color: combineRgb(0, 0, 0),
+						},
 						options: {
-							bg: combineRgb(255, 255, 0),
-							fg: combineRgb(0, 0, 0),
 							input: serialIn.id,
 							output: serialOut.id,
 						},
