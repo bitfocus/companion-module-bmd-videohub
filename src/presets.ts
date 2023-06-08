@@ -174,8 +174,9 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 		}
 	}
 
-	for (const output of state.iterateAllOutputs()) {
-		for (const input of state.iterateInputs()) {
+	// Limit the number of fixed routing options created, having them all consumes a lot of memory and can crash the process
+	for (const output of state.iterateAllOutputs().slice(0, 20)) {
+		for (const input of state.iterateInputs().slice(0, 20)) {
 			presets[`output_${output.id}_${input.id}`] = {
 				category: `Output ${output.id + 1}`,
 				name: `Output ${output.id + 1} button for ${input.name}`,
@@ -263,8 +264,9 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 		}
 	}
 
-	for (const serialOut of state.iterateSerials()) {
-		for (const serialIn of state.iterateSerials()) {
+	// Limit the number of fixed routing options created, having them all consumes a lot of memory and can crash the process
+	for (const serialOut of state.iterateSerials().slice(0, 20)) {
+		for (const serialIn of state.iterateSerials().slice(0, 20)) {
 			if (serialIn.id == serialOut.id) {
 				continue
 			}
