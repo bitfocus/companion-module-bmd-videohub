@@ -2,6 +2,10 @@
 
 See HELP.md and LICENSE
 
+**Changes in v2.1.1**
+
+- Fix crash for larger models
+
 **Changes in v2.1.0**
 
 - Convert feedbacks to boolean feedbacks
