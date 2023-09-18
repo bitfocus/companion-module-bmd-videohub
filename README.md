@@ -2,6 +2,10 @@
 
 See HELP.md and LICENSE
 
+**Changes in v2.1.3**
+
+- Size changes not applying correctly
+
 **Changes in v2.1.2**
 
 - Send PING message on an interval to avoid disconnects

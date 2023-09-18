@@ -34,6 +34,10 @@ export function updateDevice(self: InstanceBaseExt, _labeltype: string, data: st
 	}
 
 	self.saveConfig(self.config)
+
+	self.state.updateCounts(self.config)
+
+	self.initThings(true)
 }
 
 /**
