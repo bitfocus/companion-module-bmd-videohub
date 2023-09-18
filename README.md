@@ -2,6 +2,10 @@
 
 See HELP.md and LICENSE
 
+**Changes in v2.1.2**
+
+- Send PING message on an interval to avoid disconnects
+
 **Changes in v2.1.1**
 
 - Fix crash for larger models

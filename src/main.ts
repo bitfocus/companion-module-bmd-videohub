@@ -23,6 +23,7 @@ class VideohubInstance extends InstanceBase<VideoHubConfig> {
 	readonly state: VideohubState
 
 	socket: TCPHelper | undefined
+	pingTimer: NodeJS.Timeout | undefined
 	config: VideoHubConfig
 
 	constructor(internal: unknown) {
@@ -49,6 +50,12 @@ class VideohubInstance extends InstanceBase<VideoHubConfig> {
 	async destroy() {
 		if (this.socket !== undefined) {
 			this.socket.destroy()
+			delete this.socket
+		}
+
+		if (this.pingTimer) {
+			clearInterval(this.pingTimer)
+			delete this.pingTimer
 		}
 	}
 
@@ -89,6 +96,11 @@ class VideohubInstance extends InstanceBase<VideoHubConfig> {
 			delete this.socket
 		}
 
+		if (this.pingTimer) {
+			clearInterval(this.pingTimer)
+			delete this.pingTimer
+		}
+
 		if (this.config.port === undefined) {
 			this.config.port = 9990
 		}
@@ -102,6 +114,10 @@ class VideohubInstance extends InstanceBase<VideoHubConfig> {
 
 			this.socket.on('error', (err) => {
 				this.log('error', 'Network error: ' + err.message)
+			})
+
+			this.socket.on('end', () => {
+				this.log('debug', 'Connection closed')
 			})
 
 			this.socket.on('connect', () => {
@@ -124,6 +140,12 @@ class VideohubInstance extends InstanceBase<VideoHubConfig> {
 
 				receivebuffer = receivebuffer.substring(discardOffset)
 			})
+
+			this.pingTimer = setInterval(() => {
+				if (!this.socket || !this.socket.isConnected) return
+
+				this.socket.send('PING\n\n')
+			}, 15000)
 		}
 	}
 
@@ -132,14 +154,16 @@ class VideohubInstance extends InstanceBase<VideoHubConfig> {
 
 	#handleReceivedLine(line: string) {
 		try {
-			if (this.command === null && line.match(/:/)) {
+			if ((this.command === null && line.match(/:/)) || line === 'ACK') {
 				this.command = line
 			} else if (this.command !== null && line.length > 0) {
 				this.stash.push(line.trim())
 			} else if (line.length === 0 && this.command !== null) {
 				const cmd = this.command.trim().split(/:/)[0]
 
-				this.#processVideohubInformation(cmd, this.stash)
+				if (cmd !== 'ACK') {
+					this.#processVideohubInformation(cmd, this.stash)
+				}
 
 				this.stash = []
 				this.command = null
