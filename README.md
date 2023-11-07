@@ -2,6 +2,10 @@
 
 See HELP.md and LICENSE
 
+**Changes in v2.2.0**
+
+- Bonjour device discovery
+
 **Changes in v2.1.3**
 
 - Size changes not applying correctly
