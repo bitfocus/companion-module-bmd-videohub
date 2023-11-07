@@ -1,4 +1,4 @@
-import { InstanceBase, runEntrypoint, TCPHelper } from '@companion-module/base'
+import { InstanceBase, InstanceStatus, runEntrypoint, TCPHelper } from '@companion-module/base'
 import { getConfigFields, VideoHubConfig } from './config.js'
 import { initVariables } from './variables.js'
 import { getPresets } from './presets.js'
@@ -7,6 +7,7 @@ import { getFeedbacks } from './feedback.js'
 import { updateDevice, updateLabels, updateRouting, updateStatus } from './internalAPI.js'
 import { VideohubState } from './state.js'
 import { UpgradeScripts } from './upgrades.js'
+import { IpAndPort } from './types.js'
 
 /**
  * Companion instance class for the Blackmagic VideoHub Routers.
@@ -101,12 +102,11 @@ class VideohubInstance extends InstanceBase<VideoHubConfig> {
 			delete this.pingTimer
 		}
 
-		if (this.config.port === undefined) {
-			this.config.port = 9990
-		}
+		const target = this.parseIpAndPort()
+		if (target) {
+			this.updateStatus(InstanceStatus.Connecting)
 
-		if (this.config.host) {
-			this.socket = new TCPHelper(this.config.host, this.config.port)
+			this.socket = new TCPHelper(target.ip, target.port || 9990)
 
 			this.socket.on('status_change', (status, message) => {
 				this.updateStatus(status, message)
@@ -146,6 +146,8 @@ class VideohubInstance extends InstanceBase<VideoHubConfig> {
 
 				this.socket.send('PING\n\n')
 			}, 15000)
+		} else {
+			this.updateStatus(InstanceStatus.Disconnected)
 		}
 	}
 
@@ -213,7 +215,7 @@ class VideohubInstance extends InstanceBase<VideoHubConfig> {
 	async configUpdated(config: VideoHubConfig) {
 		let resetConnection = false
 
-		if (this.config.host != config.host) {
+		if (this.config.host != config.host || this.config.bonjourHost != config.bonjourHost) {
 			resetConnection = true
 		}
 
@@ -226,6 +228,29 @@ class VideohubInstance extends InstanceBase<VideoHubConfig> {
 		if (resetConnection === true || this.socket === undefined) {
 			this.init_tcp()
 		}
+	}
+
+	parseIpAndPort(): IpAndPort | null {
+		const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
+
+		if (this.config.bonjourHost) {
+			const [ip, rawPort] = this.config.bonjourHost.split(':')
+			const port = Number(rawPort)
+			if (ip.match(ipRegex) && !isNaN(port)) {
+				return {
+					ip,
+					port,
+				}
+			}
+		} else if (this.config.host) {
+			if (this.config.host.match(ipRegex)) {
+				return {
+					ip: this.config.host,
+					port: undefined,
+				}
+			}
+		}
+		return null
 	}
 }
 

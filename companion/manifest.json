@@ -22,5 +22,14 @@
 	},
 	"manufacturer": "Blackmagic Design",
 	"products": ["Videohub"],
-	"keywords": ["Matrix"]
+	"keywords": ["Matrix"],
+	"bonjourQueries": {
+		"bonjourHost": {
+			"type": "blackmagic",
+			"protocol": "tcp",
+			"txt": {
+				"class": "Videohub"
+			}
+		}
+	}
 }

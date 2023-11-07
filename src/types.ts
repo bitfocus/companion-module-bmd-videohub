@@ -13,3 +13,8 @@ export interface InstanceBaseExt extends InstanceBase<VideoHubConfig> {
 
 	initThings(includeVariables: boolean): void
 }
+
+export interface IpAndPort {
+	ip: string
+	port: number | undefined
+}

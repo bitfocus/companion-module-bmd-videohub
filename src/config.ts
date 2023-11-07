@@ -1,8 +1,8 @@
 import { Regex, SomeCompanionConfigField } from '@companion-module/base'
 
 export interface VideoHubConfig {
+	bonjourHost?: string
 	host?: string
-	port?: number
 	take?: boolean
 
 	inputCount?: number
@@ -21,12 +21,27 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			value: 'This module will connect to any Blackmagic Design VideoHub Device.',
 		},
 		{
+			type: 'bonjour-device',
+			id: 'bonjourHost',
+			label: 'Device',
+			width: 6,
+		},
+		{
+			type: 'static-text',
+			id: 'bonjourHost-filler',
+			width: 6,
+			label: '',
+			value: '',
+			isVisible: (options) => !!options['bonjourHost'],
+		},
+		{
 			type: 'textinput',
 			id: 'host',
 			label: 'Videohub IP',
 			width: 6,
 			default: '192.168.10.150',
 			regex: Regex.IP,
+			isVisible: (options) => !options['bonjourHost'],
 		},
 		{
 			type: 'checkbox',
