@@ -49,6 +49,13 @@ export function initVariables(self: InstanceBase<VideoHubConfig>, state: Videohu
 			})
 
 			variableValues[`output_${output.id + 1}_input`] = state.getInput(output.route)?.name ?? '?'
+
+			variableDefinitions.push({
+				name: `ID of input routed to output ${output.id + 1}`,
+				variableId: `output_${output.id + 1}_input_id`,
+			})
+
+			variableValues[`output_${output.id + 1}_input_id`] = state.getInput(output.route)?.id + 1 ?? '?'
 		}
 	}
 
@@ -69,7 +76,7 @@ export function initVariables(self: InstanceBase<VideoHubConfig>, state: Videohu
 			variableValues[`serial_${serial.id + 1}_id`] = serial.id
 
 			variableDefinitions.push({
-				name: `Label of serial routed to serial power ${serial.id + 1}`,
+				name: `Label of serial routed to serial port ${serial.id + 1}`,
 				variableId: `serial_${serial.id + 1}_route`,
 			})
 
