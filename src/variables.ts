@@ -17,6 +17,13 @@ export function initVariables(self: InstanceBase<VideoHubConfig>, state: Videohu
 			})
 
 			variableValues[`input_${input.id + 1}`] = input.name
+
+			variableDefinitions.push({
+				name: `ID of input ${input.id + 1}`,
+				variableId: `input_${input.id + 1}_id`,
+			})
+
+			variableValues[`input_${input.id + 1}_id`] = input.id + 1
 		}
 	}
 
@@ -30,11 +37,25 @@ export function initVariables(self: InstanceBase<VideoHubConfig>, state: Videohu
 			variableValues[`output_${output.id + 1}`] = output.name
 
 			variableDefinitions.push({
+				name: `ID of output ${output.id + 1}`,
+				variableId: `output_${output.id + 1}_id`,
+			})
+
+			variableValues[`output_${output.id + 1}_id`] = output.id
+
+			variableDefinitions.push({
 				name: `Label of input routed to output ${output.id + 1}`,
 				variableId: `output_${output.id + 1}_input`,
 			})
 
 			variableValues[`output_${output.id + 1}_input`] = state.getInput(output.route)?.name ?? '?'
+
+			variableDefinitions.push({
+				name: `ID of input routed to output ${output.id + 1}`,
+				variableId: `output_${output.id + 1}_input_id`,
+			})
+
+			variableValues[`output_${output.id + 1}_input_id`] = state.getInput(output.route)?.id + 1 ?? '?'
 		}
 	}
 
@@ -48,7 +69,14 @@ export function initVariables(self: InstanceBase<VideoHubConfig>, state: Videohu
 			variableValues[`serial_${serial.id + 1}`] = serial.name
 
 			variableDefinitions.push({
-				name: `Label of serial routed to serial power ${serial.id + 1}`,
+				name: `ID of serial port ${serial.id + 1}`,
+				variableId: `serial_${serial.id + 1}_id`,
+			})
+
+			variableValues[`serial_${serial.id + 1}_id`] = serial.id
+
+			variableDefinitions.push({
+				name: `Label of serial routed to serial port ${serial.id + 1}`,
 				variableId: `serial_${serial.id + 1}_route`,
 			})
 
@@ -63,8 +91,18 @@ export function initVariables(self: InstanceBase<VideoHubConfig>, state: Videohu
 	})
 
 	variableDefinitions.push({
+		name: 'ID of selected destination',
+		variableId: 'selected_destination_id',
+	})
+
+	variableDefinitions.push({
 		name: 'Label of input routed to selection',
 		variableId: 'selected_source',
+	})
+
+	variableDefinitions.push({
+		name: 'ID of input routed to selection',
+		variableId: 'selected_source_id',
 	})
 
 	updateSelectedDestinationVariables(state, variableValues)
@@ -82,5 +120,9 @@ export function updateSelectedDestinationVariables(
 
 	variableValues['selected_destination'] = selectedOutput?.name ?? '?'
 
+	variableValues['selected_destination_id'] = selectedOutput?.id ?? undefined
+
 	variableValues['selected_source'] = inputForSelectedOutput?.name ?? '?'
+
+	variableValues['selected_source_id'] = inputForSelectedOutput?.id ?? undefined
 }
