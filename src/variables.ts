@@ -82,6 +82,13 @@ export function initVariables(self: InstanceBase<VideoHubConfig>, state: Videohu
 
 			const sourceSerial = state.getSerial(serial.route)
 			variableValues[`serial_${serial.id + 1}_route`] = sourceSerial?.name ?? '?'
+
+			variableDefinitions.push({
+				name: `ID of serial routed to serial port ${serial.id + 1}`,
+				variableId: `serial_${serial.id + 1}_route_id`,
+			})
+
+			variableValues[`serial_${serial.id + 1}_route_id`] = sourceSerial?.id ?? '?'
 		}
 	}
 
