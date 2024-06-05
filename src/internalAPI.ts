@@ -192,7 +192,7 @@ export function updateRouting(self: InstanceBaseExt, state: VideohubState, label
 	updateSelectedDestinationVariables(state, variableValues)
 
 	self.setVariableValues(variableValues)
-	self.checkFeedbacks('input_bg', 'selected_source')
+	self.checkFeedbacks('input_bg', 'selected_source', 'input_bg_dyn', 'selected_source_dyn')
 }
 
 // /**

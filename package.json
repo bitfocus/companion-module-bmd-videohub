@@ -1,6 +1,6 @@
 {
 	"name": "bmd-videohub",
-	"version": "2.2.0",
+	"version": "2.3.0",
 	"main": "dist/main.js",
 	"type": "module",
 	"scripts": {
@@ -14,7 +14,8 @@
 	},
 	"license": "MIT",
 	"dependencies": {
-		"@companion-module/base": "~1.6.0"
+		"@companion-module/base": "~1.8.0",
+		"simple-eval": "^1.0.1"
 	},
 	"devDependencies": {
 		"@companion-module/tools": "^1.4.1",

@@ -2,6 +2,10 @@
 
 See HELP.md and LICENSE
 
+**Changes in v2.3.0**
+
+- Dynamic routing, using local and global variables to select inputs/outputs
+
 **Changes in v2.2.0**
 
 - Bonjour device discovery

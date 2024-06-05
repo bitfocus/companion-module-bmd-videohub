@@ -63,8 +63,13 @@ export function initVariables(self: InstanceBase<VideoHubConfig>, state: Videohu
 	})
 
 	variableDefinitions.push({
-		name: 'Label of input routed to selection',
+		name: 'Label of input routed to selected destination',
 		variableId: 'selected_source',
+	})
+
+	variableDefinitions.push({
+		name: 'Label of selected source',
+		variableId: 'selected_queued_source',
 	})
 
 	updateSelectedDestinationVariables(state, variableValues)
@@ -76,11 +81,14 @@ export function initVariables(self: InstanceBase<VideoHubConfig>, state: Videohu
 export function updateSelectedDestinationVariables(
 	state: VideohubState,
 	variableValues: CompanionVariableValues
-): void {
+): void { 
 	const selectedOutput = state.getSelectedOutput()
 	const inputForSelectedOutput = selectedOutput ? state.getInput(selectedOutput.route) : undefined
+	const selectedQueuedSource = (state.queuedOp && (state.queuedOp.src !== undefined)) ? state.getInput(state.queuedOp.src) : undefined
 
 	variableValues['selected_destination'] = selectedOutput?.name ?? '?'
 
 	variableValues['selected_source'] = inputForSelectedOutput?.name ?? '?'
+
+	variableValues['selected_queued_source'] = selectedQueuedSource?.name ?? '?'
 }
