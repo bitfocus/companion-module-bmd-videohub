@@ -14,7 +14,7 @@ import simpleEval from 'simple-eval'
  * !!! Utilized by bmd-multiview16 !!!
  */
 export function getActions(self: InstanceBaseExt, state: VideohubState): CompanionActionDefinitions {
-	const { inputChoices, outputChoices, serialChoices } = getInputChoices(state)
+	const { inputChoices, outputChoices, serialChoices , lockChoices} = getInputChoices(state)
 
 	const actions: CompanionActionDefinitions = {}
 
@@ -162,7 +162,6 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 			let sourceId = Number(simpleEval(sourceNum))-1
 			const output = state.getOutputById(destId)
 			if (output) {
-				self.log('debug', String(output.index))
 				if (output.type === 'monitor') {
 					sendCommand('VIDEO MONITORING OUTPUT ROUTING:\n' + output.index + ' ' + sourceId + '\n\n')
 				} else {
@@ -556,13 +555,11 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 	actions['clear'] = {
 		name: 'Clear',
 		options: [],
-		callback: () => {self.log('debug', "559")
+		callback: () => {
 			state.queuedOp = undefined
-self.log('debug', "561")
 			let values: CompanionVariableValues = {}
 			updateSelectedDestinationVariables(state, values)
 			self.setVariableValues(values)
-self.log('debug', "565")
 			self.checkFeedbacks('take', 'take_tally_source', 'take_tally_dest', 'take_tally_route', 'take_tally_source_dyn', 'take_tally_dest_dyn', 'take_tally_route_dyn')
 		},
 	}
@@ -665,6 +662,180 @@ self.log('debug', "565")
 			}
 		},
 	}
+
+
+	actions['lock_output'] = {
+		name: 'Lock/Unlock Output',
+		options: [
+			{
+				type: 'dropdown',
+				label: 'Output',
+				id: 'output',
+				default: 0,
+				choices: outputChoices,
+			},
+			{
+				type: 'dropdown',
+				label: 'Lock State',
+				id: 'lock_state',
+				default: 'U',
+				choices: lockChoices,
+            }
+		],
+		callback: (action) => {
+			const output = state.getOutputById(Number(action.options.output))
+			if (output) {
+				if (output.type === 'monitor') {
+					sendCommand('MONITORING OUTPUT LOCKS:\n' + output.index + ' ' + action.options.lock_state + '\n\n')
+				} else {
+					sendCommand('VIDEO OUTPUT LOCKS:\n' + output.index + ' ' + action.options.lock_state + '\n\n')
+				}
+			}
+		},
+	}
+
+
+	actions['lock_output_dyn'] = {
+		name: 'Lock/Unlock Output (dynamic)',
+		options: [
+			{
+				type: 'textinput',
+				label: 'Output',
+				id: 'output',
+				default: '',
+				useVariables: { local: true }
+			},
+			{
+				type: 'textinput',
+				label: 'Lock State',
+				id: 'lock_state',
+				default: '',
+				useVariables: { local: true }
+            }
+		],
+		callback: async function (action, context) {
+			// Parse internal variables from options textinputs
+			let outputStr: string = await context.parseVariablesInString(String(action.options.output))
+			let lockStr: string = await context.parseVariablesInString(String(action.options.lock_state))
+
+			// Evaluate outpu expression
+			let outputId = Number(simpleEval(outputStr)) - 1
+
+			// if lock_state is a meaningful letter
+			const lockRegExp = new RegExp('^[lLoO]$')
+			const unlockRegExp = new RegExp('^[uU]$')
+
+			if (lockRegExp.test(lockStr)) {
+				lockStr = 'O'
+			} else if (unlockRegExp.test(lockStr)) {
+				lockStr = 'U'
+			} else {
+				// if lock_state is an expression, evaluate it :
+				// < 1 -> unlock
+				// <= 1 -> lock
+				let lockNum = Number(simpleEval(lockStr))
+				if (typeof lockNum != 'number') {
+					self.log('error', "Can't evaluate lock state")
+					return
+				} else {
+					if (lockNum > 0) {
+						lockStr = 'O'
+					} else {
+						lockStr = 'U'
+					}
+				}
+			}
+
+			const output = state.getOutputById(outputId)
+			if (output) {
+				if (output.type === 'monitor') {
+					sendCommand('MONITORING OUTPUT LOCKS:\n' + output.index + ' ' + lockStr + '\n\n')
+				} else {
+					sendCommand('VIDEO OUTPUT LOCKS:\n' + output.index + ' ' + lockStr + '\n\n')
+				}
+			}
+		}
+	}
+
+
+	actions['lock_serial'] = {
+		name: 'Lock/Unlock Serial',
+		options: [
+			{
+				type: 'dropdown',
+				label: 'Serial',
+				id: 'serial',
+				default: 0,
+				choices: serialChoices,
+			},
+			{
+				type: 'dropdown',
+				label: 'Lock State',
+				id: 'lock_state',
+				default: 'U',
+				choices: lockChoices,
+			}
+		],
+		callback: (action) => {
+			const serial = state.getSerial(Number(action.options.serial))
+			if (serial) {
+				sendCommand('SERIAL PORT LOCKS:\n' + serial.id + ' ' + action.options.lock_state + '\n\n')
+			}
+		}
+	}
+
+
+	actions['lock_serial_dyn'] = {
+		name: 'Lock/Unlock Serial (dynamic)',
+		options: [
+			{
+				type: 'textinput',
+				label: 'serial',
+				id: 'serial',
+				default: '',
+				useVariables: { local: true }
+			},
+			{
+				type: 'textinput',
+				label: 'Lock State',
+				id: 'lock_state',
+				default: '',
+				useVariables: { local: true }
+			}
+		],
+		callback: async function (action, context) {
+			let serialStr: string = await context.parseVariablesInString(String(action.options.serial))
+			let lockStr: string = await context.parseVariablesInString(String(action.options.lock_state))
+
+			let serialId = Number(simpleEval(serialStr)) - 1
+			const lockRegExp = new RegExp('^[lLoO]$')
+			const unlockRegExp = new RegExp('^[uU]$')
+
+			if (lockRegExp.test(lockStr)) {
+				lockStr = 'O'
+			} else if (unlockRegExp.test(lockStr)) {
+				lockStr = 'U'
+			} else {
+				let lockNum = Number(simpleEval(lockStr))
+				if (typeof lockNum != 'number') {
+					self.log('error', "Can't evaluate lock state")
+					return
+				} else {
+					if (lockNum > 0) {
+						lockStr = 'O'
+					} else {
+						lockStr = 'U'
+                    }
+                }
+            }
+
+			const serial = state.getSerial(serialId)
+			if (serial) {
+				sendCommand('MONITORING OUTPUT LOCKS:\n' + serial.id + ' ' + lockStr + '\n\n')
+			}
+		},
+	}
+
 
 	return actions
 }
