@@ -1,6 +1,15 @@
 # companion-module-bmd-videohub
 
+
 See HELP.md and LICENSE
+
+**Changes in v2.3.0**
+
+- Dynamic routing, using local and global variables to select inputs/outputs
+- Fix 'weird response from videohub' bug
+- Add lock/unlock feature
+- Use of variable is now possible to rename inputs, outputs and serial
+- Default name for monitor outputs are now "Monitor #" instead of "Output #"
 
 **Changes in v2.2.0**
 

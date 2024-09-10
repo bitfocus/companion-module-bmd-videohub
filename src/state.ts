@@ -5,7 +5,7 @@ export interface InputState {
 	label: string
 	name: string
 	status: string // TODO - type better?
-	// lock: string // TODO - type better?
+	lock: string // TODO - type better?
 }
 export interface OutputState {
 	id: number
@@ -14,7 +14,7 @@ export interface OutputState {
 	name: string
 	route: number
 	status: string // TODO - type better?
-	// lock: string // TODO - type better?
+	lock: string // TODO - type better?
 	fallback: number[]
 	type: 'primary' | 'monitor'
 }
@@ -24,7 +24,7 @@ export interface SerialState {
 	name: string
 	route: number
 	status: string // TODO - type better?
-	// lock: string // TODO - type better?
+	lock: string // TODO - type better?
 	// directions: string // TODO - type better?
 }
 
@@ -65,7 +65,7 @@ export class VideohubState {
 				label: `${id + 1}: Input ${id + 1}`,
 				name: `Input ${id + 1}`,
 				status: 'BNC',
-				// lock: 'U',
+				lock: 'U',
 			})
 		}
 
@@ -77,7 +77,7 @@ export class VideohubState {
 				name: `Serial ${id + 1}`,
 				route: id,
 				status: 'RS422',
-				// lock: 'U',
+				lock: 'U',
 				// directions: 'auto',
 			})
 		}
@@ -91,7 +91,7 @@ export class VideohubState {
 				name: `Output ${id + 1}`,
 				route: id,
 				status: 'BNC',
-				// lock: 'U',
+				lock: 'U',
 				fallback: [],
 				type: 'primary',
 			})
@@ -103,10 +103,10 @@ export class VideohubState {
 				id,
 				index: id,
 				label: `${id + 1}: Output ${id + 1}`,
-				name: `Output ${id + 1}`,
+				name: `Monitor ${id + 1}`,
 				route: id,
 				status: 'BNC',
-				// lock: 'U',
+				lock: 'U',
 				fallback: [],
 				type: 'monitor',
 			})
