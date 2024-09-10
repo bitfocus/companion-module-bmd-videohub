@@ -103,7 +103,7 @@ export class VideohubState {
 				id,
 				index: id,
 				label: `${id + 1}: Output ${id + 1}`,
-				name: `Output ${id + 1}`,
+				name: `Monitor ${id + 1}`,
 				route: id,
 				status: 'BNC',
 				lock: 'U',

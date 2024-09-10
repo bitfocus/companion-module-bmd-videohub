@@ -9,6 +9,7 @@ See HELP.md and LICENSE
 - Fix 'weird response from videohub' bug
 - Add lock/unlock feature
 - Use of variable is now possible to rename inputs, outputs and serial
+- Default name for monitor outputs are now "Monitor #" instead of "Output #"
 
 **Changes in v2.2.0**
 
