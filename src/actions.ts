@@ -46,15 +46,17 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 				label: 'New label',
 				id: 'label',
 				default: 'Dest name',
+				useVariables: { local: true }
 			},
 		],
-		callback: (action) => {
+		callback: async function (action, context) {
+			let name: string = await context.parseVariablesInString(String(action.options.label))
 			const output = state.getOutputById(Number(action.options.destination))
 			if (output) {
 				if (output.type === 'monitor') {
-					sendCommand('MONITORING OUTPUT LABELS:\n' + output.index + ' ' + action.options.label + '\n\n')
+					sendCommand('MONITORING OUTPUT LABELS:\n' + output.index + ' ' + name + '\n\n')
 				} else {
-					sendCommand('OUTPUT LABELS:\n' + output.index + ' ' + action.options.label + '\n\n')
+					sendCommand('OUTPUT LABELS:\n' + output.index + ' ' + name + '\n\n')
 				}
 			}
 		},
@@ -74,10 +76,12 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 				label: 'New label',
 				id: 'label',
 				default: 'Src name',
+				useVariables: { local: true }
 			},
 		],
-		callback: (action) => {
-			sendCommand('INPUT LABELS:\n' + action.options.source + ' ' + action.options.label + '\n\n')
+		callback: async function (action, context) {
+			let name: string = await context.parseVariablesInString(String(action.options.label))
+			sendCommand('INPUT LABELS:\n' + action.options.source + ' ' + name + '\n\n')
 		},
 	}
 
@@ -97,10 +101,12 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 					label: 'New label',
 					id: 'label',
 					default: 'Serial name',
+					useVariables: { local: true }
 				},
 			],
-			callback: (action) => {
-				sendCommand('SERIAL PORT LABELS:\n' + action.options.serial + ' ' + action.options.label + '\n\n')
+			callback: async function (action, context) {
+				let name: string = await context.parseVariablesInString(String(action.options.label))
+				sendCommand('SERIAL PORT LABELS:\n' + action.options.serial + ' ' + name + '\n\n')
 			},
 		}
 	}

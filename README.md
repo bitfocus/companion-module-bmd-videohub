@@ -6,6 +6,9 @@ See HELP.md and LICENSE
 **Changes in v2.3.0**
 
 - Dynamic routing, using local and global variables to select inputs/outputs
+- Fix 'weird response from videohub' bug
+- Add lock/unlock feature
+- Use of variable is now possible to rename inputs, outputs and serial
 
 **Changes in v2.2.0**
 
