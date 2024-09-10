@@ -144,7 +144,7 @@ class VideohubInstance extends InstanceBase<VideoHubConfig> {
 			this.pingTimer = setInterval(() => {
 				if (!this.socket || !this.socket.isConnected) return
 
-				this.socket.send('PING\n\n')
+				this.socket.send('PING:\n\n')
 			}, 15000)
 		} else {
 			this.updateStatus(InstanceStatus.Disconnected)
