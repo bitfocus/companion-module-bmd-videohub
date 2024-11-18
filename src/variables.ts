@@ -42,7 +42,7 @@ export function initVariables(self: InstanceBase<VideoHubConfig>, state: Videohu
 			})
 
 			const activeId: number | undefined = state.getInput(output.route)?.id
-			variableValues[`output_${output.id + 1}_input_id`] = (activeId ? activeId + 1 : '?').toString()
+			variableValues[`output_${output.id + 1}_input_id`] = activeId !== undefined ? (activeId + 1) : '?'
 		}
 	}
 
