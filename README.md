@@ -2,6 +2,10 @@
 
 See HELP.md and LICENSE
 
+**Changes in v2.3.0**
+
+- Add variables for routed input ids
+
 **Changes in v2.2.0**
 
 - Bonjour device discovery
