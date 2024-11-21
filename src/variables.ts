@@ -35,6 +35,14 @@ export function initVariables(self: InstanceBase<VideoHubConfig>, state: Videohu
 			})
 
 			variableValues[`output_${output.id + 1}_input`] = state.getInput(output.route)?.name ?? '?'
+
+			variableDefinitions.push({
+				name: `Id of input routed to output ${output.id + 1}`,
+				variableId: `output_${output.id + 1}_input_id`,
+			})
+
+			const activeId: number | undefined = state.getInput(output.route)?.id
+			variableValues[`output_${output.id + 1}_input_id`] = activeId !== undefined ? (activeId + 1) : '?'
 		}
 	}
 

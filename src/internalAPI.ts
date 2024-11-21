@@ -161,6 +161,7 @@ export function updateRouting(self: InstanceBaseExt, state: VideohubState, label
 					output.route = src // now we set the route in the container to the new value
 
 					variableValues[`output_${dest + 1}_input`] = state.getInput(src)?.name ?? '?'
+					variableValues[`output_${dest + 1}_input_id`] = src + 1
 				}
 				break
 			}
@@ -175,6 +176,7 @@ export function updateRouting(self: InstanceBaseExt, state: VideohubState, label
 					output.route = src // now we set the route in the container to the new value
 
 					variableValues[`output_${dest + 1}_input`] = state.getInput(src)?.name ?? '?'
+					variableValues[`output_${dest + 1}_input_id`] = src + 1
 				}
 				break
 			}
