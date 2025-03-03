@@ -1,11 +1,20 @@
-import type { DropdownChoice } from '@companion-module/base'
+import type { DropdownChoice, CompanionVariableValues } from '@companion-module/base'
 import type { VideohubState } from './state'
 
 export interface InputChoicesResult {
 	inputChoices: DropdownChoice[]
 	outputChoices: DropdownChoice[]
 	serialChoices: DropdownChoice[]
+	lockChoices: DropdownChoice[]
 }
+
+
+export const LOCKSTATES: CompanionVariableValues = {
+	L: 'Locked',
+	O: 'Owned',
+	U: 'Unlocked'
+}
+
 
 /**
  * INTERNAL: use model data to define the choices for the dropdowns.
@@ -15,6 +24,7 @@ export function getInputChoices(state: VideohubState): InputChoicesResult {
 		inputChoices: [],
 		outputChoices: [],
 		serialChoices: [],
+		lockChoices: [{ id: 'U', label: 'Unlock' }, { id: 'O', label: 'Lock' }]
 	}
 
 	for (const input of state.iterateInputs()) {

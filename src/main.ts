@@ -4,7 +4,7 @@ import { initVariables } from './variables.js'
 import { getPresets } from './presets.js'
 import { getActions } from './actions.js'
 import { getFeedbacks } from './feedback.js'
-import { updateDevice, updateLabels, updateRouting, updateStatus } from './internalAPI.js'
+import { updateDevice, updateLabels, updateRouting, updateStatus, updateLocks } from './internalAPI.js'
 import { VideohubState } from './state.js'
 import { UpgradeScripts } from './upgrades.js'
 import { IpAndPort } from './types.js'
@@ -128,7 +128,6 @@ class VideohubInstance extends InstanceBase<VideoHubConfig> {
 			let receivebuffer = ''
 			this.socket.on('data', (chunk) => {
 				receivebuffer += chunk.toString()
-
 				let lineEnd = -1
 				let discardOffset = 0
 
@@ -191,8 +190,8 @@ class VideohubInstance extends InstanceBase<VideoHubConfig> {
 			this.initThings(false)
 		} else if (key.match(/(VIDEO OUTPUT|VIDEO MONITORING OUTPUT|SERIAL PORT) ROUTING/)) {
 			updateRouting(this, this.state, key, data)
-			// } else if (key.match(/(VIDEO OUTPUT|VIDEO MONITORING OUTPUT|SERIAL PORT) LOCKS/)) {
-			// 	updateLocks(this, key, data)
+			 } else if (key.match(/(VIDEO OUTPUT|VIDEO MONITORING OUTPUT|SERIAL PORT) LOCKS/)) {
+			 	updateLocks(this, key, data)
 		} else if (key.match(/(VIDEO INPUT|VIDEO OUTPUT|SERIAL PORT) STATUS/)) {
 			updateStatus(this, this.state, key, data)
 			this.initThings(false)

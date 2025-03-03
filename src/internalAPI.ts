@@ -2,6 +2,7 @@ import type { CompanionVariableValues } from '@companion-module/base'
 import type { VideohubState } from './state.js'
 import type { InstanceBaseExt } from './types.js'
 import { updateSelectedDestinationVariables } from './variables.js'
+import { LOCKSTATES } from './choices.js'
 
 /**
  * INTERNAL: Updates device data from the Videohub
@@ -107,33 +108,51 @@ export function updateLabels(self: InstanceBaseExt, state: VideohubState, labelt
 	self.setVariableValues(variableValues)
 }
 
-// /**
-//  * INTERNAL: Updates lock states based on data from the Videohub
-//  *
-//  * @param {string} labeltype - the command/data type being passed
-//  * @param {Object} object - the collected data
-//  * @access protected
-//  * @since 1.1.0
-//  */
-// export function updateLocks(self: InstanceBaseExt, labeltype: string, object) {
-// 	for (var key in object) {
-// 		var parsethis = object[key]
-// 		var a = parsethis.split(/ /)
-// 		var num = parseInt(a.shift())
-// 		var label = a.join(' ')
+ /**
+  * INTERNAL: Updates lock states based on data from the Videohub
+  *
+  * @param {string} labeltype - the command/data type being passed
+  * @param {Object} object - the collected data
+  * @access protected
+  * @since 1.1.0
+  */
+export function updateLocks(self: InstanceBaseExt, labeltype: string, object: any) {
+	const state = self.state
+	const variableValues: CompanionVariableValues = {} 
 
-// 		switch (labeltype) {
-// 			case 'MONITORING OUTPUT LOCKS':
-// 				num = num + this.outputCount
-// 			case 'VIDEO OUTPUT LOCKS':
-// 				this.getOutput(num).lock = label
-// 				break
-// 			case 'SERIAL PORT LOCKS':
-// 				this.getSerial(num).lock = label
-// 				break
-// 		}
-// 	}
-// }
+ 	for (var key in object) {
+ 		var parsethis = object[key]
+ 		var a = parsethis.split(/ /)
+ 		var num = parseInt(a.shift())
+ 		var lock_state = a
+		var channel
+
+ 		switch (labeltype) {
+				case 'MONITORING OUTPUT LOCKS': {
+					if (channel = state.getMonitoringOutput(num)) {
+						variableValues[`output_${channel.id + 1}_lock_state`] = LOCKSTATES[lock_state]
+					}
+					break
+				}
+				case 'VIDEO OUTPUT LOCKS': {
+					if (channel = state.getPrimaryOutput(num)) {
+						variableValues[`output_${channel.id + 1}_lock_state`] = LOCKSTATES[lock_state]
+					}
+					break
+				}
+				case 'SERIAL PORT LOCKS': {
+					if (channel = state.getSerial(num)) {
+						variableValues[`serial_${channel.id + 1}_lock_state`] = LOCKSTATES[lock_state]
+					}
+					break
+				}
+		}
+		self.setVariableValues(variableValues)
+	}
+
+
+
+ }
 
 /**
  * INTERNAL: Updates Companion's routing table based on data sent from the Videohub

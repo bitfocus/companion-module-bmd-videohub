@@ -1,6 +1,7 @@
 import type { CompanionVariableDefinition, CompanionVariableValues, InstanceBase } from '@companion-module/base'
 import type { VideoHubConfig } from './config.js'
 import type { VideohubState } from './state.js'
+import { LOCKSTATES } from './choices.js'
 
 /**
  * Initialize variables.
@@ -42,7 +43,14 @@ export function initVariables(self: InstanceBase<VideoHubConfig>, state: Videohu
 			})
 
 			const activeId: number | undefined = state.getInput(output.route)?.id
-			variableValues[`output_${output.id + 1}_input_id`] = activeId !== undefined ? (activeId + 1) : '?'
+			variableValues[`output_${output.id + 1}_input_id`] = activeId !== undefined ? activeId + 1 : '?'
+
+			variableDefinitions.push({
+				name: 'Lock state of output ${output.id + 1}',
+				variableId: `output_${output.id + 1}_lock_state`,
+			})
+
+			variableValues[`output_${output.id + 1}_lock_state`] = LOCKSTATES[output?.lock] ?? '?'
 		}
 	}
 
@@ -62,6 +70,13 @@ export function initVariables(self: InstanceBase<VideoHubConfig>, state: Videohu
 
 			const sourceSerial = state.getSerial(serial.route)
 			variableValues[`serial_${serial.id + 1}_route`] = sourceSerial?.name ?? '?'
+
+			variableDefinitions.push({
+				name: 'Lock state of serial ${serial.id + 1}',
+				variableId: `serial_${serial.id + 1}_lock_state`,
+			})
+
+			variableValues[`serial_${serial.id + 1}_lock_state`] = LOCKSTATES[serial?.lock] ?? '?'
 		}
 	}
 
@@ -89,10 +104,11 @@ export function initVariables(self: InstanceBase<VideoHubConfig>, state: Videohu
 export function updateSelectedDestinationVariables(
 	state: VideohubState,
 	variableValues: CompanionVariableValues
-): void { 
+): void {
 	const selectedOutput = state.getSelectedOutput()
 	const inputForSelectedOutput = selectedOutput ? state.getInput(selectedOutput.route) : undefined
-	const selectedQueuedSource = (state.queuedOp && (state.queuedOp.src !== undefined)) ? state.getInput(state.queuedOp.src) : undefined
+	const selectedQueuedSource =
+		state.queuedOp && state.queuedOp.src !== undefined ? state.getInput(state.queuedOp.src) : undefined
 
 	variableValues['selected_destination'] = selectedOutput?.name ?? '?'
 
