@@ -2,3 +2,5 @@
 /dist
 /pkg
 /pkg.tgz
+/.yarn
+DEBUG-*

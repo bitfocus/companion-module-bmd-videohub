@@ -7,8 +7,6 @@ import { updateSelectedDestinationVariables } from './variables.js'
 
 /**
  * Get the available actions.
- *
- * !!! Utilized by bmd-multiview16 !!!
  */
 export function getActions(self: InstanceBaseExt, state: VideohubState): CompanionActionDefinitions {
 	const { inputChoices, outputChoices, serialChoices } = getInputChoices(state)

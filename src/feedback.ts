@@ -4,8 +4,6 @@ import { VideohubState } from './state.js'
 
 /**
  * Get the available feedbacks.
- *
- * !!! Utilized by bmd-multiview16 !!!
  */
 export function getFeedbacks(state: VideohubState): CompanionFeedbackDefinitions {
 	const { inputChoices, outputChoices, serialChoices } = getInputChoices(state)
