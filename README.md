@@ -7,6 +7,7 @@ See HELP.md and LICENSE
 - Routing from variables
 - Lock/unlock outputs and serialports
 - Fix: 'weird response from videohub NAK'
+- Improve naming of monitor outputs
 - Update tooling
 
 **Changes in v2.3.0**
