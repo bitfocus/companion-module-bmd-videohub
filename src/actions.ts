@@ -626,10 +626,10 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 				useVariables: true,
 			},
 		],
-		callback: async (action) => {
+		callback: async (action, context) => {
 			if (!action.options.source_file || typeof action.options.source_file !== 'string') return
 
-			const source_file = await self.parseVariablesInString(action.options.source_file)
+			const source_file = await context.parseVariablesInString(action.options.source_file)
 			if (!source_file) return
 
 			try {
@@ -689,10 +689,10 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 				useVariables: true,
 			},
 		],
-		callback: async (action) => {
+		callback: async (action, context) => {
 			if (!action.options.destination_file || typeof action.options.destination_file !== 'string') return
 
-			const destination_file = await self.parseVariablesInString(action.options.destination_file)
+			const destination_file = await context.parseVariablesInString(action.options.destination_file)
 			if (!destination_file) return
 
 			let string =
