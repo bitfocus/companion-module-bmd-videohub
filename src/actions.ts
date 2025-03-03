@@ -1,32 +1,19 @@
 import type { CompanionActionDefinitions, CompanionVariableValues } from '@companion-module/base'
 import fs from 'fs/promises'
 import { getInputChoices } from './choices.js'
-import type { VideohubState } from './state.js'
+import { LockState, OutputState, type VideohubState } from './state.js'
 import type { InstanceBaseExt } from './types.js'
 import { updateSelectedDestinationVariables } from './variables.js'
 import { parseUserLockStateString } from './util.js'
+import type { VideohubApi } from './internalAPI.js'
 
 /**
  * Get the available actions.
  */
-export function getActions(self: InstanceBaseExt, state: VideohubState): CompanionActionDefinitions {
+export function getActions(self: InstanceBaseExt, api: VideohubApi, state: VideohubState): CompanionActionDefinitions {
 	const { inputChoices, outputChoices, serialChoices, lockChoices } = getInputChoices(state)
 
 	const actions: CompanionActionDefinitions = {}
-
-	const sendCommand = (cmd: string) => {
-		if (self.socket !== undefined && self.socket.isConnected) {
-			try {
-				self.log('debug', 'TCP sending ' + cmd)
-				self.socket.send(cmd)
-			} catch (error: any) {
-				self.log('error', 'TCP error ' + error.message)
-			}
-		} else {
-			self.log('error', 'Socket not connected ')
-			self.init_tcp()
-		}
-	}
 
 	actions['rename_destination'] = {
 		name: 'Rename destination',
@@ -46,16 +33,12 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 				useVariables: { local: true },
 			},
 		],
-		callback: async function (action, context) {
+		callback: async (action, context) => {
 			let name: string = await context.parseVariablesInString(String(action.options.label))
 			const output = state.getOutputById(Number(action.options.destination))
-			if (output) {
-				if (output.type === 'monitor') {
-					sendCommand('MONITORING OUTPUT LABELS:\n' + output.index + ' ' + name + '\n\n')
-				} else {
-					sendCommand('OUTPUT LABELS:\n' + output.index + ' ' + name + '\n\n')
-				}
-			}
+			if (!output) return
+
+			await api.setOutputLabel(output, name)
 		},
 	}
 	actions['rename_source'] = {
@@ -76,9 +59,13 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 				useVariables: { local: true },
 			},
 		],
-		callback: async function (action, context) {
+		callback: async (action, context) => {
 			let name: string = await context.parseVariablesInString(String(action.options.label))
-			sendCommand('INPUT LABELS:\n' + action.options.source + ' ' + name + '\n\n')
+
+			const input = state.getInput(Number(action.options.source))
+			if (!input) return
+
+			await api.setInputLabel(input, name)
 		},
 	}
 
@@ -101,9 +88,13 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 					useVariables: { local: true },
 				},
 			],
-			callback: async function (action, context) {
+			callback: async (action, context) => {
 				let name: string = await context.parseVariablesInString(String(action.options.label))
-				sendCommand('SERIAL PORT LABELS:\n' + action.options.serial + ' ' + name + '\n\n')
+
+				const serial = state.getSerial(Number(action.options.serial))
+				if (!serial) return
+
+				await api.setSerialLabel(serial, name)
 			},
 		}
 	}
@@ -126,15 +117,11 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 				choices: outputChoices,
 			},
 		],
-		callback: (action) => {
+		callback: async (action) => {
 			const output = state.getOutputById(Number(action.options.destination))
-			if (output) {
-				if (output.type === 'monitor') {
-					sendCommand('VIDEO MONITORING OUTPUT ROUTING:\n' + output.index + ' ' + action.options.source + '\n\n')
-				} else {
-					sendCommand('VIDEO OUTPUT ROUTING:\n' + output.index + ' ' + action.options.source + '\n\n')
-				}
-			}
+			if (!output) return
+
+			await api.setOutputRoute(output, Number(action.options.source))
 		},
 	}
 
@@ -156,20 +143,14 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 				useVariables: { local: true },
 			},
 		],
-		callback: async function (action, context) {
+		callback: async (action, context) => {
 			let destNum: string = await context.parseVariablesInString(String(action.options.destination))
 			let sourceNum: string = await context.parseVariablesInString(String(action.options.source))
 
-			let destId = Number(destNum) - 1
-			let sourceId = Number(sourceNum) - 1
-			const output = state.getOutputById(destId)
-			if (output) {
-				if (output.type === 'monitor') {
-					sendCommand('VIDEO MONITORING OUTPUT ROUTING:\n' + output.index + ' ' + sourceId + '\n\n')
-				} else {
-					sendCommand('VIDEO OUTPUT ROUTING:\n' + output.index + ' ' + sourceId + '\n\n')
-				}
-			}
+			const output = state.getOutputById(Number(destNum) - 1)
+			if (!output) return
+
+			await api.setOutputRoute(output, Number(sourceNum) - 1)
 		},
 	}
 
@@ -191,17 +172,13 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 				choices: outputChoices,
 			},
 		],
-		callback: (action) => {
+		callback: async (action) => {
 			const thisOutput = state.getOutputById(Number(action.options.destination))
 			const otherOutput = state.getOutputById(Number(action.options.source_routed_to_destination))
 
-			if (thisOutput && otherOutput) {
-				if (thisOutput.type === 'monitor') {
-					sendCommand('VIDEO MONITORING OUTPUT ROUTING:\n' + thisOutput.index + ' ' + otherOutput.route + '\n\n')
-				} else {
-					sendCommand('VIDEO OUTPUT ROUTING:\n' + thisOutput.index + ' ' + otherOutput.route + '\n\n')
-				}
-			}
+			if (!thisOutput || !otherOutput) return
+
+			await api.setOutputRoute(thisOutput, otherOutput.route)
 		},
 	}
 
@@ -223,7 +200,7 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 				useVariables: { local: true },
 			},
 		],
-		callback: async function (action, context) {
+		callback: async (action, context) => {
 			let destNum: string = await context.parseVariablesInString(String(action.options.destination))
 			let sourceFromDestNum: string = await context.parseVariablesInString(
 				String(action.options.source_routed_to_destination)
@@ -231,13 +208,9 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 			const thisOutput = state.getOutputById(Number(destNum) - 1)
 			const otherOutput = state.getOutputById(Number(sourceFromDestNum) - 1)
 
-			if (thisOutput && otherOutput) {
-				if (thisOutput.type === 'monitor') {
-					sendCommand('VIDEO MONITORING OUTPUT ROUTING:\n' + thisOutput.index + ' ' + otherOutput.route + '\n\n')
-				} else {
-					sendCommand('VIDEO OUTPUT ROUTING:\n' + thisOutput.index + ' ' + otherOutput.route + '\n\n')
-				}
-			}
+			if (!thisOutput || !otherOutput) return
+
+			await api.setOutputRoute(thisOutput, otherOutput.route)
 		},
 	}
 
@@ -252,22 +225,18 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 				choices: outputChoices,
 			},
 		],
-		callback: (action) => {
+		callback: async (action) => {
 			const output = state.getOutputById(Number(action.options.destination))
 
-			if (output) {
-				let fallbackpop = output.fallback.pop() // The current route (i.e what the hardware is actually set to)
-				// has already been pushed onto the stack at "updateRouting" so to
-				// get to the last route we have to first pop this one off.
-				fallbackpop = output.fallback.pop() // This now, is the route to fallback to.
+			if (!output) return
 
-				if (fallbackpop !== undefined && fallbackpop >= 0) {
-					if (output.type === 'monitor') {
-						sendCommand('VIDEO MONITORING OUTPUT ROUTING:\n' + output.index + ' ' + fallbackpop + '\n\n')
-					} else {
-						sendCommand('VIDEO OUTPUT ROUTING:\n' + output.index + ' ' + fallbackpop + '\n\n')
-					}
-				}
+			let fallbackpop = output.fallback.pop() // The current route (i.e what the hardware is actually set to)
+			// has already been pushed onto the stack at "updateRouting" so to
+			// get to the last route we have to first pop this one off.
+			fallbackpop = output.fallback.pop() // This now, is the route to fallback to.
+
+			if (fallbackpop !== undefined && fallbackpop >= 0) {
+				await api.setOutputRoute(output, fallbackpop)
 			}
 		},
 	}
@@ -291,8 +260,11 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 					choices: serialChoices,
 				},
 			],
-			callback: (action) => {
-				sendCommand('SERIAL PORT ROUTING:\n' + action.options.destination + ' ' + action.options.source + '\n\n')
+			callback: async (action) => {
+				const serial = state.getSerial(Number(action.options.destination))
+				if (!serial) return
+
+				await api.setSerialRoute(serial, Number(action.options.source))
 			},
 		}
 
@@ -314,13 +286,14 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 					useVariables: { local: true },
 				},
 			],
-			callback: async function (action, context) {
+			callback: async (action, context) => {
 				let destNum: string = await context.parseVariablesInString(String(action.options.destination))
 				let sourceNum: string = await context.parseVariablesInString(String(action.options.source))
-				let destId = Number(destNum) - 1
-				let sourceId = Number(sourceNum) - 1
 
-				sendCommand('SERIAL PORT ROUTING:\n' + destId + ' ' + sourceId + '\n\n')
+				const serial = state.getSerial(Number(destNum) - 1)
+				if (!serial) return
+
+				await api.setSerialRoute(serial, Number(sourceNum) - 1)
 			},
 		}
 	}
@@ -336,51 +309,21 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 				useVariables: { local: true },
 			},
 		],
-		callback: async function (action, context) {
+		callback: async (action, context) => {
 			let destNum: string = await context.parseVariablesInString(String(action.options.destination))
 
 			const output = state.getOutputById(Number(destNum) - 1)
+			if (!output) return
 
-			if (output) {
-				let fallbackpop = output.fallback.pop() // The current route (i.e what the hardware is actually set to)
-				// has already been pushed onto the stack at "updateRouting" so to
-				// get to the last route we have to first pop this one off.
-				fallbackpop = output.fallback.pop() // This now, is the route to fallback to.
+			let fallbackpop = output.fallback.pop() // The current route (i.e what the hardware is actually set to)
+			// has already been pushed onto the stack at "updateRouting" so to
+			// get to the last route we have to first pop this one off.
+			fallbackpop = output.fallback.pop() // This now, is the route to fallback to.
 
-				if (fallbackpop !== undefined && fallbackpop >= 0) {
-					if (output.type === 'monitor') {
-						sendCommand('VIDEO MONITORING OUTPUT ROUTING:\n' + output.index + ' ' + fallbackpop + '\n\n')
-					} else {
-						sendCommand('VIDEO OUTPUT ROUTING:\n' + output.index + ' ' + fallbackpop + '\n\n')
-					}
-				}
+			if (fallbackpop !== undefined && fallbackpop >= 0) {
+				await api.setOutputRoute(output, fallbackpop)
 			}
 		},
-	}
-
-	if (serialChoices.length > 0) {
-		actions['route_serial'] = {
-			name: 'Route serial port',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Source',
-					id: 'source',
-					default: 0,
-					choices: serialChoices,
-				},
-				{
-					type: 'dropdown',
-					label: 'Destination',
-					id: 'destination',
-					default: '1',
-					choices: serialChoices,
-				},
-			],
-			callback: (action) => {
-				sendCommand('SERIAL PORT ROUTING:\n' + action.options.destination + ' ' + action.options.source + '\n\n')
-			},
-		}
 	}
 
 	actions['select_destination'] = {
@@ -395,9 +338,12 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 			},
 		],
 		callback: (action) => {
-			state.selectedDestination = Number(action.options.destination)
+			const output = state.getOutputById(Number(action.options.destination))
+			if (!output) return
+
+			state.selectedDestination = output.id
 			if (state.queuedOp) {
-				state.queuedOp.dest = state.selectedDestination
+				state.queuedOp.output = output
 			}
 
 			self.checkFeedbacks(
@@ -428,51 +374,29 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 				choices: inputChoices,
 			},
 		],
-		callback: (action) => {
+		callback: async (action) => {
 			const output = state.getSelectedOutput()
-			if (output) {
-				if (output.type === 'monitor') {
-					if (self.config.take) {
-						state.queuedOp = {
-							cmd: 'VIDEO MONITORING OUTPUT ROUTING:\n' + output.index + ' ' + action.options.source + '\n\n',
-							dest: output.id,
-							src: Number(action.options.source),
-						}
+			if (!output) return
 
-						self.checkFeedbacks(
-							'take',
-							'take_tally_source',
-							'take_tally_dest',
-							'take_tally_route',
-							'take_tally_source_dyn',
-							'take_tally_dest_dyn',
-							'take_tally_route_dyn'
-						)
-					} else {
-						sendCommand('VIDEO MONITORING OUTPUT ROUTING:\n' + output.index + ' ' + action.options.source + '\n\n')
-					}
-				} else {
-					if (self.config.take) {
-						state.queuedOp = {
-							cmd: 'VIDEO OUTPUT ROUTING:\n' + output.index + ' ' + action.options.source + '\n\n',
-							dest: output.id,
-							src: Number(action.options.source),
-						}
-
-						self.checkFeedbacks(
-							'take',
-							'take_tally_source',
-							'take_tally_dest',
-							'take_tally_route',
-							'take_tally_source_dyn',
-							'take_tally_dest_dyn',
-							'take_tally_route_dyn'
-						)
-					} else {
-						sendCommand('VIDEO OUTPUT ROUTING:\n' + output.index + ' ' + action.options.source + '\n\n')
-					}
+			if (self.config.take) {
+				state.queuedOp = {
+					output: output,
+					src: Number(action.options.source),
 				}
+
+				self.checkFeedbacks(
+					'take',
+					'take_tally_source',
+					'take_tally_dest',
+					'take_tally_route',
+					'take_tally_source_dyn',
+					'take_tally_dest_dyn',
+					'take_tally_route_dyn'
+				)
+			} else {
+				await api.setOutputRoute(output, Number(action.options.source))
 			}
+
 			let values: CompanionVariableValues = {}
 			updateSelectedDestinationVariables(state, values)
 			self.setVariableValues(values)
@@ -490,12 +414,15 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 				useVariables: { local: true },
 			},
 		],
-		callback: async function (action, context) {
+		callback: async (action, context) => {
 			let destNum: string = await context.parseVariablesInString(String(action.options.destination))
 
-			state.selectedDestination = Number(destNum) - 1
+			const output = state.getOutputById(Number(destNum) - 1)
+			if (!output) return
+
+			state.selectedDestination = output.id
 			if (state.queuedOp) {
-				state.queuedOp.dest = state.selectedDestination
+				state.queuedOp.output = output
 			}
 
 			self.checkFeedbacks(
@@ -518,53 +445,32 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 	actions['route_source_dyn'] = {
 		name: 'Route source to selected destination (dynamic)',
 		options: [{ type: 'textinput', label: 'Source', id: 'source', default: '', useVariables: { local: true } }],
-		callback: async function (action, context) {
+		callback: async (action, context) => {
 			let sourceNum: string = await context.parseVariablesInString(String(action.options.source))
 			let sourceId = Number(sourceNum) - 1
+
 			const output = state.getSelectedOutput()
-			if (output) {
-				if (output.type === 'monitor') {
-					if (self.config.take) {
-						state.queuedOp = {
-							cmd: 'VIDEO MONITORING OUTPUT ROUTING:\n' + output.index + ' ' + sourceId + '\n\n',
-							dest: output.id,
-							src: sourceId,
-						}
+			if (!output) return
 
-						self.checkFeedbacks(
-							'take',
-							'take_tally_source',
-							'take_tally_dest',
-							'take_tally_route',
-							'take_tally_source_dyn',
-							'take_tally_dest_dyn',
-							'take_tally_route_dyn'
-						)
-					} else {
-						sendCommand('VIDEO MONITORING OUTPUT ROUTING:\n' + output.index + ' ' + sourceId + '\n\n')
-					}
-				} else {
-					if (self.config.take) {
-						state.queuedOp = {
-							cmd: 'VIDEO OUTPUT ROUTING:\n' + output.index + ' ' + sourceId + '\n\n',
-							dest: output.id,
-							src: sourceId,
-						}
-
-						self.checkFeedbacks(
-							'take',
-							'take_tally_source',
-							'take_tally_dest',
-							'take_tally_route',
-							'take_tally_source_dyn',
-							'take_tally_dest_dyn',
-							'take_tally_route_dyn'
-						)
-					} else {
-						sendCommand('VIDEO OUTPUT ROUTING:\n' + output.index + ' ' + sourceId + '\n\n')
-					}
+			if (self.config.take) {
+				state.queuedOp = {
+					output: output,
+					src: sourceId,
 				}
+
+				self.checkFeedbacks(
+					'take',
+					'take_tally_source',
+					'take_tally_dest',
+					'take_tally_route',
+					'take_tally_source_dyn',
+					'take_tally_dest_dyn',
+					'take_tally_route_dyn'
+				)
+			} else {
+				await api.setOutputRoute(output, sourceId)
 			}
+
 			let values: CompanionVariableValues = {}
 			updateSelectedDestinationVariables(state, values)
 			self.setVariableValues(values)
@@ -574,7 +480,7 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 	actions['take'] = {
 		name: 'Take',
 		options: [],
-		callback: () => {
+		callback: async () => {
 			const op = state.queuedOp
 			state.queuedOp = undefined
 
@@ -592,7 +498,9 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 				'take_tally_route_dyn'
 			)
 
-			if (op) sendCommand(op.cmd)
+			if (!op || op.src === undefined) return
+
+			await api.setOutputRoute(op.output, op.src)
 		},
 	}
 	actions['clear'] = {
@@ -638,8 +546,7 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 					const routes_text = data.split(':')[0] // trim off the comment and extra data
 					const routes = routes_text.split(',') // split into the individual routes
 
-					let primaryRoutes: string[] = []
-					let monitorRoutes: string[] = []
+					const mappedRoutes = new Map<OutputState, number>()
 
 					for (const route of routes) {
 						const [dest, source] = route.split(' ').map((s) => Number(s))
@@ -654,19 +561,10 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 							throw `${route} - ${source} is not a valid Router Source `
 						}
 
-						if (output.type === 'monitor') {
-							monitorRoutes.push(`${output.index} ${input.id}`)
-						} else {
-							primaryRoutes.push(`${output.index} ${input.id}`)
-						}
+						mappedRoutes.set(output, input.id)
 					}
 
-					if (primaryRoutes.length > 0) {
-						sendCommand(`VIDEO OUTPUT ROUTING:\n${primaryRoutes.join('\n')}\n\n`)
-					}
-					if (monitorRoutes.length > 0) {
-						sendCommand(`VIDEO MONITORING OUTPUT ROUTING:\n${primaryRoutes.join('\n')}\n\n`)
-					}
+					await api.setMultipleOutputRoutes(mappedRoutes)
 
 					self.log('info', routes.length + ' Routes read from File: ' + source_file)
 				} catch (err: any) {
@@ -732,15 +630,11 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 				choices: lockChoices,
 			},
 		],
-		callback: (action) => {
+		callback: async (action) => {
 			const output = state.getOutputById(Number(action.options.output))
-			if (output) {
-				if (output.type === 'monitor') {
-					sendCommand('MONITORING OUTPUT LOCKS:\n' + output.index + ' ' + action.options.lock_state + '\n\n')
-				} else {
-					sendCommand('VIDEO OUTPUT LOCKS:\n' + output.index + ' ' + action.options.lock_state + '\n\n')
-				}
-			}
+			if (!output) return
+
+			await api.setOutputLocked(output, action.options.lock_state as LockState)
 		},
 	}
 
@@ -763,7 +657,7 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 				tooltip: 'lock/unlock',
 			},
 		],
-		callback: async function (action, context) {
+		callback: async (action, context) => {
 			// Parse internal variables from options textinputs
 			let outputStr: string = await context.parseVariablesInString(String(action.options.output))
 			let lockStr: string = await context.parseVariablesInString(String(action.options.lock_state))
@@ -779,13 +673,9 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 			}
 
 			const output = state.getOutputById(outputId)
-			if (output) {
-				if (output.type === 'monitor') {
-					sendCommand('MONITORING OUTPUT LOCKS:\n' + output.index + ' ' + lockState + '\n\n')
-				} else {
-					sendCommand('VIDEO OUTPUT LOCKS:\n' + output.index + ' ' + lockState + '\n\n')
-				}
-			}
+			if (!output) return
+
+			await api.setOutputLocked(output, lockState)
 		},
 	}
 
@@ -807,11 +697,11 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 				choices: lockChoices,
 			},
 		],
-		callback: (action) => {
+		callback: async (action) => {
 			const serial = state.getSerial(Number(action.options.serial))
-			if (serial) {
-				sendCommand('SERIAL PORT LOCKS:\n' + serial.id + ' ' + action.options.lock_state + '\n\n')
-			}
+			if (!serial) return
+
+			await api.setSerialLocked(serial, action.options.lock_state as LockState)
 		},
 	}
 
@@ -834,7 +724,7 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 				tooltip: 'lock/unlock',
 			},
 		],
-		callback: async function (action, context) {
+		callback: async (action, context) => {
 			let serialStr: string = await context.parseVariablesInString(String(action.options.serial))
 			let lockStr: string = await context.parseVariablesInString(String(action.options.lock_state))
 
@@ -847,9 +737,9 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 			}
 
 			const serial = state.getSerial(serialId)
-			if (serial) {
-				sendCommand('MONITORING OUTPUT LOCKS:\n' + serial.id + ' ' + lockState + '\n\n')
-			}
+			if (!serial) return
+
+			await api.setSerialLocked(serial, lockState)
 		},
 	}
 

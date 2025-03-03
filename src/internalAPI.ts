@@ -1,5 +1,5 @@
 import type { CompanionVariableValues } from '@companion-module/base'
-import type { VideohubState } from './state.js'
+import type { InputState, LockState, OutputState, SerialState, VideohubState } from './state.js'
 import type { InstanceBaseExt } from './types.js'
 import { updateSelectedDestinationVariables } from './variables.js'
 import { LOCKSTATES } from './choices.js'
@@ -108,51 +108,48 @@ export function updateLabels(self: InstanceBaseExt, state: VideohubState, labelt
 	self.setVariableValues(variableValues)
 }
 
- /**
-  * INTERNAL: Updates lock states based on data from the Videohub
-  *
-  * @param {string} labeltype - the command/data type being passed
-  * @param {Object} object - the collected data
-  * @access protected
-  * @since 1.1.0
-  */
+/**
+ * INTERNAL: Updates lock states based on data from the Videohub
+ *
+ * @param {string} labeltype - the command/data type being passed
+ * @param {Object} object - the collected data
+ * @access protected
+ * @since 1.1.0
+ */
 export function updateLocks(self: InstanceBaseExt, labeltype: string, object: any) {
 	const state = self.state
-	const variableValues: CompanionVariableValues = {} 
+	const variableValues: CompanionVariableValues = {}
 
- 	for (var key in object) {
- 		var parsethis = object[key]
- 		var a = parsethis.split(/ /)
- 		var num = parseInt(a.shift())
- 		var lock_state = a
+	for (var key in object) {
+		var parsethis = object[key]
+		var a = parsethis.split(/ /)
+		var num = parseInt(a.shift())
+		var lock_state = a
 		var channel
 
- 		switch (labeltype) {
-				case 'MONITORING OUTPUT LOCKS': {
-					if (channel = state.getMonitoringOutput(num)) {
-						variableValues[`output_${channel.id + 1}_lock_state`] = LOCKSTATES[lock_state]
-					}
-					break
+		switch (labeltype) {
+			case 'MONITORING OUTPUT LOCKS': {
+				if ((channel = state.getMonitoringOutput(num))) {
+					variableValues[`output_${channel.id + 1}_lock_state`] = LOCKSTATES[lock_state]
 				}
-				case 'VIDEO OUTPUT LOCKS': {
-					if (channel = state.getPrimaryOutput(num)) {
-						variableValues[`output_${channel.id + 1}_lock_state`] = LOCKSTATES[lock_state]
-					}
-					break
+				break
+			}
+			case 'VIDEO OUTPUT LOCKS': {
+				if ((channel = state.getPrimaryOutput(num))) {
+					variableValues[`output_${channel.id + 1}_lock_state`] = LOCKSTATES[lock_state]
 				}
-				case 'SERIAL PORT LOCKS': {
-					if (channel = state.getSerial(num)) {
-						variableValues[`serial_${channel.id + 1}_lock_state`] = LOCKSTATES[lock_state]
-					}
-					break
+				break
+			}
+			case 'SERIAL PORT LOCKS': {
+				if ((channel = state.getSerial(num))) {
+					variableValues[`serial_${channel.id + 1}_lock_state`] = LOCKSTATES[lock_state]
 				}
+				break
+			}
 		}
 		self.setVariableValues(variableValues)
 	}
-
-
-
- }
+}
 
 /**
  * INTERNAL: Updates Companion's routing table based on data sent from the Videohub
@@ -268,5 +265,95 @@ export function updateStatus(_self: InstanceBaseExt, state: VideohubState, label
 				break
 			}
 		}
+	}
+}
+
+export class VideohubApi {
+	#self: InstanceBaseExt
+
+	constructor(self: InstanceBaseExt) {
+		this.#self = self
+	}
+
+	#sendCommand(cmd: string) {
+		if (this.#self.socket !== undefined && this.#self.socket.isConnected) {
+			try {
+				this.#self.log('debug', 'TCP sending ' + cmd)
+				this.#self.socket.send(cmd)
+			} catch (error: any) {
+				this.#self.log('error', 'TCP error ' + error.message)
+			}
+		} else {
+			this.#self.log('error', 'Socket not connected ')
+			this.#self.init_tcp()
+		}
+	}
+
+	/*
+	 * Note: all the methods here are promise based to prepare for the future when we will detect if the command was successful
+	 */
+
+	async setOutputLabel(output: OutputState, name: string): Promise<void> {
+		if (output.type === 'monitor') {
+			this.#sendCommand('MONITORING OUTPUT LABELS:\n' + output.id + ' ' + name + '\n\n')
+		} else {
+			this.#sendCommand('OUTPUT LABELS:\n' + output.id + ' ' + name + '\n\n')
+		}
+	}
+
+	async setInputLabel(input: InputState, name: string): Promise<void> {
+		this.#sendCommand('INPUT LABELS:\n' + input.id + ' ' + name + '\n\n')
+	}
+
+	async setSerialLabel(serial: SerialState, name: string): Promise<void> {
+		this.#sendCommand('SERIAL PORT LABELS:\n' + serial.id + ' ' + name + '\n\n')
+	}
+
+	async setOutputRoute(output: OutputState, source: number): Promise<void> {
+		if (output.type === 'monitor') {
+			this.#sendCommand('VIDEO MONITORING OUTPUT ROUTING:\n' + output.id + ' ' + source + '\n\n')
+		} else {
+			this.#sendCommand('VIDEO OUTPUT ROUTING:\n' + output.id + ' ' + source + '\n\n')
+		}
+	}
+
+	async setSerialRoute(serial: SerialState, source: number): Promise<void> {
+		this.#sendCommand('SERIAL PORT ROUTING:\n' + serial.id + ' ' + source + '\n\n')
+	}
+
+	async setMultipleOutputRoutes(routes: Map<OutputState, number>): Promise<void> {
+		const primaryRoutes: string[] = []
+		const monitorRoutes: string[] = []
+
+		for (const [output, source] of routes) {
+			if (output.type === 'monitor') {
+				monitorRoutes.push(`${output.id} ${source}`)
+			} else {
+				primaryRoutes.push(`${output.id} ${source}`)
+			}
+		}
+
+		if (primaryRoutes.length > 0) {
+			this.#sendCommand(`VIDEO OUTPUT ROUTING:\n${primaryRoutes.join('\n')}\n\n`)
+		}
+		if (monitorRoutes.length > 0) {
+			this.#sendCommand(`VIDEO MONITORING OUTPUT ROUTING:\n${monitorRoutes.join('\n')}\n\n`)
+		}
+	}
+
+	async setOutputLocked(output: OutputState, lock: LockState): Promise<void> {
+		if (lock !== 'U' && lock !== 'O') throw new Error('Invalid lock state')
+
+		if (output.type === 'monitor') {
+			this.#sendCommand('MONITORING OUTPUT LOCKS:\n' + output.id + ' ' + lock + '\n\n')
+		} else {
+			this.#sendCommand('VIDEO OUTPUT LOCKS:\n' + output.id + ' ' + lock + '\n\n')
+		}
+	}
+
+	async setSerialLocked(serial: SerialState, lock: LockState): Promise<void> {
+		if (lock !== 'U' && lock !== 'O') throw new Error('Invalid lock state')
+
+		this.#sendCommand('SERIAL PORT LOCKS:\n' + serial.id + ' ' + lock + '\n\n')
 	}
 }

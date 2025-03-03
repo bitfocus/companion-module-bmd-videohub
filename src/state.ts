@@ -8,7 +8,6 @@ export interface InputState {
 }
 export interface OutputState {
 	id: number
-	index: number
 	label: string
 	name: string
 	route: number
@@ -30,8 +29,8 @@ export interface SerialState {
 export type LockState = 'L' | 'O' | 'U'
 
 export interface QueueOperation {
-	cmd: string
-	dest: number
+	// cmd: string
+	output: OutputState
 	src: number | undefined
 }
 
@@ -86,7 +85,6 @@ export class VideohubState {
 		for (let id = this.#primaryOutputs.length; id < outputCount; id++) {
 			this.#primaryOutputs.push({
 				id,
-				index: id,
 				label: `${id + 1}: Output ${id + 1}`,
 				name: `Output ${id + 1}`,
 				route: id,
@@ -101,7 +99,6 @@ export class VideohubState {
 		for (let id = this.#monitorOutputs.length; id < monitoringCount; id++) {
 			this.#monitorOutputs.push({
 				id,
-				index: id,
 				label: `${id + 1}: Output ${id + 1}`,
 				name: `Monitor ${id + 1}`,
 				route: id,

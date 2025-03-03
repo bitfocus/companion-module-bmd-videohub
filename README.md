@@ -1,7 +1,13 @@
 # companion-module-bmd-videohub
 
-
 See HELP.md and LICENSE
+
+**Changes in v2.4.0**
+
+- Routing from variables
+- Lock/unlock outputs and serialports
+- Fix: 'weird response from videohub NAK'
+- Update tooling
 
 **Changes in v2.3.0**
 

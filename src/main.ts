@@ -4,7 +4,7 @@ import { initVariables } from './variables.js'
 import { getPresets } from './presets.js'
 import { getActions } from './actions.js'
 import { getFeedbacks } from './feedback.js'
-import { updateDevice, updateLabels, updateRouting, updateStatus, updateLocks } from './internalAPI.js'
+import { updateDevice, updateLabels, updateRouting, updateStatus, updateLocks, VideohubApi } from './internalAPI.js'
 import { VideohubState } from './state.js'
 import { UpgradeScripts } from './upgrades.js'
 import { IpAndPort } from './types.js'
@@ -80,7 +80,9 @@ class VideohubInstance extends InstanceBase<VideoHubConfig> {
 			initVariables(this, this.state)
 		}
 
-		this.setActionDefinitions(getActions(this, this.state))
+		const api = new VideohubApi(this)
+
+		this.setActionDefinitions(getActions(this, api, this.state))
 		this.setFeedbackDefinitions(getFeedbacks(this, this.state))
 		this.setPresetDefinitions(getPresets(this.state))
 	}
