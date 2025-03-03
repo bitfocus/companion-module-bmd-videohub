@@ -8,13 +8,11 @@ export interface InputChoicesResult {
 	lockChoices: DropdownChoice[]
 }
 
-
 export const LOCKSTATES: CompanionVariableValues = {
 	L: 'Locked',
 	O: 'Owned',
-	U: 'Unlocked'
+	U: 'Unlocked',
 }
-
 
 /**
  * INTERNAL: use model data to define the choices for the dropdowns.
@@ -24,7 +22,10 @@ export function getInputChoices(state: VideohubState): InputChoicesResult {
 		inputChoices: [],
 		outputChoices: [],
 		serialChoices: [],
-		lockChoices: [{ id: 'U', label: 'Unlock' }, { id: 'O', label: 'Lock' }]
+		lockChoices: [
+			{ id: 'U', label: 'Unlock' },
+			{ id: 'O', label: 'Lock' },
+		],
 	}
 
 	for (const input of state.iterateInputs()) {
@@ -35,7 +36,7 @@ export function getInputChoices(state: VideohubState): InputChoicesResult {
 
 	for (const output of state.iterateAllOutputs()) {
 		if (output.status != 'None') {
-			result.outputChoices.push({ id: output.id, label: output.label })
+			result.outputChoices.push({ id: output.outputId, label: output.label })
 		}
 	}
 

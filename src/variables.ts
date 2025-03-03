@@ -23,34 +23,36 @@ export function initVariables(self: InstanceBase<VideoHubConfig>, state: Videohu
 
 	for (const output of state.iterateAllOutputs()) {
 		if (output.status != 'None') {
+			const outputType = output.type === 'primary' ? 'output' : 'monitor'
+
 			variableDefinitions.push({
-				name: `Label of output ${output.id + 1}`,
-				variableId: `output_${output.id + 1}`,
+				name: `Label of ${outputType} ${output.id + 1}`,
+				variableId: `output_${output.outputId + 1}`,
 			})
 
-			variableValues[`output_${output.id + 1}`] = output.name
+			variableValues[`output_${output.outputId + 1}`] = output.name
 
 			variableDefinitions.push({
-				name: `Label of input routed to output ${output.id + 1}`,
-				variableId: `output_${output.id + 1}_input`,
+				name: `Label of input routed to ${outputType} ${output.id + 1}`,
+				variableId: `output_${output.outputId + 1}_input`,
 			})
 
-			variableValues[`output_${output.id + 1}_input`] = state.getInput(output.route)?.name ?? '?'
+			variableValues[`output_${output.outputId + 1}_input`] = state.getInput(output.route)?.name ?? '?'
 
 			variableDefinitions.push({
-				name: `Id of input routed to output ${output.id + 1}`,
-				variableId: `output_${output.id + 1}_input_id`,
+				name: `Id of input routed to ${outputType} ${output.id + 1}`,
+				variableId: `output_${output.outputId + 1}_input_id`,
 			})
 
 			const activeId: number | undefined = state.getInput(output.route)?.id
-			variableValues[`output_${output.id + 1}_input_id`] = activeId !== undefined ? activeId + 1 : '?'
+			variableValues[`output_${output.outputId + 1}_input_id`] = activeId !== undefined ? activeId + 1 : '?'
 
 			variableDefinitions.push({
-				name: 'Lock state of output ${output.id + 1}',
-				variableId: `output_${output.id + 1}_lock_state`,
+				name: `Lock state of ${outputType} ${output.id + 1}`,
+				variableId: `output_${output.outputId + 1}_lock_state`,
 			})
 
-			variableValues[`output_${output.id + 1}_lock_state`] = LOCKSTATES[output?.lock] ?? '?'
+			variableValues[`output_${output.outputId + 1}_lock_state`] = LOCKSTATES[output?.lock] ?? '?'
 		}
 	}
 
@@ -72,7 +74,7 @@ export function initVariables(self: InstanceBase<VideoHubConfig>, state: Videohu
 			variableValues[`serial_${serial.id + 1}_route`] = sourceSerial?.name ?? '?'
 
 			variableDefinitions.push({
-				name: 'Lock state of serial ${serial.id + 1}',
+				name: `Lock state of serial ${serial.id + 1}`,
 				variableId: `serial_${serial.id + 1}_lock_state`,
 			})
 

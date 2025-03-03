@@ -266,7 +266,8 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 		],
 		callback: (feedback) => {
 			return (
-				Number(feedback.options.input) == state.queuedOp?.src && state.selectedDestination == state.queuedOp?.output.id
+				Number(feedback.options.input) == state.queuedOp?.src &&
+				state.selectedDestination == state.queuedOp?.output.outputId
 			)
 		},
 	}
@@ -292,7 +293,7 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 			let inputNum: string = await context.parseVariablesInString(String(feedback.options.input!))
 			let inputId = Number(inputNum) - 1
 
-			return inputId == state.queuedOp?.src && state.selectedDestination == state.queuedOp?.output.id
+			return inputId == state.queuedOp?.src && state.selectedDestination == state.queuedOp?.output.outputId
 		},
 	}
 
@@ -314,7 +315,7 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 			},
 		],
 		callback: (feedback) => {
-			return Number(feedback.options.output) == state.queuedOp?.output.id
+			return Number(feedback.options.output) == state.queuedOp?.output.outputId
 		},
 	}
 
@@ -338,7 +339,7 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 		callback: async function (feedback, context) {
 			let outputNum: string = await context.parseVariablesInString(String(feedback.options.output!))
 			let outputId = Number(outputNum) - 1
-			return outputId == state.queuedOp?.output.id
+			return outputId == state.queuedOp?.output.outputId
 		},
 	}
 

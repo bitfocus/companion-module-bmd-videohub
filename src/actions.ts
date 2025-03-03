@@ -389,7 +389,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 			const output = state.getOutputById(Number(action.options.destination))
 			if (!output) return
 
-			state.selectedDestination = output.id
+			state.selectedDestination = output.outputId
 			if (state.queuedOp) {
 				state.queuedOp.output = output
 			}
@@ -474,7 +474,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 			const output = state.getOutputById(Number(destNum) - 1)
 			if (!output) return
 
-			state.selectedDestination = output.id
+			state.selectedDestination = output.outputId
 			if (state.queuedOp) {
 				state.queuedOp.output = output
 			}

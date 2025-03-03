@@ -75,7 +75,7 @@ export function updateLabels(self: InstanceBaseExt, state: VideohubState, labelt
 				break
 			}
 			case 'OUTPUT LABELS': {
-				const output = state.getOutputById(num)
+				const output = state.getPrimaryOutput(num)
 				if (output) {
 					output.name = label
 					output.label = `${num + 1}: ${label}`
@@ -98,7 +98,7 @@ export function updateLabels(self: InstanceBaseExt, state: VideohubState, labelt
 	if (labeltype == 'INPUT LABELS') {
 		for (const output of state.iterateAllOutputs()) {
 			if (output.status != 'None') {
-				variableValues[`output_${output.id + 1}_input`] = state.getInput(output.route)?.name ?? '?'
+				variableValues[`output_${output.outputId + 1}_input`] = state.getInput(output.route)?.name ?? '?'
 			}
 		}
 	}
@@ -130,7 +130,7 @@ export function updateLocks(self: InstanceBaseExt, labeltype: string, lines: str
 				const output = state.getMonitoringOutput(index)
 				if (output) {
 					output.lock = lock_state
-					variableValues[`output_${output.id + 1}_lock_state`] = LOCKSTATES[lock_state]
+					variableValues[`output_${output.outputId + 1}_lock_state`] = LOCKSTATES[lock_state]
 				}
 				break
 			}
@@ -138,7 +138,7 @@ export function updateLocks(self: InstanceBaseExt, labeltype: string, lines: str
 				const output = state.getPrimaryOutput(index)
 				if (output) {
 					output.lock = lock_state
-					variableValues[`output_${output.id + 1}_lock_state`] = LOCKSTATES[lock_state]
+					variableValues[`output_${output.outputId + 1}_lock_state`] = LOCKSTATES[lock_state]
 				}
 				break
 			}
@@ -186,7 +186,7 @@ export function updateRouting(self: InstanceBaseExt, state: VideohubState, label
 				break
 			}
 			case 'VIDEO OUTPUT ROUTING': {
-				const output = state.getOutputById(dest)
+				const output = state.getPrimaryOutput(dest)
 				if (output) {
 					// Lets not let the fallback array grow without bounds. is 20 enough?
 					if (output.fallback.length > 20) {

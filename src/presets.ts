@@ -77,12 +77,12 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 	}
 
 	for (const output of state.iterateAllOutputs()) {
-		presets[`select_destination_${output.id}`] = {
+		presets[`select_destination_${output.outputId}`] = {
 			category: 'Select Destination (X)',
 			name: `Selection destination button for ${output.name}`,
 			type: 'button',
 			style: {
-				text: `$(videohub:output_${output.id + 1})`,
+				text: `$(videohub:output_${output.outputId + 1})`,
 				size: '18',
 				color: combineRgb(255, 255, 255),
 				bgcolor: combineRgb(0, 0, 0),
@@ -95,7 +95,7 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 						color: combineRgb(0, 0, 0),
 					},
 					options: {
-						output: output.id,
+						output: output.outputId,
 					},
 				},
 				{
@@ -105,7 +105,7 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 						color: combineRgb(255, 255, 255),
 					},
 					options: {
-						output: output.id,
+						output: output.outputId,
 					},
 				},
 			],
@@ -115,7 +115,7 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 						{
 							actionId: 'select_destination',
 							options: {
-								destination: output.id,
+								destination: output.outputId,
 							},
 						},
 					],
@@ -175,11 +175,11 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 	}
 
 	// Limit the number of fixed routing options created, having them all consumes a lot of memory and can crash the process
-	for (const output of state.iterateAllOutputs().slice(0, 20)) {
+	for (const output of state.iteratePrimaryOutputs().slice(0, 20)) {
 		for (const input of state.iterateInputs().slice(0, 20)) {
-			presets[`output_${output.id}_${input.id}`] = {
-				category: `Output ${output.id + 1}`,
-				name: `Output ${output.id + 1} button for ${input.name}`,
+			presets[`output_${output.outputId}_${input.id}`] = {
+				category: `Output ${output.outputId + 1}`,
+				name: `Output ${output.outputId + 1} button for ${input.name}`,
 				type: 'button',
 				style: {
 					text: `$(videohub:input_${input.id + 1})`,
@@ -196,7 +196,7 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 						},
 						options: {
 							input: input.id,
-							output: output.id,
+							output: output.outputId,
 						},
 					},
 				],
@@ -207,7 +207,7 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 								actionId: 'route',
 								options: {
 									source: input.id,
-									destination: output.id,
+									destination: output.outputId,
 								},
 							},
 						],
@@ -216,9 +216,9 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 				],
 			}
 
-			presets[`output_${output.id}_${input.id}_momentary`] = {
-				category: `Output ${output.id + 1} (momentary)`,
-				name: `Output ${output.id + 1} button for ${input.name} with route back`,
+			presets[`output_${output.outputId}_${input.id}_momentary`] = {
+				category: `Output ${output.outputId + 1} (momentary)`,
+				name: `Output ${output.outputId + 1} button for ${input.name} with route back`,
 				type: 'button',
 				style: {
 					text: `$(videohub:input_${input.id + 1}) (mom.)`,
@@ -235,7 +235,7 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 						},
 						options: {
 							input: input.id,
-							output: output.id,
+							output: output.outputId,
 						},
 					},
 				],
@@ -246,7 +246,7 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 								actionId: 'route',
 								options: {
 									source: input.id,
-									destination: output.id,
+									destination: output.outputId,
 								},
 							},
 						],
@@ -254,7 +254,7 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions {
 							{
 								actionId: 'route_to_previous',
 								options: {
-									destination: output.id,
+									destination: output.outputId,
 								},
 							},
 						],

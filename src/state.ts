@@ -8,6 +8,8 @@ export interface InputState {
 }
 export interface OutputState {
 	id: number
+	/** The id of the output, using an offset based on the type */
+	outputId: number
 	label: string
 	name: string
 	route: number
@@ -85,6 +87,7 @@ export class VideohubState {
 		for (let id = this.#primaryOutputs.length; id < outputCount; id++) {
 			this.#primaryOutputs.push({
 				id,
+				outputId: id,
 				label: `${id + 1}: Output ${id + 1}`,
 				name: `Output ${id + 1}`,
 				route: id,
@@ -99,6 +102,7 @@ export class VideohubState {
 		for (let id = this.#monitorOutputs.length; id < monitoringCount; id++) {
 			this.#monitorOutputs.push({
 				id,
+				outputId: id,
 				label: `${id + 1}: Output ${id + 1}`,
 				name: `Monitor ${id + 1}`,
 				route: id,
@@ -109,7 +113,7 @@ export class VideohubState {
 			})
 		}
 		for (let index = 0; index < this.#monitorOutputs.length; index++) {
-			this.#monitorOutputs[index].id = this.#primaryOutputs.length + index
+			this.#monitorOutputs[index].outputId = this.#primaryOutputs.length + index
 		}
 	}
 
@@ -165,6 +169,10 @@ export class VideohubState {
 
 	public iterateInputs(): InputState[] {
 		return this.#inputs
+	}
+
+	public iteratePrimaryOutputs(): OutputState[] {
+		return this.#primaryOutputs
 	}
 
 	public iterateAllOutputs(): OutputState[] {
