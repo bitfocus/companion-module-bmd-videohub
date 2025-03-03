@@ -6,7 +6,8 @@
 	"scripts": {
 		"dev": "run build:main --watch",
 		"build": "rimraf dist && run build:main",
-		"build:main": "tsc -p tsconfig.json"
+		"build:main": "tsc -p tsconfig.json",
+		"dist": "companion-module-build"
 	},
 	"repository": {
 		"type": "git",
@@ -14,12 +15,12 @@
 	},
 	"license": "MIT",
 	"dependencies": {
-		"@companion-module/base": "~1.6.0"
+		"@companion-module/base": "~1.11.3"
 	},
 	"devDependencies": {
-		"@companion-module/tools": "^1.4.1",
-		"rimraf": "^5.0.5",
-		"typescript": "~5.2"
+		"@companion-module/tools": "^2.1.1",
+		"rimraf": "^6.0.1",
+		"typescript": "~5.8.2"
 	},
 	"prettier": "@companion-module/tools/.prettierrc.json",
 	"packageManager": "yarn@4.7.0"
