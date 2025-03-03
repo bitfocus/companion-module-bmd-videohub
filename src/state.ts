@@ -5,7 +5,6 @@ export interface InputState {
 	label: string
 	name: string
 	status: string // TODO - type better?
-	lock: string // TODO - type better?
 }
 export interface OutputState {
 	id: number
@@ -14,7 +13,7 @@ export interface OutputState {
 	name: string
 	route: number
 	status: string // TODO - type better?
-	lock: string // TODO - type better?
+	lock: LockState
 	fallback: number[]
 	type: 'primary' | 'monitor'
 }
@@ -24,9 +23,11 @@ export interface SerialState {
 	name: string
 	route: number
 	status: string // TODO - type better?
-	lock: string // TODO - type better?
+	lock: LockState
 	// directions: string // TODO - type better?
 }
+
+export type LockState = 'L' | 'O' | 'U'
 
 export interface QueueOperation {
 	cmd: string
@@ -65,7 +66,6 @@ export class VideohubState {
 				label: `${id + 1}: Input ${id + 1}`,
 				name: `Input ${id + 1}`,
 				status: 'BNC',
-				lock: 'U',
 			})
 		}
 

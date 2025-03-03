@@ -4,6 +4,7 @@ import { getInputChoices } from './choices.js'
 import type { VideohubState } from './state.js'
 import type { InstanceBaseExt } from './types.js'
 import { updateSelectedDestinationVariables } from './variables.js'
+import { parseUserLockStateString } from './util.js'
 
 /**
  * Get the available actions.
@@ -16,6 +17,7 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 	const sendCommand = (cmd: string) => {
 		if (self.socket !== undefined && self.socket.isConnected) {
 			try {
+				self.log('debug', 'TCP sending ' + cmd)
 				self.socket.send(cmd)
 			} catch (error: any) {
 				self.log('error', 'TCP error ' + error.message)
@@ -756,8 +758,9 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 				type: 'textinput',
 				label: 'Lock State',
 				id: 'lock_state',
-				default: '',
+				default: 'lock',
 				useVariables: { local: true },
+				tooltip: 'lock/unlock',
 			},
 		],
 		callback: async function (action, context) {
@@ -768,37 +771,19 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 			// Evaluate outpu expression
 			let outputId = Number(outputStr) - 1
 
-			// if lock_state is a meaningful letter
-			const lockRegExp = new RegExp('^[lLoO]$')
-			const unlockRegExp = new RegExp('^[uU]$')
-
-			if (lockRegExp.test(lockStr)) {
-				lockStr = 'O'
-			} else if (unlockRegExp.test(lockStr)) {
-				lockStr = 'U'
-			} else {
-				// if lock_state is an expression, evaluate it :
-				// < 1 -> unlock
-				// <= 1 -> lock
-				let lockNum = Number(lockStr)
-				if (typeof lockNum != 'number') {
-					self.log('error', "Can't evaluate lock state")
-					return
-				} else {
-					if (lockNum > 0) {
-						lockStr = 'O'
-					} else {
-						lockStr = 'U'
-					}
-				}
+			const lockState = parseUserLockStateString(lockStr)
+			self.log('info', 'lockState: ' + lockState + ' from ' + lockStr)
+			if (!lockState) {
+				self.log('error', "Can't evaluate lock state")
+				return
 			}
 
 			const output = state.getOutputById(outputId)
 			if (output) {
 				if (output.type === 'monitor') {
-					sendCommand('MONITORING OUTPUT LOCKS:\n' + output.index + ' ' + lockStr + '\n\n')
+					sendCommand('MONITORING OUTPUT LOCKS:\n' + output.index + ' ' + lockState + '\n\n')
 				} else {
-					sendCommand('VIDEO OUTPUT LOCKS:\n' + output.index + ' ' + lockStr + '\n\n')
+					sendCommand('VIDEO OUTPUT LOCKS:\n' + output.index + ' ' + lockState + '\n\n')
 				}
 			}
 		},
@@ -844,8 +829,9 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 				type: 'textinput',
 				label: 'Lock State',
 				id: 'lock_state',
-				default: '',
+				default: 'lock',
 				useVariables: { local: true },
+				tooltip: 'lock/unlock',
 			},
 		],
 		callback: async function (action, context) {
@@ -853,30 +839,16 @@ export function getActions(self: InstanceBaseExt, state: VideohubState): Compani
 			let lockStr: string = await context.parseVariablesInString(String(action.options.lock_state))
 
 			let serialId = Number(serialStr) - 1
-			const lockRegExp = new RegExp('^[lLoO]$')
-			const unlockRegExp = new RegExp('^[uU]$')
 
-			if (lockRegExp.test(lockStr)) {
-				lockStr = 'O'
-			} else if (unlockRegExp.test(lockStr)) {
-				lockStr = 'U'
-			} else {
-				let lockNum = Number(lockStr)
-				if (typeof lockNum != 'number') {
-					self.log('error', "Can't evaluate lock state")
-					return
-				} else {
-					if (lockNum > 0) {
-						lockStr = 'O'
-					} else {
-						lockStr = 'U'
-					}
-				}
+			const lockState = parseUserLockStateString(lockStr)
+			if (!lockState) {
+				self.log('error', "Can't evaluate lock state")
+				return
 			}
 
 			const serial = state.getSerial(serialId)
 			if (serial) {
-				sendCommand('MONITORING OUTPUT LOCKS:\n' + serial.id + ' ' + lockStr + '\n\n')
+				sendCommand('MONITORING OUTPUT LOCKS:\n' + serial.id + ' ' + lockState + '\n\n')
 			}
 		},
 	}

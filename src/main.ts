@@ -190,8 +190,8 @@ class VideohubInstance extends InstanceBase<VideoHubConfig> {
 			this.initThings(false)
 		} else if (key.match(/(VIDEO OUTPUT|VIDEO MONITORING OUTPUT|SERIAL PORT) ROUTING/)) {
 			updateRouting(this, this.state, key, data)
-			 } else if (key.match(/(VIDEO OUTPUT|VIDEO MONITORING OUTPUT|SERIAL PORT) LOCKS/)) {
-			 	updateLocks(this, key, data)
+		} else if (key.match(/(VIDEO OUTPUT|VIDEO MONITORING OUTPUT|SERIAL PORT) LOCKS/)) {
+			updateLocks(this, key, data)
 		} else if (key.match(/(VIDEO INPUT|VIDEO OUTPUT|SERIAL PORT) STATUS/)) {
 			updateStatus(this, this.state, key, data)
 			this.initThings(false)
