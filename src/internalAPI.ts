@@ -112,37 +112,41 @@ export function updateLabels(self: InstanceBaseExt, state: VideohubState, labelt
  * INTERNAL: Updates lock states based on data from the Videohub
  *
  * @param {string} labeltype - the command/data type being passed
- * @param {Object} object - the collected data
+ * @param {Object} lines - the collected data
  * @access protected
  * @since 1.1.0
  */
-export function updateLocks(self: InstanceBaseExt, labeltype: string, object: any) {
+export function updateLocks(self: InstanceBaseExt, labeltype: string, lines: string[]) {
 	const state = self.state
 	const variableValues: CompanionVariableValues = {}
 
-	for (var key in object) {
-		var parsethis = object[key]
-		var a = parsethis.split(/ /)
-		var num = parseInt(a.shift())
-		var lock_state = a
-		var channel
+	for (const line of lines) {
+		const parts = line.split(/ /)
+		const index = Number(parts[0])
+		const lock_state = parts[1] as LockState
 
 		switch (labeltype) {
 			case 'MONITORING OUTPUT LOCKS': {
-				if ((channel = state.getMonitoringOutput(num))) {
-					variableValues[`output_${channel.id + 1}_lock_state`] = LOCKSTATES[lock_state]
+				const output = state.getMonitoringOutput(index)
+				if (output) {
+					output.lock = lock_state
+					variableValues[`output_${output.id + 1}_lock_state`] = LOCKSTATES[lock_state]
 				}
 				break
 			}
 			case 'VIDEO OUTPUT LOCKS': {
-				if ((channel = state.getPrimaryOutput(num))) {
-					variableValues[`output_${channel.id + 1}_lock_state`] = LOCKSTATES[lock_state]
+				const output = state.getPrimaryOutput(index)
+				if (output) {
+					output.lock = lock_state
+					variableValues[`output_${output.id + 1}_lock_state`] = LOCKSTATES[lock_state]
 				}
 				break
 			}
 			case 'SERIAL PORT LOCKS': {
-				if ((channel = state.getSerial(num))) {
-					variableValues[`serial_${channel.id + 1}_lock_state`] = LOCKSTATES[lock_state]
+				const serial = state.getSerial(index)
+				if (serial) {
+					serial.lock = lock_state
+					variableValues[`serial_${serial.id + 1}_lock_state`] = LOCKSTATES[lock_state]
 				}
 				break
 			}
@@ -309,7 +313,9 @@ export class VideohubApi {
 		this.#sendCommand('SERIAL PORT LABELS:\n' + serial.id + ' ' + name + '\n\n')
 	}
 
-	async setOutputRoute(output: OutputState, source: number): Promise<void> {
+	async setOutputRoute(output: OutputState, source: number, ignoreLock: boolean): Promise<void> {
+		if (output.lock !== 'U' && !ignoreLock) return
+
 		if (output.type === 'monitor') {
 			this.#sendCommand('VIDEO MONITORING OUTPUT ROUTING:\n' + output.id + ' ' + source + '\n\n')
 		} else {
@@ -317,7 +323,9 @@ export class VideohubApi {
 		}
 	}
 
-	async setSerialRoute(serial: SerialState, source: number): Promise<void> {
+	async setSerialRoute(serial: SerialState, source: number, ignoreLock: boolean): Promise<void> {
+		if (serial.lock !== 'U' && !ignoreLock) return
+
 		this.#sendCommand('SERIAL PORT ROUTING:\n' + serial.id + ' ' + source + '\n\n')
 	}
 

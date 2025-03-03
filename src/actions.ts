@@ -116,12 +116,18 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				default: 0,
 				choices: outputChoices,
 			},
+			{
+				type: 'checkbox',
+				label: 'Ignore Lock',
+				id: 'ignore_lock',
+				default: false,
+			},
 		],
 		callback: async (action) => {
 			const output = state.getOutputById(Number(action.options.destination))
 			if (!output) return
 
-			await api.setOutputRoute(output, Number(action.options.source))
+			await api.setOutputRoute(output, Number(action.options.source), !!action.options.ignore_lock)
 		},
 	}
 
@@ -142,6 +148,12 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				default: '',
 				useVariables: { local: true },
 			},
+			{
+				type: 'checkbox',
+				label: 'Ignore Lock',
+				id: 'ignore_lock',
+				default: false,
+			},
 		],
 		callback: async (action, context) => {
 			let destNum: string = await context.parseVariablesInString(String(action.options.destination))
@@ -150,7 +162,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 			const output = state.getOutputById(Number(destNum) - 1)
 			if (!output) return
 
-			await api.setOutputRoute(output, Number(sourceNum) - 1)
+			await api.setOutputRoute(output, Number(sourceNum) - 1, !!action.options.ignore_lock)
 		},
 	}
 
@@ -171,6 +183,12 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				default: 0,
 				choices: outputChoices,
 			},
+			{
+				type: 'checkbox',
+				label: 'Ignore Lock',
+				id: 'ignore_lock',
+				default: false,
+			},
 		],
 		callback: async (action) => {
 			const thisOutput = state.getOutputById(Number(action.options.destination))
@@ -178,7 +196,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 
 			if (!thisOutput || !otherOutput) return
 
-			await api.setOutputRoute(thisOutput, otherOutput.route)
+			await api.setOutputRoute(thisOutput, otherOutput.route, !!action.options.ignore_lock)
 		},
 	}
 
@@ -199,6 +217,12 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				default: '',
 				useVariables: { local: true },
 			},
+			{
+				type: 'checkbox',
+				label: 'Ignore Lock',
+				id: 'ignore_lock',
+				default: false,
+			},
 		],
 		callback: async (action, context) => {
 			let destNum: string = await context.parseVariablesInString(String(action.options.destination))
@@ -210,7 +234,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 
 			if (!thisOutput || !otherOutput) return
 
-			await api.setOutputRoute(thisOutput, otherOutput.route)
+			await api.setOutputRoute(thisOutput, otherOutput.route, !!action.options.ignore_lock)
 		},
 	}
 
@@ -224,6 +248,12 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				default: 0,
 				choices: outputChoices,
 			},
+			{
+				type: 'checkbox',
+				label: 'Ignore Lock',
+				id: 'ignore_lock',
+				default: false,
+			},
 		],
 		callback: async (action) => {
 			const output = state.getOutputById(Number(action.options.destination))
@@ -236,7 +266,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 			fallbackpop = output.fallback.pop() // This now, is the route to fallback to.
 
 			if (fallbackpop !== undefined && fallbackpop >= 0) {
-				await api.setOutputRoute(output, fallbackpop)
+				await api.setOutputRoute(output, fallbackpop, !!action.options.ignore_lock)
 			}
 		},
 	}
@@ -259,12 +289,18 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 					default: '1',
 					choices: serialChoices,
 				},
+				{
+					type: 'checkbox',
+					label: 'Ignore Lock',
+					id: 'ignore_lock',
+					default: false,
+				},
 			],
 			callback: async (action) => {
 				const serial = state.getSerial(Number(action.options.destination))
 				if (!serial) return
 
-				await api.setSerialRoute(serial, Number(action.options.source))
+				await api.setSerialRoute(serial, Number(action.options.source), !!action.options.ignore_lock)
 			},
 		}
 
@@ -285,6 +321,12 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 					default: '1',
 					useVariables: { local: true },
 				},
+				{
+					type: 'checkbox',
+					label: 'Ignore Lock',
+					id: 'ignore_lock',
+					default: false,
+				},
 			],
 			callback: async (action, context) => {
 				let destNum: string = await context.parseVariablesInString(String(action.options.destination))
@@ -293,7 +335,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				const serial = state.getSerial(Number(destNum) - 1)
 				if (!serial) return
 
-				await api.setSerialRoute(serial, Number(sourceNum) - 1)
+				await api.setSerialRoute(serial, Number(sourceNum) - 1, !!action.options.ignore_lock)
 			},
 		}
 	}
@@ -308,6 +350,12 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				default: '',
 				useVariables: { local: true },
 			},
+			{
+				type: 'checkbox',
+				label: 'Ignore Lock',
+				id: 'ignore_lock',
+				default: false,
+			},
 		],
 		callback: async (action, context) => {
 			let destNum: string = await context.parseVariablesInString(String(action.options.destination))
@@ -321,7 +369,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 			fallbackpop = output.fallback.pop() // This now, is the route to fallback to.
 
 			if (fallbackpop !== undefined && fallbackpop >= 0) {
-				await api.setOutputRoute(output, fallbackpop)
+				await api.setOutputRoute(output, fallbackpop, !!action.options.ignore_lock)
 			}
 		},
 	}
@@ -373,6 +421,12 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				default: 0,
 				choices: inputChoices,
 			},
+			{
+				type: 'checkbox',
+				label: 'Ignore Lock',
+				id: 'ignore_lock',
+				default: false,
+			},
 		],
 		callback: async (action) => {
 			const output = state.getSelectedOutput()
@@ -394,7 +448,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 					'take_tally_route_dyn'
 				)
 			} else {
-				await api.setOutputRoute(output, Number(action.options.source))
+				await api.setOutputRoute(output, Number(action.options.source), !!action.options.ignore_lock)
 			}
 
 			let values: CompanionVariableValues = {}
@@ -444,7 +498,21 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 
 	actions['route_source_dyn'] = {
 		name: 'Route source to selected destination (dynamic)',
-		options: [{ type: 'textinput', label: 'Source', id: 'source', default: '', useVariables: { local: true } }],
+		options: [
+			{
+				type: 'textinput',
+				label: 'Source',
+				id: 'source',
+				default: '',
+				useVariables: { local: true },
+			},
+			{
+				type: 'checkbox',
+				label: 'Ignore Lock',
+				id: 'ignore_lock',
+				default: false,
+			},
+		],
 		callback: async (action, context) => {
 			let sourceNum: string = await context.parseVariablesInString(String(action.options.source))
 			let sourceId = Number(sourceNum) - 1
@@ -468,7 +536,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 					'take_tally_route_dyn'
 				)
 			} else {
-				await api.setOutputRoute(output, sourceId)
+				await api.setOutputRoute(output, sourceId, !!action.options.ignore_lock)
 			}
 
 			let values: CompanionVariableValues = {}
@@ -479,8 +547,15 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 
 	actions['take'] = {
 		name: 'Take',
-		options: [],
-		callback: async () => {
+		options: [
+			{
+				type: 'checkbox',
+				label: 'Ignore Lock',
+				id: 'ignore_lock',
+				default: false,
+			},
+		],
+		callback: async (action) => {
 			const op = state.queuedOp
 			state.queuedOp = undefined
 
@@ -500,7 +575,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 
 			if (!op || op.src === undefined) return
 
-			await api.setOutputRoute(op.output, op.src)
+			await api.setOutputRoute(op.output, op.src, !!action.options.ignore_lock)
 		},
 	}
 	actions['clear'] = {
@@ -525,6 +600,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 
 	actions['load_route_from_file'] = {
 		name: 'Load Routes File',
+		description: 'This will ignore any locked outputs',
 		options: [
 			{
 				type: 'textinput',
