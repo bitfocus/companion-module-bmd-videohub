@@ -81,7 +81,7 @@ class VideohubInstance extends InstanceBase<VideoHubConfig> {
 		}
 
 		this.setActionDefinitions(getActions(this, this.state))
-		this.setFeedbackDefinitions(getFeedbacks(this.state))
+		this.setFeedbackDefinitions(getFeedbacks(this, this.state))
 		this.setPresetDefinitions(getPresets(this.state))
 	}
 
