@@ -349,8 +349,8 @@ export class VideohubApi {
 		}
 	}
 
-	async setOutputLocked(output: OutputState, lock: LockState): Promise<void> {
-		if (lock !== 'U' && lock !== 'O') throw new Error('Invalid lock state')
+	async setOutputLocked(output: OutputState, lock: LockState | 'F'): Promise<void> {
+		if (lock !== 'U' && lock !== 'O' && lock !== 'F') throw new Error('Invalid lock state')
 
 		if (output.type === 'monitor') {
 			this.#sendCommand('MONITORING OUTPUT LOCKS:\n' + output.id + ' ' + lock + '\n\n')
@@ -359,8 +359,8 @@ export class VideohubApi {
 		}
 	}
 
-	async setSerialLocked(serial: SerialState, lock: LockState): Promise<void> {
-		if (lock !== 'U' && lock !== 'O') throw new Error('Invalid lock state')
+	async setSerialLocked(serial: SerialState, lock: LockState | 'F'): Promise<void> {
+		if (lock !== 'U' && lock !== 'O' && lock !== 'F') throw new Error('Invalid lock state')
 
 		this.#sendCommand('SERIAL PORT LOCKS:\n' + serial.id + ' ' + lock + '\n\n')
 	}

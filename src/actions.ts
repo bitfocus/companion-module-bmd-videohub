@@ -705,10 +705,18 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				default: 'U',
 				choices: lockChoices,
 			},
+			{
+				type: 'checkbox',
+				label: 'Force',
+				id: 'ignore_lock',
+				default: false,
+			},
 		],
 		callback: async (action) => {
 			const output = state.getOutputById(Number(action.options.output))
 			if (!output) return
+
+			if (action.options.ignore_lock) await api.setOutputLocked(output, 'F')
 
 			await api.setOutputLocked(output, action.options.lock_state as LockState)
 		},
@@ -732,6 +740,12 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				useVariables: { local: true },
 				tooltip: 'lock/unlock',
 			},
+			{
+				type: 'checkbox',
+				label: 'Force',
+				id: 'ignore_lock',
+				default: false,
+			},
 		],
 		callback: async (action, context) => {
 			// Parse internal variables from options textinputs
@@ -750,6 +764,8 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 
 			const output = state.getOutputById(outputId)
 			if (!output) return
+
+			if (action.options.ignore_lock) await api.setOutputLocked(output, 'F')
 
 			await api.setOutputLocked(output, lockState)
 		},
@@ -772,10 +788,18 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				default: 'U',
 				choices: lockChoices,
 			},
+			{
+				type: 'checkbox',
+				label: 'Force',
+				id: 'ignore_lock',
+				default: false,
+			},
 		],
 		callback: async (action) => {
 			const serial = state.getSerial(Number(action.options.serial))
 			if (!serial) return
+
+			if (action.options.ignore_lock) await api.setSerialLocked(serial, 'F')
 
 			await api.setSerialLocked(serial, action.options.lock_state as LockState)
 		},
@@ -799,6 +823,12 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				useVariables: { local: true },
 				tooltip: 'lock/unlock',
 			},
+			{
+				type: 'checkbox',
+				label: 'Force',
+				id: 'ignore_lock',
+				default: false,
+			},
 		],
 		callback: async (action, context) => {
 			let serialStr: string = await context.parseVariablesInString(String(action.options.serial))
@@ -814,6 +844,8 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 
 			const serial = state.getSerial(serialId)
 			if (!serial) return
+
+			if (action.options.ignore_lock) await api.setSerialLocked(serial, 'F')
 
 			await api.setSerialLocked(serial, lockState)
 		},
