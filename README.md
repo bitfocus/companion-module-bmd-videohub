@@ -2,6 +2,10 @@
 
 See HELP.md and LICENSE
 
+**Changes in v2.5.0**
+
+- Add option to force unlock
+
 **Changes in v2.4.0**
 
 - Routing from variables
