@@ -2,6 +2,12 @@
 
 See HELP.md and LICENSE
 
+**Changes in v2.6.0**
+
+- Reword actions & feedback names to be more uniform and clearer
+- Add option to toggle locks
+- Add feedbacks for lock states
+
 **Changes in v2.5.0**
 
 - Add option to force unlock
