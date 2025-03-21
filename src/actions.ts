@@ -702,7 +702,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				type: 'dropdown',
 				label: 'Lock State',
 				id: 'lock_state',
-				default: 'U',
+				default: 'T',
 				choices: lockChoices,
 			},
 			{
@@ -718,7 +718,12 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 
 			if (action.options.ignore_lock) await api.setOutputLocked(output, 'F')
 
-			await api.setOutputLocked(output, action.options.lock_state as LockState)
+			let target_state = String(action.options.lock_state) as LockState | 'F'
+			if (action.options.lock_state === 'T') {
+				target_state = output.lock === 'U' ? 'O' : 'U'
+			}
+
+			await api.setOutputLocked(output, target_state)
 		},
 	}
 
@@ -736,9 +741,9 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				type: 'textinput',
 				label: 'Lock State',
 				id: 'lock_state',
-				default: 'lock',
+				default: 'toggle',
 				useVariables: { local: true },
-				tooltip: 'lock/unlock',
+				tooltip: 'toggle/lock/unlock',
 			},
 			{
 				type: 'checkbox',
@@ -755,7 +760,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 			// Evaluate outpu expression
 			let outputId = Number(outputStr) - 1
 
-			const lockState = parseUserLockStateString(lockStr)
+			let lockState = parseUserLockStateString(lockStr)
 			self.log('info', 'lockState: ' + lockState + ' from ' + lockStr)
 			if (!lockState) {
 				self.log('error', "Can't evaluate lock state")
@@ -766,6 +771,10 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 			if (!output) return
 
 			if (action.options.ignore_lock) await api.setOutputLocked(output, 'F')
+
+			if (lockState === 'T') {
+				lockState = output.lock === 'U' ? 'O' : 'U'
+			}
 
 			await api.setOutputLocked(output, lockState)
 		},
@@ -786,7 +795,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 					type: 'dropdown',
 					label: 'Lock State',
 					id: 'lock_state',
-					default: 'U',
+					default: 'T',
 					choices: lockChoices,
 				},
 				{
@@ -802,7 +811,12 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 
 				if (action.options.ignore_lock) await api.setSerialLocked(serial, 'F')
 
-				await api.setSerialLocked(serial, action.options.lock_state as LockState)
+				let target_state = String(action.options.lock_state) as LockState | 'F'
+				if (action.options.lock_state === 'T') {
+					target_state = serial.lock === 'U' ? 'O' : 'U'
+				}
+
+				await api.setSerialLocked(serial, target_state)
 			},
 		}
 
@@ -820,9 +834,9 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 					type: 'textinput',
 					label: 'Lock State',
 					id: 'lock_state',
-					default: 'lock',
+					default: 'toggle',
 					useVariables: { local: true },
-					tooltip: 'lock/unlock',
+					tooltip: 'toggle/lock/unlock',
 				},
 				{
 					type: 'checkbox',
@@ -837,7 +851,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 
 				let serialId = Number(serialStr) - 1
 
-				const lockState = parseUserLockStateString(lockStr)
+				let lockState = parseUserLockStateString(lockStr)
 				if (!lockState) {
 					self.log('error', "Can't evaluate lock state")
 					return
@@ -847,6 +861,10 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				if (!serial) return
 
 				if (action.options.ignore_lock) await api.setSerialLocked(serial, 'F')
+
+				if (lockState === 'T') {
+					lockState = serial.lock === 'U' ? 'O' : 'U'
+				}
 
 				await api.setSerialLocked(serial, lockState)
 			},

@@ -23,6 +23,7 @@ export function getInputChoices(state: VideohubState): InputChoicesResult {
 		outputChoices: [],
 		serialChoices: [],
 		lockChoices: [
+			{ id: 'T', label: 'Toggle' },
 			{ id: 'U', label: 'Unlock' },
 			{ id: 'O', label: 'Lock' },
 		],
