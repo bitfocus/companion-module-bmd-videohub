@@ -16,7 +16,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 	const actions: CompanionActionDefinitions = {}
 
 	actions['rename_destination'] = {
-		name: 'Rename destination',
+		name: 'Video: Rename destination',
 		options: [
 			{
 				type: 'dropdown',
@@ -42,7 +42,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 		},
 	}
 	actions['rename_source'] = {
-		name: 'Rename source',
+		name: 'Video: Rename source',
 		options: [
 			{
 				type: 'dropdown',
@@ -71,7 +71,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 
 	if (serialChoices.length > 0) {
 		actions['rename_serial'] = {
-			name: 'Rename serial port',
+			name: 'Serial: Rename port',
 			options: [
 				{
 					type: 'dropdown',
@@ -100,7 +100,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 	}
 
 	actions['route'] = {
-		name: 'Route',
+		name: 'Video: Route source to destination',
 		options: [
 			{
 				type: 'dropdown',
@@ -132,7 +132,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 	}
 
 	actions['route_dyn'] = {
-		name: 'Route (dynamic)',
+		name: 'Video: Route source to destination (dynamic)',
 		options: [
 			{
 				type: 'textinput',
@@ -167,7 +167,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 	}
 
 	actions['route_routed'] = {
-		name: 'Route source routed to given destination',
+		name: 'Video: Route source to destination, based on another destination',
 		options: [
 			{
 				type: 'dropdown',
@@ -201,7 +201,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 	}
 
 	actions['route_routed_dyn'] = {
-		name: 'Route source routed to given destination (dynamic)',
+		name: 'Video: Route source to destination, based on another destination (dynamic)',
 		options: [
 			{
 				type: 'textinput',
@@ -239,7 +239,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 	}
 
 	actions['route_to_previous'] = {
-		name: 'Return to previous route',
+		name: 'Video: Return to previous route',
 		options: [
 			{
 				type: 'dropdown',
@@ -273,7 +273,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 
 	if (serialChoices.length > 0) {
 		actions['route_serial'] = {
-			name: 'Route serial port',
+			name: 'Serial: Route port',
 			options: [
 				{
 					type: 'dropdown',
@@ -305,7 +305,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 		}
 
 		actions['route_serial_dyn'] = {
-			name: 'Route serial port (dynamic)',
+			name: 'Serial: Route port (dynamic)',
 			options: [
 				{
 					type: 'textinput',
@@ -341,7 +341,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 	}
 
 	actions['route_to_previous_dyn'] = {
-		name: 'Return to previous route (dynamic)',
+		name: 'Video: Return to previous route (dynamic)',
 		options: [
 			{
 				type: 'textinput',
@@ -375,7 +375,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 	}
 
 	actions['select_destination'] = {
-		name: 'Select destination',
+		name: 'Video: Select destination',
 		options: [
 			{
 				type: 'dropdown',
@@ -412,7 +412,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 	}
 
 	actions['route_source'] = {
-		name: 'Route source to selected destination',
+		name: 'Video: Route source to selected destination',
 		options: [
 			{
 				type: 'dropdown',
@@ -458,7 +458,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 	}
 
 	actions['select_destination_dyn'] = {
-		name: 'Select destination (dynamic)',
+		name: 'Video: Select destination (dynamic)',
 		options: [
 			{
 				type: 'textinput',
@@ -497,7 +497,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 	}
 
 	actions['route_source_dyn'] = {
-		name: 'Route source to selected destination (dynamic)',
+		name: 'Video: Route source to selected destination (dynamic)',
 		options: [
 			{
 				type: 'textinput',
@@ -546,7 +546,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 	}
 
 	actions['take'] = {
-		name: 'Take',
+		name: 'Video: Take queued route',
 		options: [
 			{
 				type: 'checkbox',
@@ -579,7 +579,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 		},
 	}
 	actions['clear'] = {
-		name: 'Clear',
+		name: 'Video: Clear queued route',
 		options: [],
 		callback: () => {
 			state.queuedOp = undefined
@@ -599,7 +599,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 	}
 
 	actions['load_route_from_file'] = {
-		name: 'Load Routes File',
+		name: 'Route File: Load file',
 		description: 'This will ignore any locked outputs',
 		options: [
 			{
@@ -653,7 +653,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 	}
 
 	actions['store_route_in_file'] = {
-		name: 'Save Routes File',
+		name: 'Route File: Save file',
 		options: [
 			{
 				type: 'textinput',
@@ -689,11 +689,11 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 	}
 
 	actions['lock_output'] = {
-		name: 'Lock/Unlock Output',
+		name: 'Lock: Change destination lock state',
 		options: [
 			{
 				type: 'dropdown',
-				label: 'Output',
+				label: 'Destination',
 				id: 'output',
 				default: 0,
 				choices: outputChoices,
@@ -723,11 +723,11 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 	}
 
 	actions['lock_output_dyn'] = {
-		name: 'Lock/Unlock Output (dynamic)',
+		name: 'Lock: Change destination lock state (dynamic)',
 		options: [
 			{
 				type: 'textinput',
-				label: 'Output',
+				label: 'Destination',
 				id: 'output',
 				default: '',
 				useVariables: { local: true },
@@ -771,84 +771,86 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 		},
 	}
 
-	actions['lock_serial'] = {
-		name: 'Lock/Unlock Serial',
-		options: [
-			{
-				type: 'dropdown',
-				label: 'Serial',
-				id: 'serial',
-				default: 0,
-				choices: serialChoices,
+	if (serialChoices.length > 0) {
+		actions['lock_serial'] = {
+			name: 'Lock: Change serial port lock state',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Port',
+					id: 'serial',
+					default: 0,
+					choices: serialChoices,
+				},
+				{
+					type: 'dropdown',
+					label: 'Lock State',
+					id: 'lock_state',
+					default: 'U',
+					choices: lockChoices,
+				},
+				{
+					type: 'checkbox',
+					label: 'Force',
+					id: 'ignore_lock',
+					default: false,
+				},
+			],
+			callback: async (action) => {
+				const serial = state.getSerial(Number(action.options.serial))
+				if (!serial) return
+
+				if (action.options.ignore_lock) await api.setSerialLocked(serial, 'F')
+
+				await api.setSerialLocked(serial, action.options.lock_state as LockState)
 			},
-			{
-				type: 'dropdown',
-				label: 'Lock State',
-				id: 'lock_state',
-				default: 'U',
-				choices: lockChoices,
+		}
+
+		actions['lock_serial_dyn'] = {
+			name: 'Lock: Change serial port lock state (dynamic)',
+			options: [
+				{
+					type: 'textinput',
+					label: 'serial',
+					id: 'serial',
+					default: '',
+					useVariables: { local: true },
+				},
+				{
+					type: 'textinput',
+					label: 'Lock State',
+					id: 'lock_state',
+					default: 'lock',
+					useVariables: { local: true },
+					tooltip: 'lock/unlock',
+				},
+				{
+					type: 'checkbox',
+					label: 'Force',
+					id: 'ignore_lock',
+					default: false,
+				},
+			],
+			callback: async (action, context) => {
+				let serialStr: string = await context.parseVariablesInString(String(action.options.serial))
+				let lockStr: string = await context.parseVariablesInString(String(action.options.lock_state))
+
+				let serialId = Number(serialStr) - 1
+
+				const lockState = parseUserLockStateString(lockStr)
+				if (!lockState) {
+					self.log('error', "Can't evaluate lock state")
+					return
+				}
+
+				const serial = state.getSerial(serialId)
+				if (!serial) return
+
+				if (action.options.ignore_lock) await api.setSerialLocked(serial, 'F')
+
+				await api.setSerialLocked(serial, lockState)
 			},
-			{
-				type: 'checkbox',
-				label: 'Force',
-				id: 'ignore_lock',
-				default: false,
-			},
-		],
-		callback: async (action) => {
-			const serial = state.getSerial(Number(action.options.serial))
-			if (!serial) return
-
-			if (action.options.ignore_lock) await api.setSerialLocked(serial, 'F')
-
-			await api.setSerialLocked(serial, action.options.lock_state as LockState)
-		},
-	}
-
-	actions['lock_serial_dyn'] = {
-		name: 'Lock/Unlock Serial (dynamic)',
-		options: [
-			{
-				type: 'textinput',
-				label: 'serial',
-				id: 'serial',
-				default: '',
-				useVariables: { local: true },
-			},
-			{
-				type: 'textinput',
-				label: 'Lock State',
-				id: 'lock_state',
-				default: 'lock',
-				useVariables: { local: true },
-				tooltip: 'lock/unlock',
-			},
-			{
-				type: 'checkbox',
-				label: 'Force',
-				id: 'ignore_lock',
-				default: false,
-			},
-		],
-		callback: async (action, context) => {
-			let serialStr: string = await context.parseVariablesInString(String(action.options.serial))
-			let lockStr: string = await context.parseVariablesInString(String(action.options.lock_state))
-
-			let serialId = Number(serialStr) - 1
-
-			const lockState = parseUserLockStateString(lockStr)
-			if (!lockState) {
-				self.log('error', "Can't evaluate lock state")
-				return
-			}
-
-			const serial = state.getSerial(serialId)
-			if (!serial) return
-
-			if (action.options.ignore_lock) await api.setSerialLocked(serial, 'F')
-
-			await api.setSerialLocked(serial, lockState)
-		},
+		}
 	}
 
 	return actions

@@ -13,8 +13,7 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 
 	feedbacks['input_bg'] = {
 		type: 'boolean',
-		name: 'Change background color by destination',
-		description: 'If the input specified is in use by the output specified, change background color of the bank',
+		name: 'Video: Destination has specific source routed',
 		defaultStyle: {
 			color: combineRgb(0, 0, 0),
 			bgcolor: combineRgb(255, 255, 0),
@@ -22,14 +21,14 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 		options: [
 			{
 				type: 'dropdown',
-				label: 'Input',
+				label: 'Source',
 				id: 'input',
 				default: 0,
 				choices: inputChoices,
 			},
 			{
 				type: 'dropdown',
-				label: 'Output',
+				label: 'Destination',
 				id: 'output',
 				default: 0,
 				choices: outputChoices,
@@ -42,8 +41,7 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 
 	feedbacks['input_bg_dyn'] = {
 		type: 'boolean',
-		name: 'Change background color by destination (dynamic)',
-		description: 'If the input specified is in use by the output specified, change background color of the bank',
+		name: 'Video: Destination has specific source routed (dynamic)',
 		defaultStyle: {
 			color: combineRgb(0, 0, 0),
 			bgcolor: combineRgb(255, 255, 0),
@@ -51,14 +49,14 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 		options: [
 			{
 				type: 'textinput',
-				label: 'Output',
+				label: 'Destination',
 				id: 'output',
 				default: '',
 				useVariables: { local: true },
 			},
 			{
 				type: 'textinput',
-				label: 'Input',
+				label: 'Source',
 				id: 'input',
 				default: '',
 				useVariables: { local: true },
@@ -78,8 +76,7 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 	if (serialChoices.length > 0) {
 		feedbacks['serial_bg'] = {
 			type: 'boolean',
-			name: 'Change background color by serial route',
-			description: 'If the input specified is in use by the output specified, change background color of the bank',
+			name: 'Serial: Destination has specific source routed',
 			defaultStyle: {
 				color: combineRgb(0, 0, 0),
 				bgcolor: combineRgb(255, 255, 0),
@@ -87,14 +84,14 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 			options: [
 				{
 					type: 'dropdown',
-					label: 'Input',
+					label: 'Source',
 					id: 'input',
 					default: 0,
 					choices: serialChoices,
 				},
 				{
 					type: 'dropdown',
-					label: 'Output',
+					label: 'Destination',
 					id: 'output',
 					default: 0,
 					choices: serialChoices,
@@ -107,8 +104,7 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 
 		feedbacks['serial_bg_dyn'] = {
 			type: 'boolean',
-			name: 'Change background color by serial route (dynamic)',
-			description: 'If the input specified is in use by the output specified, change background color of the bank',
+			name: 'Serial: Destination has specific source routed (dynamic)',
 			defaultStyle: {
 				color: combineRgb(0, 0, 0),
 				bgcolor: combineRgb(255, 255, 0),
@@ -116,14 +112,14 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 			options: [
 				{
 					type: 'textinput',
-					label: 'Output',
+					label: 'Destination',
 					id: 'output',
 					default: '',
 					useVariables: { local: true },
 				},
 				{
 					type: 'textinput',
-					label: 'Input',
+					label: 'Source',
 					id: 'input',
 					default: '',
 					useVariables: { local: true },
@@ -142,8 +138,7 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 
 	feedbacks['selected_destination'] = {
 		type: 'boolean',
-		name: 'Change background color by selected destination',
-		description: 'If the output specified is selected, change background color of the bank',
+		name: 'Video: specified destination is selected',
 		defaultStyle: {
 			color: combineRgb(0, 0, 0),
 			bgcolor: combineRgb(255, 255, 0),
@@ -151,7 +146,7 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 		options: [
 			{
 				type: 'dropdown',
-				label: 'Output',
+				label: 'Destination',
 				id: 'output',
 				default: 0,
 				choices: outputChoices,
@@ -165,8 +160,7 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 
 	feedbacks['selected_destination_dyn'] = {
 		type: 'boolean',
-		name: 'Change background color by selected destination (dynamic)',
-		description: 'If the output specified is selected, change background color of the bank',
+		name: 'Video: specified destination is selected (dynamic)',
 		defaultStyle: {
 			color: combineRgb(0, 0, 0),
 			bgcolor: combineRgb(255, 255, 0),
@@ -174,7 +168,7 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 		options: [
 			{
 				type: 'textinput',
-				label: 'Output',
+				label: 'Destination',
 				id: 'output',
 				default: '',
 				useVariables: { local: true },
@@ -189,8 +183,7 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 
 	feedbacks['selected_source'] = {
 		type: 'boolean',
-		name: 'Change background color by route to selected destination',
-		description: 'If the input specified is in use by the selected output, change background color of the bank',
+		name: 'Video: Specified source is routed to selected destination',
 		defaultStyle: {
 			color: combineRgb(0, 0, 0),
 			bgcolor: combineRgb(255, 255, 255),
@@ -198,7 +191,7 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 		options: [
 			{
 				type: 'dropdown',
-				label: 'Input',
+				label: 'Source',
 				id: 'input',
 				default: 0,
 				choices: inputChoices,
@@ -211,8 +204,7 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 
 	feedbacks['selected_source_dyn'] = {
 		type: 'boolean',
-		name: 'Change background color by route to selected destination (dynamic)',
-		description: 'If the input specified is in use by the selected output, change background color of the bank',
+		name: 'Video: Specified source is routed to selected destination (dynamic)',
 		defaultStyle: {
 			color: combineRgb(0, 0, 0),
 			bgcolor: combineRgb(255, 255, 255),
@@ -220,7 +212,7 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 		options: [
 			{
 				type: 'textinput',
-				label: 'Input',
+				label: 'Source',
 				id: 'input',
 				default: '',
 				useVariables: { local: true },
@@ -235,8 +227,7 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 
 	feedbacks['take'] = {
 		type: 'boolean',
-		name: 'Change background color if take has a route queued',
-		description: 'If a route is queued for take, change background color of the bank',
+		name: 'Video: If there is a route queued',
 		defaultStyle: {
 			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(255, 0, 0),
@@ -249,8 +240,7 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 
 	feedbacks['take_tally_source'] = {
 		type: 'boolean',
-		name: 'Change background color if the selected source is queued in take',
-		description: 'If the selected source is queued for take, change background color of the bank',
+		name: 'Video: If the Specified source is queued for a take',
 		defaultStyle: {
 			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(255, 0, 0),
@@ -258,7 +248,7 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 		options: [
 			{
 				type: 'dropdown',
-				label: 'Input',
+				label: 'Source',
 				id: 'input',
 				default: 0,
 				choices: inputChoices,
@@ -274,8 +264,7 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 
 	feedbacks['take_tally_source_dyn'] = {
 		type: 'boolean',
-		name: 'Change background color if the selected source is queued in take (dynamic)',
-		description: 'If the selected source is queued for take, change background color of the bank',
+		name: 'Video: If the Specified source is queued for a take (dynamic)',
 		defaultStyle: {
 			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(255, 0, 0),
@@ -283,7 +272,7 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 		options: [
 			{
 				type: 'textinput',
-				label: 'Input',
+				label: 'Source',
 				id: 'input',
 				default: '',
 				useVariables: { local: true },
@@ -299,8 +288,7 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 
 	feedbacks['take_tally_dest'] = {
 		type: 'boolean',
-		name: 'Change background color if the selected destination is queued in take',
-		description: 'If the selected destination is queued for take, change background color of the bank',
+		name: 'Video: If the specified destination is queued for a take',
 		defaultStyle: {
 			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(255, 0, 0),
@@ -308,7 +296,7 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 		options: [
 			{
 				type: 'dropdown',
-				label: 'Output',
+				label: 'Destination',
 				id: 'output',
 				default: 0,
 				choices: outputChoices,
@@ -321,8 +309,7 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 
 	feedbacks['take_tally_dest_dyn'] = {
 		type: 'boolean',
-		name: 'Change background color if the selected destination is queued in take (dynamic)',
-		description: 'If the selected destination is queued for take, change background color of the bank',
+		name: 'Video: If the specified destination is queued for a take (dynamic)',
 		defaultStyle: {
 			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(255, 0, 0),
@@ -330,7 +317,7 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 		options: [
 			{
 				type: 'textinput',
-				label: 'Output',
+				label: 'Destination',
 				id: 'output',
 				default: '',
 				useVariables: { local: true },
