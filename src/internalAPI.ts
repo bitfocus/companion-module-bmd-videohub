@@ -152,6 +152,7 @@ export function updateLocks(self: InstanceBaseExt, labeltype: string, lines: str
 			}
 		}
 		self.setVariableValues(variableValues)
+		self.checkFeedbacks('lock_output', 'lock_output_dyn', 'lock_serial', 'lock_serial_dyn')
 	}
 }
 

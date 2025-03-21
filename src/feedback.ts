@@ -330,5 +330,108 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 		},
 	}
 
+	feedbacks['lock_output'] = {
+		type: 'boolean',
+		name: 'Lock: If destination is locked',
+		defaultStyle: {
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(255, 0, 0),
+		},
+		options: [
+			{
+				type: 'dropdown',
+				label: 'Destination',
+				id: 'output',
+				default: 0,
+				choices: outputChoices,
+			},
+		],
+		callback: async function (feedback) {
+			const output = state.getOutputById(Number(feedback.options.output))
+			if (!output) return false
+
+			return output.lock != 'U'
+		},
+	}
+
+	feedbacks['lock_output_dyn'] = {
+		type: 'boolean',
+		name: 'Lock: If destination is locked (dynamic)',
+		defaultStyle: {
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(255, 0, 0),
+		},
+		options: [
+			{
+				type: 'textinput',
+				label: 'Destination',
+				id: 'output',
+				default: '',
+				useVariables: { local: true },
+			},
+		],
+		callback: async function (feedback, context) {
+			// Parse internal variables from options textinputs
+			const outputStr: string = await context.parseVariablesInString(String(feedback.options.output))
+
+			const output = state.getOutputById(Number(outputStr) - 1)
+			if (!output) return false
+
+			return output.lock != 'U'
+		},
+	}
+
+	if (serialChoices.length > 0) {
+		feedbacks['lock_serial'] = {
+			type: 'boolean',
+			name: 'Lock: If serial port is locked',
+			defaultStyle: {
+				color: combineRgb(255, 255, 255),
+				bgcolor: combineRgb(255, 0, 0),
+			},
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Port',
+					id: 'serial',
+					default: 0,
+					choices: serialChoices,
+				},
+			],
+			callback: async function (feedback) {
+				const serial = state.getSerial(Number(feedback.options.serial))
+				if (!serial) return false
+
+				return serial.lock != 'U'
+			},
+		}
+
+		feedbacks['lock_serial_dyn'] = {
+			type: 'boolean',
+			name: 'Lock: If serial port is locked (dynamic)',
+			defaultStyle: {
+				color: combineRgb(255, 255, 255),
+				bgcolor: combineRgb(255, 0, 0),
+			},
+			options: [
+				{
+					type: 'textinput',
+					label: 'serial',
+					id: 'serial',
+					default: '',
+					useVariables: { local: true },
+				},
+			],
+			callback: async function (feedback, context) {
+				const serialStr: string = await context.parseVariablesInString(String(feedback.options.serial))
+
+				const serial = state.getSerial(Number(serialStr) - 1)
+				if (!serial) return false
+
+				return serial.lock != 'U'
+			},
+		}
+	}
+
 	return feedbacks
 }
