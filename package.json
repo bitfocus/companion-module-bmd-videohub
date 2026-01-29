@@ -18,7 +18,7 @@
 		"@companion-module/base": "~1.11.3"
 	},
 	"devDependencies": {
-		"@companion-module/tools": "^2.2.2",
+		"@companion-module/tools": "^2.6.1",
 		"rimraf": "^6.0.1",
 		"typescript": "~5.8.2"
 	},
