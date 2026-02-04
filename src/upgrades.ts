@@ -1,5 +1,5 @@
 import { CompanionStaticUpgradeScript, CreateConvertToBooleanFeedbackUpgradeScript } from '@companion-module/base'
-import { VideoHubConfig } from './config'
+import { VideoHubConfig } from './config.js'
 
 export const UpgradeScripts: CompanionStaticUpgradeScript<VideoHubConfig>[] = [
 	CreateConvertToBooleanFeedbackUpgradeScript({

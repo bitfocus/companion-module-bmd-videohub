@@ -1,6 +1,6 @@
 import { Regex, SomeCompanionConfigField } from '@companion-module/base'
 
-export interface VideoHubConfig {
+export type VideoHubConfig = {
 	bonjourHost?: string
 	host?: string
 	take?: boolean

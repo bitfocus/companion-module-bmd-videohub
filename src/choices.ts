@@ -1,5 +1,5 @@
 import type { DropdownChoice, CompanionVariableValues } from '@companion-module/base'
-import type { VideohubState } from './state'
+import type { VideohubState } from './state.js'
 
 export interface InputChoicesResult {
 	inputChoices: DropdownChoice[]
