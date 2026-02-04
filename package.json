@@ -19,9 +19,9 @@
 	},
 	"devDependencies": {
 		"@companion-module/tools": "^2.6.1",
-		"rimraf": "^6.0.1",
-		"typescript": "~5.8.2"
+		"rimraf": "^6.1.2",
+		"typescript": "~5.9.3"
 	},
 	"prettier": "@companion-module/tools/.prettierrc.json",
-	"packageManager": "yarn@4.7.0"
+	"packageManager": "yarn@4.12.0"
 }
