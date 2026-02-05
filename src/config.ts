@@ -1,6 +1,6 @@
 import { Regex, SomeCompanionConfigField } from '@companion-module/base'
 
-export interface VideoHubConfig {
+export type VideoHubConfig = {
 	bonjourHost?: string
 	host?: string
 	take?: boolean
@@ -27,21 +27,13 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			width: 6,
 		},
 		{
-			type: 'static-text',
-			id: 'bonjourHost-filler',
-			width: 6,
-			label: '',
-			value: '',
-			isVisible: (options) => !!options['bonjourHost'],
-		},
-		{
 			type: 'textinput',
 			id: 'host',
 			label: 'Videohub IP',
 			width: 6,
 			default: '192.168.10.150',
 			regex: Regex.IP,
-			isVisible: (options) => !options['bonjourHost'],
+			isVisibleExpression: `!$(options:bonjourHost)`,
 		},
 		{
 			type: 'checkbox',

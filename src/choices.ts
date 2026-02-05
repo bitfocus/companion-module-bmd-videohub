@@ -1,5 +1,5 @@
 import type { DropdownChoice, CompanionVariableValues } from '@companion-module/base'
-import type { VideohubState } from './state'
+import type { VideohubState } from './state.js'
 
 export interface InputChoicesResult {
 	inputChoices: DropdownChoice[]
@@ -17,7 +17,11 @@ export const LOCKSTATES: CompanionVariableValues = {
 /**
  * INTERNAL: use model data to define the choices for the dropdowns.
  */
-export function getInputChoices(state: VideohubState): InputChoicesResult {
+export function getInputChoices(
+	state: VideohubState,
+	/** @deprecated This is ugly */
+	oneIndexed: boolean,
+): InputChoicesResult {
 	const result: InputChoicesResult = {
 		inputChoices: [],
 		outputChoices: [],
@@ -31,19 +35,19 @@ export function getInputChoices(state: VideohubState): InputChoicesResult {
 
 	for (const input of state.iterateInputs()) {
 		if (input.status != 'None') {
-			result.inputChoices.push({ id: input.id, label: input.label })
+			result.inputChoices.push({ id: oneIndexed ? input.id + 1 : input.id, label: input.label })
 		}
 	}
 
 	for (const output of state.iterateAllOutputs()) {
 		if (output.status != 'None') {
-			result.outputChoices.push({ id: output.outputId, label: output.label })
+			result.outputChoices.push({ id: oneIndexed ? output.outputId + 1 : output.outputId, label: output.label })
 		}
 	}
 
 	for (const serial of state.iterateSerials()) {
 		if (serial.status != 'None') {
-			result.serialChoices.push({ id: serial.id, label: serial.label })
+			result.serialChoices.push({ id: oneIndexed ? serial.id + 1 : serial.id, label: serial.label })
 		}
 	}
 

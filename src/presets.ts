@@ -1,5 +1,5 @@
 import { combineRgb, CompanionPresetDefinitions } from '@companion-module/base'
-import { VideohubState } from './state'
+import { VideohubState } from './state.js'
 
 /**
  * INTERNAL: initialize presets.

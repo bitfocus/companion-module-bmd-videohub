@@ -1,4 +1,4 @@
-import { InstanceBase, InstanceStatus, runEntrypoint, TCPHelper } from '@companion-module/base'
+import { InstanceBase, InstanceStatus, TCPHelper } from '@companion-module/base'
 import { getConfigFields, VideoHubConfig } from './config.js'
 import { initVariables } from './variables.js'
 import { getPresets } from './presets.js'
@@ -9,18 +9,19 @@ import { VideohubState } from './state.js'
 import { UpgradeScripts } from './upgrades.js'
 import { IpAndPort } from './types.js'
 
+export { UpgradeScripts }
+
 /**
  * Companion instance class for the Blackmagic VideoHub Routers.
  *
- * !!! This class is being used by the bmd-multiview16 module, be careful !!!
- *
  * @extends InstanceBase
+ * @author Julian Waller <julian@bitfocus.io>
  * @author William Viker <william@bitfocus.io>
  * @author Keith Rocheck <keith.rocheck@gmail.com>
  * @author Peter Schuster
  * @author Jim Amen <jim.amen50@gmail.com>
  */
-class VideohubInstance extends InstanceBase<VideoHubConfig> {
+export default class VideohubInstance extends InstanceBase<VideoHubConfig> {
 	readonly state: VideohubState
 
 	socket: TCPHelper | undefined
@@ -254,5 +255,3 @@ class VideohubInstance extends InstanceBase<VideoHubConfig> {
 		return null
 	}
 }
-
-runEntrypoint(VideohubInstance, UpgradeScripts)

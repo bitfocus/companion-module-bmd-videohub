@@ -5,20 +5,13 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
-"@companion-module/base@npm:~1.11.3":
-  version: 1.11.3
-  resolution: "@companion-module/base@npm:1.11.3"
+"@companion-module/base@npm:2.0.0-0-nightly-feat-2-0-20260131-124809-4f9655d":
+  version: 2.0.0-0-nightly-feat-2-0-20260131-124809-4f9655d
+  resolution: "@companion-module/base@npm:2.0.0-0-nightly-feat-2-0-20260131-124809-4f9655d"
   dependencies:
-    ajv: "npm:^8.17.1"
     colord: "npm:^2.9.3"
-    ejson: "npm:^2.2.3"
-    eventemitter3: "npm:^5.0.1"
-    mimic-fn: "npm:^3.1.0"
-    nanoid: "npm:^3.3.8"
-    p-queue: "npm:^6.6.2"
-    p-timeout: "npm:^4.1.0"
     tslib: "npm:^2.8.1"
-  checksum: 10c0/19acbc544de97ed8f02abf03e1d657085e51f0e92363456a84bdc1975723ba1bdfc0e943ff17444cb4e6a2b588abb794a9c5b48efb4d784be32784362e7c4efd
+  checksum: 10c0/bf0bfeef7033d1ffffacdb435f40b361648049ac772e1e1f9d80ddc5b61ddf548f2f30bbeb34ee73a5aa72f5e8517da718c00b89295c27f078330cfd76af512a
   languageName: node
   linkType: hard
 
@@ -464,7 +457,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ajv@npm:^8.0.0, ajv@npm:^8.17.1, ajv@npm:^8.9.0":
+"ajv@npm:^8.0.0, ajv@npm:^8.9.0":
   version: 8.17.1
   resolution: "ajv@npm:8.17.1"
   dependencies:
@@ -496,7 +489,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "bmd-videohub@workspace:."
   dependencies:
-    "@companion-module/base": "npm:~1.11.3"
+    "@companion-module/base": "npm:2.0.0-0-nightly-feat-2-0-20260131-124809-4f9655d"
     "@companion-module/tools": "npm:^2.6.1"
     rimraf: "npm:^6.1.2"
     typescript: "npm:~5.9.3"
@@ -593,13 +586,6 @@ __metadata:
     shebang-command: "npm:^2.0.0"
     which: "npm:^2.0.1"
   checksum: 10c0/053ea8b2135caff68a9e81470e845613e374e7309a47731e81639de3eaeb90c3d01af0e0b44d2ab9d50b43467223b88567dfeb3262db942dc063b9976718ffc1
-  languageName: node
-  linkType: hard
-
-"ejson@npm:^2.2.3":
-  version: 2.2.3
-  resolution: "ejson@npm:2.2.3"
-  checksum: 10c0/648ea347f5e57441b7b9341adc6de244445b6da1d0e7747ea7a083f906299b92e4c44fc29e6de0b240d8fa4a73159e85f9367780d7af2ecbc50aae8a4e4961ae
   languageName: node
   linkType: hard
 
@@ -754,20 +740,6 @@ __metadata:
   version: 5.3.0
   resolution: "estraverse@npm:5.3.0"
   checksum: 10c0/1ff9447b96263dec95d6d67431c5e0771eb9776427421260a3e2f0fdd5d6bd4f8e37a7338f5ad2880c9f143450c9b1e4fc2069060724570a49cf9cf0312bd107
-  languageName: node
-  linkType: hard
-
-"eventemitter3@npm:^4.0.4":
-  version: 4.0.7
-  resolution: "eventemitter3@npm:4.0.7"
-  checksum: 10c0/5f6d97cbcbac47be798e6355e3a7639a84ee1f7d9b199a07017f1d2f1e2fe236004d14fa5dfaeba661f94ea57805385e326236a6debbc7145c8877fbc0297c6b
-  languageName: node
-  linkType: hard
-
-"eventemitter3@npm:^5.0.1":
-  version: 5.0.1
-  resolution: "eventemitter3@npm:5.0.1"
-  checksum: 10c0/4ba5c00c506e6c786b4d6262cfbce90ddc14c10d4667e5c83ae993c9de88aa856033994dd2b35b83e8dc1170e224e66a319fa80adc4c32adcd2379bbc75da814
   languageName: node
   linkType: hard
 
@@ -1052,13 +1024,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mimic-fn@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "mimic-fn@npm:3.1.0"
-  checksum: 10c0/a07cdd8ed6490c2dff5b11f889b245d9556b80f5a653a552a651d17cff5a2d156e632d235106c2369f00cccef4071704589574cf3601bc1b1400a1f620dff067
-  languageName: node
-  linkType: hard
-
 "minimatch@npm:^10.1.2":
   version: 10.1.2
   resolution: "minimatch@npm:10.1.2"
@@ -1084,15 +1049,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nanoid@npm:^3.3.8":
-  version: 3.3.8
-  resolution: "nanoid@npm:3.3.8"
-  bin:
-    nanoid: bin/nanoid.cjs
-  checksum: 10c0/4b1bb29f6cfebf3be3bc4ad1f1296fb0a10a3043a79f34fbffe75d1621b4318319211cd420549459018ea3592f0d2f159247a6f874911d6d26eaaadda2478120
-  languageName: node
-  linkType: hard
-
 "neo-async@npm:^2.6.2":
   version: 2.6.2
   resolution: "neo-async@npm:2.6.2"
@@ -1104,13 +1060,6 @@ __metadata:
   version: 2.0.27
   resolution: "node-releases@npm:2.0.27"
   checksum: 10c0/f1e6583b7833ea81880627748d28a3a7ff5703d5409328c216ae57befbced10ce2c991bea86434e8ec39003bd017f70481e2e5f8c1f7e0a7663241f81d6e00e2
-  languageName: node
-  linkType: hard
-
-"p-finally@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "p-finally@npm:1.0.0"
-  checksum: 10c0/6b8552339a71fe7bd424d01d8451eea92d379a711fc62f6b2fe64cad8a472c7259a236c9a22b4733abca0b5666ad503cb497792a0478c5af31ded793d00937e7
   languageName: node
   linkType: hard
 
@@ -1147,32 +1096,6 @@ __metadata:
   dependencies:
     p-limit: "npm:^4.0.0"
   checksum: 10c0/d72fa2f41adce59c198270aa4d3c832536c87a1806e0f69dffb7c1a7ca998fb053915ca833d90f166a8c082d3859eabfed95f01698a3214c20df6bb8de046312
-  languageName: node
-  linkType: hard
-
-"p-queue@npm:^6.6.2":
-  version: 6.6.2
-  resolution: "p-queue@npm:6.6.2"
-  dependencies:
-    eventemitter3: "npm:^4.0.4"
-    p-timeout: "npm:^3.2.0"
-  checksum: 10c0/5739ecf5806bbeadf8e463793d5e3004d08bb3f6177bd1a44a005da8fd81bb90f80e4633e1fb6f1dfd35ee663a5c0229abe26aebb36f547ad5a858347c7b0d3e
-  languageName: node
-  linkType: hard
-
-"p-timeout@npm:^3.2.0":
-  version: 3.2.0
-  resolution: "p-timeout@npm:3.2.0"
-  dependencies:
-    p-finally: "npm:^1.0.0"
-  checksum: 10c0/524b393711a6ba8e1d48137c5924749f29c93d70b671e6db761afa784726572ca06149c715632da8f70c090073afb2af1c05730303f915604fd38ee207b70a61
-  languageName: node
-  linkType: hard
-
-"p-timeout@npm:^4.1.0":
-  version: 4.1.0
-  resolution: "p-timeout@npm:4.1.0"
-  checksum: 10c0/25aaf13ae9ebfff4ab45591f6647f3bee1ecede073c367175fb0157c27efb170cfb51259a4d2e9118d2ca595453bc885f086ad0ca7476d1c26cee3d13a7c9f6d
   languageName: node
   linkType: hard
 
