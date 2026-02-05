@@ -11,7 +11,7 @@ import type { VideohubApi } from './internalAPI.js'
  * Get the available actions.
  */
 export function getActions(self: InstanceBaseExt, api: VideohubApi, state: VideohubState): CompanionActionDefinitions {
-	const { inputChoices, outputChoices, serialChoices, lockChoices } = getInputChoices(state)
+	const { inputChoices, outputChoices, serialChoices, lockChoices } = getInputChoices(state, true)
 
 	const actions: CompanionActionDefinitions = {}
 
@@ -22,7 +22,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				type: 'dropdown',
 				label: 'Destination',
 				id: 'destination',
-				default: 0,
+				default: 1,
 				choices: outputChoices,
 			},
 			{
@@ -35,7 +35,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 		],
 		callback: async (action) => {
 			let name: string = String(action.options.label)
-			const output = state.getOutputById(Number(action.options.destination))
+			const output = state.getOutputById(Number(action.options.destination) - 1)
 			if (!output) return
 
 			await api.setOutputLabel(output, name)
@@ -48,7 +48,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				type: 'dropdown',
 				label: 'Source',
 				id: 'source',
-				default: 0,
+				default: 1,
 				choices: inputChoices,
 			},
 			{
@@ -62,7 +62,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 		callback: async (action) => {
 			let name: string = String(action.options.label)
 
-			const input = state.getInput(Number(action.options.source))
+			const input = state.getInput(Number(action.options.source) - 1)
 			if (!input) return
 
 			await api.setInputLabel(input, name)
@@ -77,7 +77,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 					type: 'dropdown',
 					label: 'Serial Port',
 					id: 'serial',
-					default: 0,
+					default: 1,
 					choices: serialChoices,
 				},
 				{
@@ -91,7 +91,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 			callback: async (action) => {
 				let name: string = String(action.options.label)
 
-				const serial = state.getSerial(Number(action.options.serial))
+				const serial = state.getSerial(Number(action.options.serial) - 1)
 				if (!serial) return
 
 				await api.setSerialLabel(serial, name)
@@ -106,14 +106,14 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				type: 'dropdown',
 				label: 'Source',
 				id: 'source',
-				default: 0,
+				default: 1,
 				choices: inputChoices,
 			},
 			{
 				type: 'dropdown',
 				label: 'Destination',
 				id: 'destination',
-				default: 0,
+				default: 1,
 				choices: outputChoices,
 			},
 			{
@@ -124,10 +124,10 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 			},
 		],
 		callback: async (action) => {
-			const output = state.getOutputById(Number(action.options.destination))
+			const output = state.getOutputById(Number(action.options.destination) - 1)
 			if (!output) return
 
-			await api.setOutputRoute(output, Number(action.options.source), !!action.options.ignore_lock)
+			await api.setOutputRoute(output, Number(action.options.source) - 1, !!action.options.ignore_lock)
 		},
 	}
 
@@ -173,14 +173,14 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				type: 'dropdown',
 				label: 'Destination to take routed source from',
 				id: 'source_routed_to_destination',
-				default: 0,
+				default: 1,
 				choices: outputChoices,
 			},
 			{
 				type: 'dropdown',
 				label: 'Destination',
 				id: 'destination',
-				default: 0,
+				default: 1,
 				choices: outputChoices,
 			},
 			{
@@ -191,8 +191,8 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 			},
 		],
 		callback: async (action) => {
-			const thisOutput = state.getOutputById(Number(action.options.destination))
-			const otherOutput = state.getOutputById(Number(action.options.source_routed_to_destination))
+			const thisOutput = state.getOutputById(Number(action.options.destination) - 1)
+			const otherOutput = state.getOutputById(Number(action.options.source_routed_to_destination) - 1)
 
 			if (!thisOutput || !otherOutput) return
 
@@ -245,7 +245,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				type: 'dropdown',
 				label: 'Destination',
 				id: 'destination',
-				default: 0,
+				default: 1,
 				choices: outputChoices,
 			},
 			{
@@ -256,7 +256,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 			},
 		],
 		callback: async (action) => {
-			const output = state.getOutputById(Number(action.options.destination))
+			const output = state.getOutputById(Number(action.options.destination) - 1)
 
 			if (!output) return
 
@@ -279,14 +279,14 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 					type: 'dropdown',
 					label: 'Source',
 					id: 'source',
-					default: 0,
+					default: 1,
 					choices: serialChoices,
 				},
 				{
 					type: 'dropdown',
 					label: 'Destination',
 					id: 'destination',
-					default: '1',
+					default: 1,
 					choices: serialChoices,
 				},
 				{
@@ -297,10 +297,10 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				},
 			],
 			callback: async (action) => {
-				const serial = state.getSerial(Number(action.options.destination))
+				const serial = state.getSerial(Number(action.options.destination) - 1)
 				if (!serial) return
 
-				await api.setSerialRoute(serial, Number(action.options.source), !!action.options.ignore_lock)
+				await api.setSerialRoute(serial, Number(action.options.source) - 1, !!action.options.ignore_lock)
 			},
 		}
 
@@ -381,12 +381,12 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				type: 'dropdown',
 				label: 'Destination',
 				id: 'destination',
-				default: 0,
+				default: 1,
 				choices: outputChoices,
 			},
 		],
 		callback: (action) => {
-			const output = state.getOutputById(Number(action.options.destination))
+			const output = state.getOutputById(Number(action.options.destination) - 1)
 			if (!output) return
 
 			state.selectedDestination = output.outputId
@@ -418,7 +418,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				type: 'dropdown',
 				label: 'Source',
 				id: 'source',
-				default: 0,
+				default: 1,
 				choices: inputChoices,
 			},
 			{
@@ -448,7 +448,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 					'take_tally_route_dyn',
 				)
 			} else {
-				await api.setOutputRoute(output, Number(action.options.source), !!action.options.ignore_lock)
+				await api.setOutputRoute(output, Number(action.options.source) - 1, !!action.options.ignore_lock)
 			}
 
 			let values: CompanionVariableValues = {}
@@ -575,7 +575,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 
 			if (!op || op.src === undefined) return
 
-			await api.setOutputRoute(op.output, op.src, !!action.options.ignore_lock)
+			await api.setOutputRoute(op.output, op.src - 1, !!action.options.ignore_lock)
 		},
 	}
 	actions['clear'] = {
@@ -695,7 +695,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				type: 'dropdown',
 				label: 'Destination',
 				id: 'output',
-				default: 0,
+				default: 1,
 				choices: outputChoices,
 			},
 			{
@@ -713,7 +713,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 			},
 		],
 		callback: async (action) => {
-			const output = state.getOutputById(Number(action.options.output))
+			const output = state.getOutputById(Number(action.options.output) - 1)
 			if (!output) return
 
 			if (action.options.ignore_lock) await api.setOutputLocked(output, 'F')
@@ -788,7 +788,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 					type: 'dropdown',
 					label: 'Port',
 					id: 'serial',
-					default: 0,
+					default: 1,
 					choices: serialChoices,
 				},
 				{
@@ -806,7 +806,7 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				},
 			],
 			callback: async (action) => {
-				const serial = state.getSerial(Number(action.options.serial))
+				const serial = state.getSerial(Number(action.options.serial) - 1)
 				if (!serial) return
 
 				if (action.options.ignore_lock) await api.setSerialLocked(serial, 'F')

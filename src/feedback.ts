@@ -7,7 +7,7 @@ import type { InstanceBaseExt } from './types.js'
  * Get the available feedbacks.
  */
 export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): CompanionFeedbackDefinitions {
-	const { inputChoices, outputChoices, serialChoices } = getInputChoices(state)
+	const { inputChoices, outputChoices, serialChoices } = getInputChoices(state, true)
 
 	const feedbacks: CompanionFeedbackDefinitions = {}
 
@@ -23,19 +23,19 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 				type: 'dropdown',
 				label: 'Source',
 				id: 'input',
-				default: 0,
+				default: 1,
 				choices: inputChoices,
 			},
 			{
 				type: 'dropdown',
 				label: 'Destination',
 				id: 'output',
-				default: 0,
+				default: 1,
 				choices: outputChoices,
 			},
 		],
 		callback: (feedback) => {
-			return state.getOutputById(Number(feedback.options.output))?.route == Number(feedback.options.input)
+			return state.getOutputById(Number(feedback.options.output) - 1)?.route == Number(feedback.options.input) - 1
 		},
 	}
 
@@ -86,19 +86,19 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 					type: 'dropdown',
 					label: 'Source',
 					id: 'input',
-					default: 0,
+					default: 1,
 					choices: serialChoices,
 				},
 				{
 					type: 'dropdown',
 					label: 'Destination',
 					id: 'output',
-					default: 0,
+					default: 1,
 					choices: serialChoices,
 				},
 			],
 			callback: (feedback) => {
-				return state.getSerial(Number(feedback.options.output))?.route == Number(feedback.options.input)
+				return state.getSerial(Number(feedback.options.output) - 1)?.route == Number(feedback.options.input) - 1
 			},
 		}
 
@@ -148,13 +148,13 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 				type: 'dropdown',
 				label: 'Destination',
 				id: 'output',
-				default: 0,
+				default: 1,
 				choices: outputChoices,
 			},
 		],
 		callback: (feedback) => {
 			self.log('debug', 'selected source : ' + state.selectedDestination)
-			return Number(feedback.options.output) == state.selectedDestination
+			return Number(feedback.options.output) - 1 == state.selectedDestination
 		},
 	}
 
@@ -193,12 +193,12 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 				type: 'dropdown',
 				label: 'Source',
 				id: 'input',
-				default: 0,
+				default: 1,
 				choices: inputChoices,
 			},
 		],
 		callback: (feedback) => {
-			return state.getSelectedOutput()?.route == Number(feedback.options.input)
+			return state.getSelectedOutput()?.route == Number(feedback.options.input) - 1
 		},
 	}
 
@@ -250,13 +250,13 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 				type: 'dropdown',
 				label: 'Source',
 				id: 'input',
-				default: 0,
+				default: 1,
 				choices: inputChoices,
 			},
 		],
 		callback: (feedback) => {
 			return (
-				Number(feedback.options.input) == state.queuedOp?.src &&
+				Number(feedback.options.input) - 1 == state.queuedOp?.src &&
 				state.selectedDestination == state.queuedOp?.output.outputId
 			)
 		},
@@ -298,12 +298,12 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 				type: 'dropdown',
 				label: 'Destination',
 				id: 'output',
-				default: 0,
+				default: 1,
 				choices: outputChoices,
 			},
 		],
 		callback: (feedback) => {
-			return Number(feedback.options.output) == state.queuedOp?.output.outputId
+			return Number(feedback.options.output) - 1 == state.queuedOp?.output.outputId
 		},
 	}
 
@@ -342,12 +342,12 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 				type: 'dropdown',
 				label: 'Destination',
 				id: 'output',
-				default: 0,
+				default: 1,
 				choices: outputChoices,
 			},
 		],
 		callback: async function (feedback) {
-			const output = state.getOutputById(Number(feedback.options.output))
+			const output = state.getOutputById(Number(feedback.options.output) - 1)
 			if (!output) return false
 
 			return output.lock != 'U'
@@ -394,12 +394,12 @@ export function getFeedbacks(self: InstanceBaseExt, state: VideohubState): Compa
 					type: 'dropdown',
 					label: 'Port',
 					id: 'serial',
-					default: 0,
+					default: 1,
 					choices: serialChoices,
 				},
 			],
 			callback: async function (feedback) {
-				const serial = state.getSerial(Number(feedback.options.serial))
+				const serial = state.getSerial(Number(feedback.options.serial) - 1)
 				if (!serial) return false
 
 				return serial.lock != 'U'
