@@ -1,10 +1,10 @@
 import type { CompanionActionDefinitions, CompanionVariableValues } from '@companion-module/base'
 import fs from 'fs/promises'
 import { getInputChoices } from './choices.js'
-import { LockState, OutputState, type VideohubState } from './state.js'
+import { OutputState, type VideohubState } from './state.js'
 import type { InstanceBaseExt } from './types.js'
 import { updateSelectedDestinationVariables } from './variables.js'
-// import { parseUserLockStateString } from './util.js'
+import { parseUserLockStateString } from './util.js'
 import type { VideohubApi } from './internalAPI.js'
 
 /**
@@ -474,6 +474,8 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 				id: 'lock_state',
 				default: 'T',
 				choices: lockChoices,
+				allowInvalidValues: true,
+				expressionDescription: 'T = Toggle, U = Unlock, O = Lock',
 			},
 			{
 				type: 'checkbox',
@@ -488,12 +490,18 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 
 			if (action.options.ignore_lock) await api.setOutputLocked(output, 'F')
 
-			let target_state = String(action.options.lock_state) as LockState | 'F'
-			if (action.options.lock_state === 'T') {
-				target_state = output.lock === 'U' ? 'O' : 'U'
+			let lockState = parseUserLockStateString(String(action.options.lock_state))
+			self.log('info', `lockState: ${lockState} from ${String(action.options.lock_state)}`)
+			if (!lockState) {
+				self.log('error', "Can't evaluate lock state")
+				return
 			}
 
-			await api.setOutputLocked(output, target_state)
+			if (lockState === 'T') {
+				lockState = output.lock === 'U' ? 'O' : 'U'
+			}
+
+			await api.setOutputLocked(output, lockState)
 		},
 	}
 
@@ -514,6 +522,8 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 					id: 'lock_state',
 					default: 'T',
 					choices: lockChoices,
+					allowInvalidValues: true,
+					expressionDescription: 'T = Toggle, U = Unlock, O = Lock',
 				},
 				{
 					type: 'checkbox',
@@ -528,12 +538,18 @@ export function getActions(self: InstanceBaseExt, api: VideohubApi, state: Video
 
 				if (action.options.ignore_lock) await api.setSerialLocked(serial, 'F')
 
-				let target_state = String(action.options.lock_state) as LockState | 'F'
-				if (action.options.lock_state === 'T') {
-					target_state = serial.lock === 'U' ? 'O' : 'U'
+				let lockState = parseUserLockStateString(String(action.options.lock_state))
+				self.log('info', `lockState: ${lockState} from ${String(action.options.lock_state)}`)
+				if (!lockState) {
+					self.log('error', "Can't evaluate lock state")
+					return
 				}
 
-				await api.setSerialLocked(serial, target_state)
+				if (lockState === 'T') {
+					lockState = serial.lock === 'U' ? 'O' : 'U'
+				}
+
+				await api.setSerialLocked(serial, lockState)
 			},
 		}
 	}
