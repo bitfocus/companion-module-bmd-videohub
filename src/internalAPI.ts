@@ -152,7 +152,7 @@ export function updateLocks(self: InstanceBaseExt, labeltype: string, lines: str
 			}
 		}
 		self.setVariableValues(variableValues)
-		self.checkFeedbacks('lock_output', 'lock_output_dyn', 'lock_serial', 'lock_serial_dyn')
+		self.checkFeedbacks('lock_output', 'lock_serial')
 	}
 }
 
@@ -215,7 +215,7 @@ export function updateRouting(self: InstanceBaseExt, state: VideohubState, label
 	updateSelectedDestinationVariables(state, variableValues)
 
 	self.setVariableValues(variableValues)
-	self.checkFeedbacks('input_bg', 'selected_source', 'input_bg_dyn', 'selected_source_dyn')
+	self.checkFeedbacks('input_bg', 'selected_source')
 }
 
 // /**

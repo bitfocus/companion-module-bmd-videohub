@@ -36,7 +36,9 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions<Vid
 				down: [
 					{
 						actionId: 'take',
-						options: {},
+						options: {
+							ignore_lock: false,
+						},
 					},
 				],
 				up: [],
@@ -166,6 +168,7 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions<Vid
 							actionId: 'route_source',
 							options: {
 								source: input.id,
+								ignore_lock: false,
 							},
 						},
 					],
@@ -209,6 +212,7 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions<Vid
 								options: {
 									source: input.id,
 									destination: output.outputId,
+									ignore_lock: false,
 								},
 							},
 						],
@@ -248,6 +252,7 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions<Vid
 								options: {
 									source: input.id,
 									destination: output.outputId,
+									ignore_lock: false,
 								},
 							},
 						],
@@ -256,6 +261,7 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions<Vid
 								actionId: 'route_to_previous',
 								options: {
 									destination: output.outputId,
+									ignore_lock: false,
 								},
 							},
 						],
@@ -303,6 +309,7 @@ export function getPresets(state: VideohubState): CompanionPresetDefinitions<Vid
 								options: {
 									source: serialIn.id,
 									destination: serialOut.id,
+									ignore_lock: false,
 								},
 							},
 						],
