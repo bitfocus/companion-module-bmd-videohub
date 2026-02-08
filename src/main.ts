@@ -7,7 +7,7 @@ import { getFeedbacks } from './feedback.js'
 import { updateDevice, updateLabels, updateRouting, updateStatus, updateLocks, VideohubApi } from './internalAPI.js'
 import { VideohubState } from './state.js'
 import { UpgradeScripts } from './upgrades.js'
-import { IpAndPort } from './types.js'
+import type { InstanceBaseExt, IpAndPort, VideohubTypes } from './types.js'
 
 export { UpgradeScripts }
 
@@ -21,7 +21,7 @@ export { UpgradeScripts }
  * @author Peter Schuster
  * @author Jim Amen <jim.amen50@gmail.com>
  */
-export default class VideohubInstance extends InstanceBase<VideoHubConfig> {
+export default class VideohubInstance extends InstanceBase<VideohubTypes> implements InstanceBaseExt {
 	readonly state: VideohubState
 
 	socket: TCPHelper | undefined

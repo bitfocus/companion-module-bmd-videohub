@@ -1,5 +1,6 @@
 import { combineRgb, CompanionPresetDefinitions } from '@companion-module/base'
 import { VideohubState } from './state.js'
+import { VideohubTypes } from './types.js'
 
 /**
  * INTERNAL: initialize presets.
@@ -7,8 +8,8 @@ import { VideohubState } from './state.js'
  * @access protected
  * @since 1.1.1
  */
-export function getPresets(state: VideohubState): CompanionPresetDefinitions {
-	const presets: CompanionPresetDefinitions = {}
+export function getPresets(state: VideohubState): CompanionPresetDefinitions<VideohubTypes> {
+	const presets: CompanionPresetDefinitions<VideohubTypes> = {}
 
 	presets['take'] = {
 		category: 'Actions\n(XY only)',

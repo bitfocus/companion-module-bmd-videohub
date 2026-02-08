@@ -1,12 +1,12 @@
 import type { CompanionVariableDefinition, CompanionVariableValues, InstanceBase } from '@companion-module/base'
-import type { VideoHubConfig } from './config.js'
+import type { VideohubTypes } from './types.js'
 import type { VideohubState } from './state.js'
 import { LOCKSTATES } from './choices.js'
 
 /**
  * Initialize variables.
  */
-export function initVariables(self: InstanceBase<VideoHubConfig>, state: VideohubState): void {
+export function initVariables(self: InstanceBase<VideohubTypes>, state: VideohubState): void {
 	const variableDefinitions: CompanionVariableDefinition[] = []
 	const variableValues: CompanionVariableValues = {}
 
@@ -105,7 +105,7 @@ export function initVariables(self: InstanceBase<VideoHubConfig>, state: Videohu
 
 export function updateSelectedDestinationVariables(
 	state: VideohubState,
-	variableValues: CompanionVariableValues
+	variableValues: CompanionVariableValues,
 ): void {
 	const selectedOutput = state.getSelectedOutput()
 	const inputForSelectedOutput = selectedOutput ? state.getInput(selectedOutput.route) : undefined

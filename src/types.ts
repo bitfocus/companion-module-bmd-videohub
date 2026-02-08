@@ -1,8 +1,15 @@
-import type { InstanceBase, TCPHelper } from '@companion-module/base'
+import type { InstanceBase, InstanceTypes, TCPHelper } from '@companion-module/base'
 import type { VideoHubConfig } from './config.js'
 import type { VideohubState } from './state.js'
 
-export interface InstanceBaseExt extends InstanceBase<VideoHubConfig> {
+export interface VideohubTypes {
+	config: VideoHubConfig
+	secrets: undefined
+	actions: InstanceTypes['actions']
+	feedbacks: InstanceTypes['feedbacks']
+}
+
+export interface InstanceBaseExt extends InstanceBase<VideohubTypes> {
 	readonly state: VideohubState
 
 	config: VideoHubConfig

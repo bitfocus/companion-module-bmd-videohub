@@ -172,6 +172,9 @@ const mergeDynSuffixToBeExpressions: CompanionStaticUpgradeScript<VideoHubConfig
 		updatedFeedbacks: [],
 	}
 
+	/**
+	 * @deprecated replace with builtin FixupNumericOrVariablesValueToExpressions
+	 */
 	const fixupNumericValue = (options: CompanionMigrationOptionValues, key: string) => {
 		const oldVal = options[key]
 		if (!oldVal) return
