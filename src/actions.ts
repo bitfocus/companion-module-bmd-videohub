@@ -1,9 +1,9 @@
-import type { CompanionActionDefinitions, CompanionVariableValues } from '@companion-module/base'
+import type { CompanionActionDefinitions } from '@companion-module/base'
 import fs from 'fs/promises'
 import { getInputChoices } from './choices.js'
 import { OutputState, type VideohubState } from './state.js'
 import type { InstanceBaseExt } from './types.js'
-import { updateSelectedDestinationVariables } from './variables.js'
+import { updateSelectedDestinationVariables, type VariablesSchema } from './variables.js'
 import { parseUserLockStateString } from './util.js'
 import type { VideohubApi } from './internalAPI.js'
 
@@ -289,7 +289,6 @@ export function getActions(
 			},
 		},
 
-		// if (serialChoices.length > 0) {
 		route_serial: serialChoices.length > 0 && {
 			name: 'Serial: Route port',
 			options: [
@@ -344,7 +343,7 @@ export function getActions(
 
 				self.checkFeedbacks('selected_destination', 'take_tally_dest', 'selected_source', 'take_tally_source')
 
-				let values: CompanionVariableValues = {}
+				let values: Partial<VariablesSchema> = {}
 				updateSelectedDestinationVariables(state, values)
 				self.setVariableValues(values)
 			},
@@ -382,7 +381,7 @@ export function getActions(
 					await api.setOutputRoute(output, Number(action.options.source) - 1, !!action.options.ignore_lock)
 				}
 
-				let values: CompanionVariableValues = {}
+				let values: Partial<VariablesSchema> = {}
 				updateSelectedDestinationVariables(state, values)
 				self.setVariableValues(values)
 			},
@@ -402,7 +401,7 @@ export function getActions(
 				const op = state.queuedOp
 				state.queuedOp = undefined
 
-				let values: CompanionVariableValues = {}
+				let values: Partial<VariablesSchema> = {}
 				updateSelectedDestinationVariables(state, values)
 				self.setVariableValues(values)
 
@@ -418,7 +417,7 @@ export function getActions(
 			options: [],
 			callback: () => {
 				state.queuedOp = undefined
-				let values: CompanionVariableValues = {}
+				let values: Partial<VariablesSchema> = {}
 				updateSelectedDestinationVariables(state, values)
 				self.setVariableValues(values)
 				self.checkFeedbacks('take', 'take_tally_source', 'take_tally_dest')

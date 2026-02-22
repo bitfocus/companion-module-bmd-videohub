@@ -1,14 +1,28 @@
-import type { CompanionVariableDefinition, CompanionVariableValues, InstanceBase } from '@companion-module/base'
+import type { CompanionVariableDefinition, InstanceBase } from '@companion-module/base'
 import type { VideohubTypes } from './types.js'
 import type { VideohubState } from './state.js'
 import { LOCKSTATES } from './choices.js'
+
+export type VariablesSchema = {
+	[key: `input_${number}`]: string
+	[key: `output_${number}`]: string
+	[key: `output_${number}_input`]: string
+	[key: `output_${number}_input_id`]: number | '?'
+	[key: `output_${number}_lock_state`]: string
+	[key: `serial_${number}`]: string
+	[key: `serial_${number}_route`]: string
+	[key: `serial_${number}_lock_state`]: string
+	selected_destination: string
+	selected_source: string
+	selected_queued_source: string
+}
 
 /**
  * Initialize variables.
  */
 export function initVariables(self: InstanceBase<VideohubTypes>, state: VideohubState): void {
-	const variableDefinitions: CompanionVariableDefinition[] = []
-	const variableValues: CompanionVariableValues = {}
+	const variableDefinitions: CompanionVariableDefinition<VariablesSchema>[] = []
+	const variableValues: Partial<VariablesSchema> = {}
 
 	for (const input of state.iterateInputs()) {
 		if (input.status != 'None') {
@@ -105,7 +119,7 @@ export function initVariables(self: InstanceBase<VideohubTypes>, state: Videohub
 
 export function updateSelectedDestinationVariables(
 	state: VideohubState,
-	variableValues: CompanionVariableValues,
+	variableValues: Partial<VariablesSchema>,
 ): void {
 	const selectedOutput = state.getSelectedOutput()
 	const inputForSelectedOutput = selectedOutput ? state.getInput(selectedOutput.route) : undefined

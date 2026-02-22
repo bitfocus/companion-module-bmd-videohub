@@ -34,6 +34,8 @@ export default class VideohubInstance extends InstanceBase<VideohubTypes> implem
 		this.state = new VideohubState()
 
 		this.config = {}
+
+		this.instanceOptions.disableNewConfigLayout = true
 	}
 
 	/**
@@ -71,7 +73,7 @@ export default class VideohubInstance extends InstanceBase<VideohubTypes> implem
 		this.state.updateCounts(config)
 
 		this.initThings(true)
-		this.checkFeedbacks()
+		this.checkAllFeedbacks()
 
 		this.init_tcp()
 	}
@@ -85,7 +87,7 @@ export default class VideohubInstance extends InstanceBase<VideohubTypes> implem
 
 		this.setActionDefinitions(getActions(this, api, this.state))
 		this.setFeedbackDefinitions(getFeedbacks(this, this.state))
-		this.setPresetDefinitions(getPresets(this.state))
+		this.setPresetDefinitions(...getPresets(this.state))
 	}
 
 	/**
