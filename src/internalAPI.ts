@@ -1,7 +1,6 @@
-import type { CompanionVariableValues } from '@companion-module/base'
 import type { InputState, LockState, OutputState, SerialState, VideohubState } from './state.js'
 import type { InstanceBaseExt } from './types.js'
-import { updateSelectedDestinationVariables } from './variables.js'
+import { updateSelectedDestinationVariables, VariablesSchema } from './variables.js'
 import { LOCKSTATES } from './choices.js'
 
 /**
@@ -48,7 +47,7 @@ export function updateDevice(self: InstanceBaseExt, _labeltype: string, data: st
  * @param {Object} object - the collected data
  */
 export function updateLabels(self: InstanceBaseExt, state: VideohubState, labeltype: string, data: string[]) {
-	const variableValues: CompanionVariableValues = {}
+	const variableValues: Partial<VariablesSchema> = {}
 
 	for (const line of data) {
 		const [numStr, ...values] = line.split(/ /)
@@ -118,7 +117,7 @@ export function updateLabels(self: InstanceBaseExt, state: VideohubState, labelt
  */
 export function updateLocks(self: InstanceBaseExt, labeltype: string, lines: string[]) {
 	const state = self.state
-	const variableValues: CompanionVariableValues = {}
+	const variableValues: Partial<VariablesSchema> = {}
 
 	for (const line of lines) {
 		const parts = line.split(/ /)
@@ -152,7 +151,7 @@ export function updateLocks(self: InstanceBaseExt, labeltype: string, lines: str
 			}
 		}
 		self.setVariableValues(variableValues)
-		self.checkFeedbacks('lock_output', 'lock_output_dyn', 'lock_serial', 'lock_serial_dyn')
+		self.checkFeedbacks('lock_output', 'lock_serial')
 	}
 }
 
@@ -163,7 +162,7 @@ export function updateLocks(self: InstanceBaseExt, labeltype: string, lines: str
  * @param {Object} object - the collected data
  */
 export function updateRouting(self: InstanceBaseExt, state: VideohubState, labeltype: string, data: string[]) {
-	const variableValues: CompanionVariableValues = {}
+	const variableValues: Partial<VariablesSchema> = {}
 
 	for (const line of data) {
 		const [destStr, srcStr] = line.split(/ /)
@@ -215,7 +214,7 @@ export function updateRouting(self: InstanceBaseExt, state: VideohubState, label
 	updateSelectedDestinationVariables(state, variableValues)
 
 	self.setVariableValues(variableValues)
-	self.checkFeedbacks('input_bg', 'selected_source', 'input_bg_dyn', 'selected_source_dyn')
+	self.checkFeedbacks('input_bg', 'selected_source')
 }
 
 // /**

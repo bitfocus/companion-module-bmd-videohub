@@ -1,4 +1,4 @@
-import { LockState } from './state'
+import { LockState } from './state.js'
 
 export function parseUserLockStateString(input: string): LockState | 'T' | null {
 	const lockChar = input.trim().toUpperCase()[0]

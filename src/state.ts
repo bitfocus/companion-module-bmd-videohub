@@ -1,4 +1,4 @@
-import { VideoHubConfig } from './config'
+import { VideoHubConfig } from './config.js'
 
 export interface InputState {
 	id: number
