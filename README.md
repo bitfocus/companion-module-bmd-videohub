@@ -2,6 +2,11 @@
 
 See HELP.md and LICENSE
 
+**Changes in v3.0.0**
+
+- Update module api
+- This supports expressions is most action/feedback fields
+
 **Changes in v2.6.0**
 
 - Reword actions & feedback names to be more uniform and clearer
