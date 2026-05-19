@@ -26,6 +26,7 @@ export default class VideohubInstance extends InstanceBase<VideohubTypes> implem
 
 	socket: TCPHelper | undefined
 	pingTimer: NodeJS.Timeout | undefined
+	lastDataReceivedAt = 0
 	config: VideoHubConfig
 
 	constructor(internal: unknown) {
@@ -126,12 +127,14 @@ export default class VideohubInstance extends InstanceBase<VideohubTypes> implem
 			})
 
 			this.socket.on('connect', () => {
+				this.lastDataReceivedAt = Date.now()
 				this.log('debug', 'Connected')
 			})
 
 			// separate buffered stream into lines with responses
 			let receivebuffer = ''
 			this.socket.on('data', (chunk) => {
+				this.lastDataReceivedAt = Date.now()
 				receivebuffer += chunk.toString()
 				let lineEnd = -1
 				let discardOffset = 0
@@ -145,11 +148,18 @@ export default class VideohubInstance extends InstanceBase<VideohubTypes> implem
 				receivebuffer = receivebuffer.substring(discardOffset)
 			})
 
+			const pingInterval = 15000
 			this.pingTimer = setInterval(() => {
 				if (!this.socket || !this.socket.isConnected) return
 
+				if (Date.now() - this.lastDataReceivedAt > pingInterval * 2) {
+					this.log('warn', 'No data received from device in 30s, reconnecting')
+					this.init_tcp()
+					return
+				}
+
 				this.socket.send('PING:\n\n')
-			}, 15000)
+			}, pingInterval)
 		} else {
 			this.updateStatus(InstanceStatus.Disconnected)
 		}
