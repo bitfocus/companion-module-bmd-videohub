@@ -300,55 +300,57 @@ export function getPresets(
 		],
 	}
 
-	presets[`route_serial`] = {
-		name: `Route serial X to serial Y`,
-		type: 'simple',
-		style: {
-			text: `$(videohub:serial_$(local:input))`,
-			size: '18',
-			color: 0xffffff,
-			bgcolor: 0x000000,
-		},
-		feedbacks: [
-			{
-				feedbackId: 'serial_bg',
-				style: {
-					bgcolor: 0xffff00,
-					color: 0x000000,
-				},
-				options: {
-					input: { isExpression: true, value: '$(local:input)' },
-					output: { isExpression: true, value: '$(local:output)' },
-				},
+	if (state.iterateSerials().length > 0) {
+		presets[`route_serial`] = {
+			name: `Route serial X to serial Y`,
+			type: 'simple',
+			style: {
+				text: `$(videohub:serial_$(local:input))`,
+				size: '18',
+				color: 0xffffff,
+				bgcolor: 0x000000,
 			},
-		],
-		steps: [
-			{
-				down: [
-					{
-						actionId: 'route_serial',
-						options: {
-							source: { isExpression: true, value: '$(local:input)' },
-							destination: { isExpression: true, value: '$(local:output)' },
-							ignore_lock: false,
-						},
+			feedbacks: [
+				{
+					feedbackId: 'serial_bg',
+					style: {
+						bgcolor: 0xffff00,
+						color: 0x000000,
 					},
-				],
-				up: [],
-			},
-		],
-		localVariables: [
-			{
-				variableType: 'simple',
-				variableName: 'input',
-				startupValue: 1,
-			},
-			{
-				variableType: 'simple',
-				variableName: 'output',
-				startupValue: 1,
-			},
-		],
+					options: {
+						input: { isExpression: true, value: '$(local:input)' },
+						output: { isExpression: true, value: '$(local:output)' },
+					},
+				},
+			],
+			steps: [
+				{
+					down: [
+						{
+							actionId: 'route_serial',
+							options: {
+								source: { isExpression: true, value: '$(local:input)' },
+								destination: { isExpression: true, value: '$(local:output)' },
+								ignore_lock: false,
+							},
+						},
+					],
+					up: [],
+				},
+			],
+			localVariables: [
+				{
+					variableType: 'simple',
+					variableName: 'input',
+					startupValue: 1,
+				},
+				{
+					variableType: 'simple',
+					variableName: 'output',
+					startupValue: 1,
+				},
+			],
+		}
 	}
 
 	const structure: CompanionPresetSection<VideohubTypes>[] = [
