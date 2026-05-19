@@ -11,8 +11,8 @@
 	"bugs": "https://github.com/bitfocus/companion-module-bmd-videohub/issues",
 	"maintainers": [
 		{
-			"name": "William Viker",
-			"email": "william@bitfocus.io"
+			"name": "Julian Waller",
+			"email": "julian@bitfocus.io"
 		}
 	],
 	"legacyIds": ["videohub"],
