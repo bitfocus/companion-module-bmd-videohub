@@ -200,7 +200,7 @@ export function getFeedbacks(
 			],
 			callback: (feedback) => {
 				return (
-					Number(feedback.options.input) - 1 == state.queuedOp?.src &&
+					Number(feedback.options.input) == state.queuedOp?.src &&
 					state.selectedDestination == state.queuedOp?.output.outputId
 				)
 			},

@@ -33,6 +33,7 @@ export type LockState = 'L' | 'O' | 'U'
 export interface QueueOperation {
 	// cmd: string
 	output: OutputState
+	// Src to route (1 indexed)
 	src: number | undefined
 }
 
