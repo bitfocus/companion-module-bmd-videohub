@@ -2,6 +2,12 @@
 
 See HELP.md and LICENSE
 
+**Changes in v3.0.1**
+
+- fix permissions error in `Route File` actions #70
+- fix `If the Specified source is queued for a take` feedback offset by 1 #71
+- suppress preset warnings
+
 **Changes in v3.0.0**
 
 - Update module api
