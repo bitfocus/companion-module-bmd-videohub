@@ -98,6 +98,8 @@ export default class VideohubInstance extends InstanceBase<VideohubTypes> implem
 	 * @since 1.0.0
 	 */
 	init_tcp() {
+		this.lastDataReceivedAt = Date.now()
+
 		if (this.socket) {
 			this.socket.destroy()
 			delete this.socket
@@ -150,7 +152,7 @@ export default class VideohubInstance extends InstanceBase<VideohubTypes> implem
 
 			const pingInterval = 15000
 			this.pingTimer = setInterval(() => {
-				if (!this.socket || !this.socket.isConnected) return
+				if (!this.socket) return
 
 				if (Date.now() - this.lastDataReceivedAt > pingInterval * 2) {
 					this.log('warn', 'No data received from device in 30s, reconnecting')
@@ -158,7 +160,9 @@ export default class VideohubInstance extends InstanceBase<VideohubTypes> implem
 					return
 				}
 
-				this.socket.send('PING:\n\n')
+				if (this.socket.isConnected) {
+					this.socket.send('PING:\n\n')
+				}
 			}, pingInterval)
 		} else {
 			this.updateStatus(InstanceStatus.Disconnected)
