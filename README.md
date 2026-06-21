@@ -2,8 +2,9 @@
 
 See HELP.md and LICENSE
 
-**Changes in v3.0.2**
+**Changes in v3.1.0**
 
+- Add variables for the id of the selected destination/source #54
 - fix for stale connections failing to reconnect
 
 **Changes in v3.0.1**

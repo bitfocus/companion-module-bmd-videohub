@@ -13,8 +13,11 @@ export type VariablesSchema = {
 	[key: `serial_${number}_route`]: string
 	[key: `serial_${number}_lock_state`]: string
 	selected_destination: string
+	selected_destination_id: number | '?'
 	selected_source: string
+	selected_source_id: number | '?'
 	selected_queued_source: string
+	selected_queued_source_id: number | '?'
 }
 
 /**
@@ -24,8 +27,11 @@ export function initVariables(self: InstanceBase<VideohubTypes>, state: Videohub
 	const variableValues: Partial<VariablesSchema> = {}
 	const variableDefinitions: CompanionVariableDefinitions<VariablesSchema> = {
 		selected_destination: { name: 'Label of selected destination' },
+		selected_destination_id: { name: 'Id of selected destination' },
 		selected_source: { name: 'Label of input routed to selected destination' },
+		selected_source_id: { name: 'Id of input routed to selected destination' },
 		selected_queued_source: { name: 'Label of selected source' },
+		selected_queued_source_id: { name: 'Id of selected source' },
 	}
 	updateSelectedDestinationVariables(state, variableValues)
 
@@ -91,8 +97,12 @@ export function updateSelectedDestinationVariables(
 		state.queuedOp && state.queuedOp.src !== undefined ? state.getInput(state.queuedOp.src) : undefined
 
 	variableValues['selected_destination'] = selectedOutput?.name ?? '?'
+	variableValues['selected_destination_id'] = selectedOutput !== undefined ? selectedOutput.outputId + 1 : '?'
 
 	variableValues['selected_source'] = inputForSelectedOutput?.name ?? '?'
+	variableValues['selected_source_id'] = inputForSelectedOutput !== undefined ? inputForSelectedOutput.id + 1 : '?'
 
 	variableValues['selected_queued_source'] = selectedQueuedSource?.name ?? '?'
+	variableValues['selected_queued_source_id'] =
+		selectedQueuedSource !== undefined ? selectedQueuedSource.id + 1 : '?'
 }
