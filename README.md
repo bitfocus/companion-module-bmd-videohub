@@ -2,6 +2,10 @@
 
 See HELP.md and LICENSE
 
+**Changes in v3.0.2**
+
+- fix for stale connections failing to reconnect
+
 **Changes in v3.0.1**
 
 - fix permissions error in `Route File` actions #70
