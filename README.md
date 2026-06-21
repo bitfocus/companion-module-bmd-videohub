@@ -5,6 +5,7 @@ See HELP.md and LICENSE
 **Changes in v3.1.0**
 
 - Add variables for the id of the selected destination/source #54
+- Add actions & presets to step the selected destination/source, for rotary encoders #49
 - fix for stale connections failing to reconnect
 
 **Changes in v3.0.1**

@@ -4,7 +4,7 @@ import { getInputChoices } from './choices.js'
 import { OutputState, type VideohubState } from './state.js'
 import type { InstanceBaseExt } from './types.js'
 import { updateSelectedDestinationVariables, type VariablesSchema } from './variables.js'
-import { parseUserLockStateString } from './util.js'
+import { parseUserLockStateString, stepIndex } from './util.js'
 import type { VideohubApi } from './internalAPI.js'
 
 export type ActionsSchema = {
@@ -58,9 +58,23 @@ export type ActionsSchema = {
 			destination: number
 		}
 	}
+	select_destination_step: {
+		options: {
+			offset: number
+			wrap: boolean
+		}
+	}
 	route_source: {
 		options: {
 			source: number
+			ignore_lock: boolean
+		}
+	}
+	route_source_step: {
+		options: {
+			destination: number | 'selected'
+			offset: number
+			wrap: boolean
 			ignore_lock: boolean
 		}
 	}
@@ -349,6 +363,50 @@ export function getActions(
 			},
 		},
 
+		select_destination_step: {
+			name: 'Video: Step selected destination',
+			description: 'Move the selected destination up or down. Useful for a rotary encoder.',
+			options: [
+				{
+					type: 'number',
+					label: 'Offset (negative steps down)',
+					id: 'offset',
+					default: 1,
+					min: -999,
+					max: 999,
+				},
+				{
+					type: 'checkbox',
+					label: 'Wrap around at the ends',
+					id: 'wrap',
+					default: true,
+				},
+			],
+			callback: (action) => {
+				const count = state.allOutputsCount
+				if (count <= 0) return
+
+				const offset = Number(action.options.offset)
+				const current = state.selectedDestination ?? 0
+				const newId = stepIndex(current, offset, count, !!action.options.wrap)
+				if (newId === undefined) return
+
+				const output = state.getOutputById(newId)
+				if (!output) return
+
+				state.selectedDestination = output.outputId
+				if (state.queuedOp) {
+					state.queuedOp.output = output
+				}
+
+				self.checkFeedbacks('selected_destination', 'take_tally_dest', 'selected_source', 'take_tally_source')
+
+				let values: Partial<VariablesSchema> = {}
+				updateSelectedDestinationVariables(state, values)
+				self.setVariableValues(values)
+			},
+		},
+
 		route_source: {
 			name: 'Video: Route source to selected destination',
 			options: [
@@ -379,6 +437,75 @@ export function getActions(
 					self.checkFeedbacks('take', 'take_tally_source', 'take_tally_dest')
 				} else {
 					await api.setOutputRoute(output, Number(action.options.source) - 1, !!action.options.ignore_lock)
+				}
+
+				let values: Partial<VariablesSchema> = {}
+				updateSelectedDestinationVariables(state, values)
+				self.setVariableValues(values)
+			},
+		},
+
+		route_source_step: {
+			name: 'Video: Step source routed to destination',
+			description: 'Move the source routed to a destination up or down. Useful for a rotary encoder.',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Destination',
+					id: 'destination',
+					default: 'selected',
+					choices: [{ id: 'selected', label: 'Selected Destination' }, ...outputChoices],
+				},
+				{
+					type: 'number',
+					label: 'Offset (negative steps down)',
+					id: 'offset',
+					default: 1,
+					min: -999,
+					max: 999,
+				},
+				{
+					type: 'checkbox',
+					label: 'Wrap around at the ends',
+					id: 'wrap',
+					default: true,
+				},
+				{
+					type: 'checkbox',
+					label: 'Ignore Lock',
+					id: 'ignore_lock',
+					default: false,
+				},
+			],
+			callback: async (action) => {
+				const output =
+					action.options.destination === 'selected'
+						? state.getSelectedOutput()
+						: state.getOutputById(Number(action.options.destination) - 1)
+				if (!output) return
+
+				const inputCount = state.iterateInputs().length
+				if (inputCount <= 0) return
+
+				const offset = Number(action.options.offset)
+
+				// When queueing a take, step from the already-queued source so repeated turns accumulate
+				const queuedForThisOutput =
+					self.config.take && state.queuedOp && state.queuedOp.output === output && state.queuedOp.src !== undefined
+				const currentSource = queuedForThisOutput ? state.queuedOp!.src! - 1 : output.route
+
+				const newSource = stepIndex(currentSource, offset, inputCount, !!action.options.wrap)
+				if (newSource === undefined) return
+
+				if (self.config.take) {
+					state.queuedOp = {
+						output: output,
+						src: newSource + 1,
+					}
+
+					self.checkFeedbacks('take', 'take_tally_source', 'take_tally_dest')
+				} else {
+					await api.setOutputRoute(output, newSource, !!action.options.ignore_lock)
 				}
 
 				let values: Partial<VariablesSchema> = {}

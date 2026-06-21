@@ -353,7 +353,87 @@ export function getPresets(
 		}
 	}
 
+	presets['encoder_select_destination'] = {
+		name: 'Step selected destination',
+		type: 'simple',
+		style: {
+			text: 'Dest\\n$(videohub:selected_destination)',
+			size: '14',
+			color: 0xffffff,
+			bgcolor: 0x000000,
+		},
+		feedbacks: [],
+		steps: [
+			{
+				down: [],
+				up: [],
+				rotate_left: [
+					{
+						actionId: 'select_destination_step',
+						options: { offset: -1, wrap: true },
+					},
+				],
+				rotate_right: [
+					{
+						actionId: 'select_destination_step',
+						options: { offset: 1, wrap: true },
+					},
+				],
+			},
+		],
+	}
+
+	presets['encoder_route_source'] = {
+		name: 'Step source of selected destination',
+		type: 'simple',
+		style: {
+			text: 'Src\\n$(videohub:selected_source)',
+			size: '14',
+			color: 0xffffff,
+			bgcolor: 0x000000,
+		},
+		feedbacks: [],
+		steps: [
+			{
+				down: [
+					{
+						actionId: 'take',
+						options: { ignore_lock: false },
+					},
+				],
+				up: [],
+				rotate_left: [
+					{
+						actionId: 'route_source_step',
+						options: { destination: 'selected', offset: -1, wrap: true, ignore_lock: false },
+					},
+				],
+				rotate_right: [
+					{
+						actionId: 'route_source_step',
+						options: { destination: 'selected', offset: 1, wrap: true, ignore_lock: false },
+					},
+				],
+			},
+		],
+	}
+
 	const structure: CompanionPresetSection<VideohubTypes>[] = [
+		{
+			id: 'rotary-encoders',
+			name: 'Rotary Encoders',
+			description: 'Presets for stepping the selected destination and its source using a rotary encoder',
+			definitions: [
+				{
+					id: 'encoders',
+					name: 'Encoders',
+					description:
+						'Rotate to step the selected destination or its routed source. Press the source encoder to take a queued route.',
+					type: 'simple',
+					presets: ['encoder_select_destination', 'encoder_route_source'],
+				},
+			],
+		},
 		{
 			id: 'xy-routing',
 			name: 'XY Routing',
