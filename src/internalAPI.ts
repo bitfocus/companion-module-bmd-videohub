@@ -1,3 +1,4 @@
+import { CommandQueue } from './commandQueue.js'
 import type { InputState, LockState, OutputState, SerialState, VideohubState } from './state.js'
 import type { InstanceBaseExt } from './types.js'
 import { updateSelectedDestinationVariables, VariablesSchema } from './variables.js'
@@ -274,59 +275,77 @@ export function updateStatus(_self: InstanceBaseExt, state: VideohubState, label
 
 export class VideohubApi {
 	#self: InstanceBaseExt
+	#queue: CommandQueue
 
 	constructor(self: InstanceBaseExt) {
 		this.#self = self
+		this.#queue = new CommandQueue({
+			send: (cmd) => {
+				this.#self.log('debug', 'TCP sending ' + cmd)
+				this.#self.socket?.send(cmd)
+			},
+			isConnected: () => this.#self.socket !== undefined && this.#self.socket.isConnected,
+			log: (level, message) => this.#self.log(level, message),
+			reconnect: () => this.#self.init_tcp(),
+		})
 	}
 
-	#sendCommand(cmd: string) {
-		if (this.#self.socket !== undefined && this.#self.socket.isConnected) {
-			try {
-				this.#self.log('debug', 'TCP sending ' + cmd)
-				this.#self.socket.send(cmd)
-			} catch (error: any) {
-				this.#self.log('error', 'TCP error ' + error.message)
-			}
-		} else {
-			this.#self.log('error', 'Socket not connected ')
-			this.#self.init_tcp()
-		}
+	/** The device accepted the command currently in flight. */
+	handleAck(): void {
+		this.#queue.handleAck()
+	}
+
+	/** The device did not understand the command currently in flight. */
+	handleNak(): void {
+		this.#queue.handleNak()
+	}
+
+	/** Reject every pending command. Called when the connection drops or the instance is destroyed. */
+	flush(reason: string): void {
+		this.#queue.flush(reason)
+	}
+
+	#sendCommand(cmd: string): Promise<void> {
+		return this.#queue.enqueue(cmd)
 	}
 
 	/*
-	 * Note: all the methods here are promise based to prepare for the future when we will detect if the command was successful
+	 * Note: these methods resolve once the Videohub has acknowledged the command, which means it was
+	 * accepted - not that it was applied. The manual is explicit that a client "should never rely on
+	 * the desired update actually occurring" and must watch the status updates the device sends
+	 * afterwards to know the real state. That is what updateRouting/updateLabels/updateLocks do.
 	 */
 
 	async setOutputLabel(output: OutputState, name: string): Promise<void> {
 		if (output.type === 'monitor') {
-			this.#sendCommand('MONITORING OUTPUT LABELS:\n' + output.id + ' ' + name + '\n\n')
+			return this.#sendCommand('MONITORING OUTPUT LABELS:\n' + output.id + ' ' + name + '\n\n')
 		} else {
-			this.#sendCommand('OUTPUT LABELS:\n' + output.id + ' ' + name + '\n\n')
+			return this.#sendCommand('OUTPUT LABELS:\n' + output.id + ' ' + name + '\n\n')
 		}
 	}
 
 	async setInputLabel(input: InputState, name: string): Promise<void> {
-		this.#sendCommand('INPUT LABELS:\n' + input.id + ' ' + name + '\n\n')
+		return this.#sendCommand('INPUT LABELS:\n' + input.id + ' ' + name + '\n\n')
 	}
 
 	async setSerialLabel(serial: SerialState, name: string): Promise<void> {
-		this.#sendCommand('SERIAL PORT LABELS:\n' + serial.id + ' ' + name + '\n\n')
+		return this.#sendCommand('SERIAL PORT LABELS:\n' + serial.id + ' ' + name + '\n\n')
 	}
 
 	async setOutputRoute(output: OutputState, source: number, ignoreLock: boolean): Promise<void> {
 		if (output.lock !== 'U' && !ignoreLock) return
 
 		if (output.type === 'monitor') {
-			this.#sendCommand('VIDEO MONITORING OUTPUT ROUTING:\n' + output.id + ' ' + source + '\n\n')
+			return this.#sendCommand('VIDEO MONITORING OUTPUT ROUTING:\n' + output.id + ' ' + source + '\n\n')
 		} else {
-			this.#sendCommand('VIDEO OUTPUT ROUTING:\n' + output.id + ' ' + source + '\n\n')
+			return this.#sendCommand('VIDEO OUTPUT ROUTING:\n' + output.id + ' ' + source + '\n\n')
 		}
 	}
 
 	async setSerialRoute(serial: SerialState, source: number, ignoreLock: boolean): Promise<void> {
 		if (serial.lock !== 'U' && !ignoreLock) return
 
-		this.#sendCommand('SERIAL PORT ROUTING:\n' + serial.id + ' ' + source + '\n\n')
+		return this.#sendCommand('SERIAL PORT ROUTING:\n' + serial.id + ' ' + source + '\n\n')
 	}
 
 	async setMultipleOutputRoutes(routes: Map<OutputState, number>): Promise<void> {
@@ -342,10 +361,10 @@ export class VideohubApi {
 		}
 
 		if (primaryRoutes.length > 0) {
-			this.#sendCommand(`VIDEO OUTPUT ROUTING:\n${primaryRoutes.join('\n')}\n\n`)
+			await this.#sendCommand(`VIDEO OUTPUT ROUTING:\n${primaryRoutes.join('\n')}\n\n`)
 		}
 		if (monitorRoutes.length > 0) {
-			this.#sendCommand(`VIDEO MONITORING OUTPUT ROUTING:\n${monitorRoutes.join('\n')}\n\n`)
+			await this.#sendCommand(`VIDEO MONITORING OUTPUT ROUTING:\n${monitorRoutes.join('\n')}\n\n`)
 		}
 	}
 
@@ -353,15 +372,24 @@ export class VideohubApi {
 		if (lock !== 'U' && lock !== 'O' && lock !== 'F') throw new Error('Invalid lock state')
 
 		if (output.type === 'monitor') {
-			this.#sendCommand('MONITORING OUTPUT LOCKS:\n' + output.id + ' ' + lock + '\n\n')
+			return this.#sendCommand('MONITORING OUTPUT LOCKS:\n' + output.id + ' ' + lock + '\n\n')
 		} else {
-			this.#sendCommand('VIDEO OUTPUT LOCKS:\n' + output.id + ' ' + lock + '\n\n')
+			return this.#sendCommand('VIDEO OUTPUT LOCKS:\n' + output.id + ' ' + lock + '\n\n')
 		}
 	}
 
 	async setSerialLocked(serial: SerialState, lock: LockState | 'F'): Promise<void> {
 		if (lock !== 'U' && lock !== 'O' && lock !== 'F') throw new Error('Invalid lock state')
 
-		this.#sendCommand('SERIAL PORT LOCKS:\n' + serial.id + ' ' + lock + '\n\n')
+		return this.#sendCommand('SERIAL PORT LOCKS:\n' + serial.id + ' ' + lock + '\n\n')
+	}
+
+	/**
+	 * No-op command used to check the device is still responding. Goes through the queue like
+	 * everything else - the Videohub acknowledges pings too, so a direct write would have its ACK
+	 * matched against whatever command was in flight.
+	 */
+	async ping(): Promise<void> {
+		return this.#sendCommand('PING:\n\n')
 	}
 }
