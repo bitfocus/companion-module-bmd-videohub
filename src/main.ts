@@ -24,6 +24,12 @@ export { UpgradeScripts }
 export default class VideohubInstance extends InstanceBase<VideohubTypes> implements InstanceBaseExt {
 	readonly state: VideohubState
 
+	/**
+	 * Owns the command queue, so it must outlive initThings() - which runs on every label and
+	 * status update, including the ones the device sends in response to our own commands.
+	 */
+	readonly api: VideohubApi
+
 	socket: TCPHelper | undefined
 	pingTimer: NodeJS.Timeout | undefined
 	lastDataReceivedAt = 0
@@ -33,6 +39,7 @@ export default class VideohubInstance extends InstanceBase<VideohubTypes> implem
 		super(internal)
 
 		this.state = new VideohubState()
+		this.api = new VideohubApi(this)
 
 		this.config = {}
 
@@ -53,6 +60,8 @@ export default class VideohubInstance extends InstanceBase<VideohubTypes> implem
 	 * @since 1.0.0
 	 */
 	async destroy() {
+		this.api.flush('Instance destroyed')
+
 		if (this.socket !== undefined) {
 			this.socket.destroy()
 			delete this.socket
@@ -84,9 +93,7 @@ export default class VideohubInstance extends InstanceBase<VideohubTypes> implem
 			initVariables(this, this.state)
 		}
 
-		const api = new VideohubApi(this)
-
-		this.setActionDefinitions(getActions(this, api, this.state))
+		this.setActionDefinitions(getActions(this, this.api, this.state))
 		this.setFeedbackDefinitions(getFeedbacks(this, this.state))
 		this.setPresetDefinitions(...getPresets(this.state))
 	}
@@ -99,6 +106,9 @@ export default class VideohubInstance extends InstanceBase<VideohubTypes> implem
 	 */
 	init_tcp() {
 		this.lastDataReceivedAt = Date.now()
+
+		// Nothing queued against the old socket can still be acknowledged.
+		this.api.flush('Connection was reset')
 
 		if (this.socket) {
 			this.socket.destroy()
@@ -122,10 +132,12 @@ export default class VideohubInstance extends InstanceBase<VideohubTypes> implem
 
 			this.socket.on('error', (err) => {
 				this.log('error', 'Network error: ' + err.message)
+				this.api.flush('Network error: ' + err.message)
 			})
 
 			this.socket.on('end', () => {
 				this.log('debug', 'Connection closed')
+				this.api.flush('Connection closed')
 			})
 
 			this.socket.on('connect', () => {
@@ -161,7 +173,9 @@ export default class VideohubInstance extends InstanceBase<VideohubTypes> implem
 				}
 
 				if (this.socket.isConnected) {
-					this.socket.send('PING:\n\n')
+					// Rejections are already logged by the queue, and a failed ping triggers its own
+					// reconnect, so nothing more to do here than keep the rejection handled.
+					this.api.ping().catch(() => null)
 				}
 			}, pingInterval)
 		} else {
@@ -174,14 +188,20 @@ export default class VideohubInstance extends InstanceBase<VideohubTypes> implem
 
 	#handleReceivedLine(line: string) {
 		try {
-			if ((this.command === null && line.match(/:/)) || line === 'ACK') {
+			if ((this.command === null && line.match(/:/)) || line === 'ACK' || line === 'NAK') {
 				this.command = line
 			} else if (this.command !== null && line.length > 0) {
 				this.stash.push(line.trim())
 			} else if (line.length === 0 && this.command !== null) {
 				const cmd = this.command.trim().split(/:/)[0]
 
-				if (cmd !== 'ACK') {
+				// ACK and NAK arrive as blocks with no body, so they settle the in-flight command at
+				// block termination like any other block.
+				if (cmd === 'ACK') {
+					this.api.handleAck()
+				} else if (cmd === 'NAK') {
+					this.api.handleNak()
+				} else {
 					this.#processVideohubInformation(cmd, this.stash)
 				}
 
