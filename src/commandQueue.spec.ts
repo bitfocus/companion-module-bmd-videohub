@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { ACK_TIMEOUT_MS, CommandQueue, type CommandQueueHost } from './commandQueue.js'
+import { ACK_TIMEOUT_MS, CommandQueue, MAX_IN_FLIGHT, type CommandQueueHost } from './commandQueue.js'
 
 const createHost = () => {
 	const sent: string[] = []
@@ -45,54 +45,92 @@ describe('CommandQueue', () => {
 		expect(sent).toEqual(['PING:\n\n'])
 	})
 
-	it('holds every later command until the one in flight is acknowledged', async () => {
+	it(`sends up to ${MAX_IN_FLIGHT} commands before waiting for an acknowledgement`, async () => {
 		const { host, sent } = createHost()
 		const queue = new CommandQueue(host)
 
-		const results = [settled(queue.enqueue('A')), settled(queue.enqueue('B')), settled(queue.enqueue('C'))]
+		const results = ['A', 'B', 'C', 'D', 'E'].map((cmd) => settled(queue.enqueue(cmd)))
 
-		// This is the bug: without gating, all three would already be on the wire.
-		expect(sent).toEqual(['A'])
-
-		queue.handleAck()
-		expect(sent).toEqual(['A', 'B'])
+		expect(sent).toEqual(['A', 'B', 'C', 'D'])
+		expect(queue.depth).toBe(5)
 
 		queue.handleAck()
-		expect(sent).toEqual(['A', 'B', 'C'])
+		expect(sent).toEqual(['A', 'B', 'C', 'D', 'E'])
 
-		queue.handleAck()
-		await expect(Promise.all(results)).resolves.toEqual(['resolved', 'resolved', 'resolved'])
+		for (let i = 0; i < 4; i++) queue.handleAck()
+
+		await expect(Promise.all(results)).resolves.toEqual([
+			'resolved',
+			'resolved',
+			'resolved',
+			'resolved',
+			'resolved',
+		])
 		expect(queue.depth).toBe(0)
 	})
 
-	it('rejects on NAK and carries on with the next command', async () => {
-		const { host, sent } = createHost()
-		const queue = new CommandQueue(host)
-
-		const first = settled(queue.enqueue('A'))
-		const second = settled(queue.enqueue('B'))
-
-		queue.handleNak()
-
-		await expect(first).resolves.toBe('rejected')
-		expect(sent).toEqual(['A', 'B'])
-
-		queue.handleAck()
-		await expect(second).resolves.toBe('resolved')
-		expect(host.reconnect).not.toHaveBeenCalled()
-	})
-
-	it('rejects everything and reconnects when an acknowledgement never arrives', async () => {
+	it('settles in-flight commands in FIFO order on ACK', async () => {
 		const { host } = createHost()
 		const queue = new CommandQueue(host)
 
-		const first = settled(queue.enqueue('A'))
-		const second = settled(queue.enqueue('B'))
+		const a = settled(queue.enqueue('A'))
+		const b = settled(queue.enqueue('B'))
+		const c = settled(queue.enqueue('C'))
+		const d = settled(queue.enqueue('D'))
+
+		queue.handleAck()
+		await expect(a).resolves.toBe('resolved')
+
+		let bSettled = false
+		void b.then(() => {
+			bSettled = true
+		})
+		await Promise.resolve()
+		expect(bSettled).toBe(false)
+
+		queue.handleAck()
+		queue.handleAck()
+		queue.handleAck()
+		await expect(Promise.all([b, c, d])).resolves.toEqual(['resolved', 'resolved', 'resolved'])
+	})
+
+	it('rejects on NAK for the oldest only and keeps other in-flight commands', async () => {
+		const { host, sent } = createHost()
+		const queue = new CommandQueue(host)
+
+		const results = ['A', 'B', 'C', 'D', 'E'].map((cmd) => settled(queue.enqueue(cmd)))
+		expect(sent).toEqual(['A', 'B', 'C', 'D'])
+
+		queue.handleNak()
+		await expect(results[0]).resolves.toBe('rejected')
+		expect(sent).toEqual(['A', 'B', 'C', 'D', 'E'])
+
+		for (let i = 0; i < 4; i++) queue.handleAck()
+		await expect(Promise.all(results.slice(1))).resolves.toEqual([
+			'resolved',
+			'resolved',
+			'resolved',
+			'resolved',
+		])
+		expect(host.reconnect).not.toHaveBeenCalled()
+	})
+
+	it('rejects everything and reconnects when any in-flight acknowledgement times out', async () => {
+		const { host, sent } = createHost()
+		const queue = new CommandQueue(host)
+
+		const results = ['A', 'B', 'C', 'D', 'E'].map((cmd) => settled(queue.enqueue(cmd)))
+		expect(sent).toEqual(['A', 'B', 'C', 'D'])
 
 		await vi.advanceTimersByTimeAsync(ACK_TIMEOUT_MS)
 
-		await expect(first).resolves.toBe('rejected')
-		await expect(second).resolves.toBe('rejected')
+		await expect(Promise.all(results)).resolves.toEqual([
+			'rejected',
+			'rejected',
+			'rejected',
+			'rejected',
+			'rejected',
+		])
 		expect(host.reconnect).toHaveBeenCalledTimes(1)
 		expect(queue.depth).toBe(0)
 	})
@@ -138,11 +176,11 @@ describe('CommandQueue', () => {
 
 		queue.flush('Connection closed')
 
-		expect(sent).toEqual(['A'])
+		expect(sent).toEqual(['A', 'B'])
 
 		// A late acknowledgement must not pull the flushed command back onto the wire.
 		queue.handleAck()
-		expect(sent).toEqual(['A'])
+		expect(sent).toEqual(['A', 'B'])
 	})
 
 	it('rejects without reconnecting when the socket is not connected', async () => {
@@ -161,9 +199,10 @@ describe('CommandQueue', () => {
 		const { host } = createHost()
 		const queue = new CommandQueue(host)
 
-		const result = settled(queue.enqueue('A'))
+		const results = ['A', 'B'].map((cmd) => settled(queue.enqueue(cmd)))
 		queue.handleAck()
-		await expect(result).resolves.toBe('resolved')
+		queue.handleAck()
+		await expect(Promise.all(results)).resolves.toEqual(['resolved', 'resolved'])
 
 		await vi.advanceTimersByTimeAsync(ACK_TIMEOUT_MS * 2)
 
