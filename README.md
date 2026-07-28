@@ -2,6 +2,12 @@
 
 See HELP.md and LICENSE
 
+
+**Changes in v3.2.0**
+
+- Add command queue, to limit number of in flight messages to a number the videohub can handle without dropping any.
+  This should improve reliability of the module when firing many actions at once
+
 **Changes in v3.1.0**
 
 - Add variables for the id of the selected destination/source #54
