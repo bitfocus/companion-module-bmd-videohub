@@ -145,15 +145,16 @@ describe('CommandQueue', () => {
 		expect(sent).toEqual(['A'])
 	})
 
-	it('rejects and reconnects when the socket is not connected', async () => {
+	it('rejects without reconnecting when the socket is not connected', async () => {
 		const { host, disconnect } = createHost()
 		const queue = new CommandQueue(host)
 
 		disconnect()
-		const result = settled(queue.enqueue('A'))
+		const results = [settled(queue.enqueue('A')), settled(queue.enqueue('B')), settled(queue.enqueue('C'))]
 
-		await expect(result).resolves.toBe('rejected')
-		expect(host.reconnect).toHaveBeenCalledTimes(1)
+		await expect(Promise.all(results)).resolves.toEqual(['rejected', 'rejected', 'rejected'])
+		// TCPHelper owns reconnect-on-drop; the queue must not call init_tcp and thrash it.
+		expect(host.reconnect).not.toHaveBeenCalled()
 	})
 
 	it('stops the timeout once a command is acknowledged', async () => {

@@ -117,8 +117,9 @@ export class CommandQueue {
 		if (this.#inFlight || this.#queue.length === 0) return
 
 		if (!this.#host.isConnected()) {
+			// TCPHelper already reconnects on drop; calling init_tcp here would destroy that
+			// helper and thrash the connection if several commands arrive while down.
 			this.flush('Socket not connected')
-			this.#host.reconnect()
 			return
 		}
 
