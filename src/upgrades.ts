@@ -4,7 +4,7 @@ import {
 	CompanionStaticUpgradeScript,
 	CreateConvertToBooleanFeedbackUpgradeScript,
 } from '@companion-module/base'
-import { VideoHubConfig } from './config.js'
+import { DEFAULT_PORT, VideoHubConfig } from './config.js'
 
 const fixupActionsForExpressions: {
 	basicName: string
@@ -249,6 +249,25 @@ const mergeDynSuffixToBeExpressions: CompanionStaticUpgradeScript<VideoHubConfig
 	return result
 }
 
+/**
+ * The port is now configurable, so populate the default for existing connections
+ */
+const populateDefaultPort: CompanionStaticUpgradeScript<VideoHubConfig> = (_ctx, props) => {
+	const result: CompanionStaticUpgradeResult<VideoHubConfig, undefined> = {
+		updatedConfig: null,
+		updatedSecrets: null,
+		updatedActions: [],
+		updatedFeedbacks: [],
+	}
+
+	if (props.config && !props.config.port) {
+		props.config.port = DEFAULT_PORT
+		result.updatedConfig = props.config
+	}
+
+	return result
+}
+
 export const UpgradeScripts: CompanionStaticUpgradeScript<VideoHubConfig>[] = [
 	CreateConvertToBooleanFeedbackUpgradeScript({
 		input_bg: true,
@@ -261,4 +280,5 @@ export const UpgradeScripts: CompanionStaticUpgradeScript<VideoHubConfig>[] = [
 	}),
 	offsetZeroBasedNumbers,
 	mergeDynSuffixToBeExpressions,
+	populateDefaultPort,
 ]

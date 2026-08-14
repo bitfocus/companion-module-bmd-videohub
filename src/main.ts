@@ -1,5 +1,5 @@
 import { InstanceBase, InstanceStatus, TCPHelper } from '@companion-module/base'
-import { getConfigFields, VideoHubConfig } from './config.js'
+import { DEFAULT_PORT, getConfigFields, VideoHubConfig } from './config.js'
 import { initVariables } from './variables.js'
 import { getPresets } from './presets.js'
 import { getActions } from './actions.js'
@@ -124,7 +124,7 @@ export default class VideohubInstance extends InstanceBase<VideohubTypes> implem
 		if (target) {
 			this.updateStatus(InstanceStatus.Connecting)
 
-			this.socket = new TCPHelper(target.ip, target.port || 9990)
+			this.socket = new TCPHelper(target.ip, target.port || DEFAULT_PORT)
 
 			this.socket.on('status_change', (status, message) => {
 				this.updateStatus(status, message)
@@ -253,7 +253,11 @@ export default class VideohubInstance extends InstanceBase<VideohubTypes> implem
 	async configUpdated(config: VideoHubConfig) {
 		let resetConnection = false
 
-		if (this.config.host != config.host || this.config.bonjourHost != config.bonjourHost) {
+		if (
+			this.config.host != config.host ||
+			this.config.port != config.port ||
+			this.config.bonjourHost != config.bonjourHost
+		) {
 			resetConnection = true
 		}
 
@@ -284,7 +288,7 @@ export default class VideohubInstance extends InstanceBase<VideohubTypes> implem
 			if (this.config.host.match(ipRegex)) {
 				return {
 					ip: this.config.host,
-					port: undefined,
+					port: this.config.port,
 				}
 			}
 		}

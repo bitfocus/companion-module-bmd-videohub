@@ -1,8 +1,11 @@
 import { Regex, SomeCompanionConfigField } from '@companion-module/base'
 
+export const DEFAULT_PORT = 9990
+
 export type VideoHubConfig = {
 	bonjourHost?: string
 	host?: string
+	port?: number
 	take?: boolean
 
 	inputCount?: number
@@ -33,6 +36,16 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			width: 6,
 			default: '192.168.10.150',
 			regex: Regex.IP,
+			isVisibleExpression: `!$(options:bonjourHost)`,
+		},
+		{
+			type: 'number',
+			id: 'port',
+			label: 'Port',
+			width: 6,
+			default: DEFAULT_PORT,
+			min: 1,
+			max: 65535,
 			isVisibleExpression: `!$(options:bonjourHost)`,
 		},
 		{
